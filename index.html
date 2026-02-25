@@ -192,31 +192,6 @@
         .main-footer p {
             margin: 0;
         }
-
-        /* Link de primeiro acesso */
-        .primeiro-acesso {
-            text-align: center;
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-
-        .primeiro-acesso p {
-            margin: 0;
-            color: #666;
-        }
-
-        .primeiro-acesso a {
-            color: var(--vermelho-principal, #c62828);
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s ease;
-        }
-
-        .primeiro-acesso a:hover {
-            color: #8b1e1e;
-            text-decoration: underline;
-        }
     </style>
 </head>
 
@@ -254,8 +229,6 @@
                     <div class="spinner"></div>
                     <p>Verificando acesso...</p>
                 </div>
-
-            
             </div>
         </main>
 
@@ -278,6 +251,8 @@
             // Lista de admins
             const ADMIN_EMAILS = [
                 'admin@autoflow.com',
+                'rafael@gmail.com',
+                'admin@gmail.com'
             ];
 
             // MAPEAMENTO: plano básico vai para orcamento-rapido.html
@@ -363,6 +338,7 @@
 
             async function redirecionarUsuario(user) {
                 try {
+                    // Verificar se é ADMIN
                     if (ADMIN_EMAILS.includes(user.email)) {
                         console.log('✅ Admin detectado. Redirecionando...');
                         showMessage('✅ Bem-vindo, Administrador!', 'success');
@@ -370,7 +346,8 @@
                         sessionStorage.removeItem('oficinaId');
 
                         setTimeout(() => {
-                            window.location.href = 'html/admin-oficinas.html';
+                            // ✅ CORRIGIDO: sem pasta html/ porque os arquivos estão na mesma pasta
+                            window.location.href = 'admin-oficinas.html';
                         }, 1000);
                         return;
                     }
