@@ -1,441 +1,924 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - AutoFlow</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/dashboard.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>AutoFlow - Sistema de Gestão para Oficinas</title>
+    
+    <!-- Fontes e ícones -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        /* Centralização completa da tela de login */
-        body {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+        * {
             margin: 0;
-            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .main-header {
-            text-align: center;
-            margin-bottom: 25px;
-            background: transparent;
-            box-shadow: none;
-            border-bottom: none;
             padding: 0;
-        }
-
-        .logo h1 {
-            font-size: 2.2rem;
-            color: var(--vermelho-principal, #c62828);
-            margin: 0;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .main-content {
-            background: white;
-            padding: 40px 35px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            margin: 0;
-        }
-
-        .welcome-section {
-            text-align: center;
-        }
-
-        .welcome-section h2 {
-            font-size: 1.8rem;
-            color: #333;
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: -0.3px;
-        }
-
-        /* Estilo para a logo */
-        .logo-img {
-            max-width: 220px;
-            height: auto;
-            margin: 0 auto 25px auto;
-            display: block;
-        }
-
-        .welcome-section p {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1rem;
-        }
-
-        .login-form {
-            text-align: left;
-            margin: 0 auto;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
             box-sizing: border-box;
         }
 
-        .form-group input:focus {
-            border-color: var(--vermelho-principal, #c62828);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+        :root {
+            --primary: #c62828;
+            --primary-dark: #8b1e1e;
+            --primary-light: #ef5350;
+            --secondary: #2c3e50;
+            --secondary-light: #34495e;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-600: #6c757d;
+            --gray-800: #343a40;
+            --white: #ffffff;
+            --black: #212121;
         }
 
-        .form-group input::placeholder {
-            color: #aaa;
-            font-size: 0.95rem;
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--gray-800);
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .btn-block {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
             width: 100%;
-            padding: 14px;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--gray-800);
+            font-weight: 500;
+            transition: color 0.3s;
             font-size: 1rem;
-            margin-top: 10px;
-            background-color: var(--vermelho-principal, #c62828);
-            color: white;
-            border: none;
-            border-radius: 8px;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: var(--primary);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
             font-weight: 600;
+            transition: all 0.3s;
+            border: none;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            font-size: 1rem;
         }
 
-        .btn-block:hover {
-            background-color: #8b1e1e;
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
         }
 
-        .btn-block:disabled {
-            background-color: #999;
-            cursor: not-allowed;
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(198,40,40,0.3);
         }
 
-        .alert-box {
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-large {
+            padding: 15px 40px;
+            font-size: 1.1rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            padding: 150px 0 80px;
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--white) 100%);
+        }
+
+        .hero .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            color: var(--gray-800);
+        }
+
+        .hero-content h1 span {
+            color: var(--primary);
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--gray-600);
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .hero-image img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        /* ===== FEATURES ===== */
+        .features {
+            padding: 80px 0;
+            background: var(--white);
+        }
+
+        .section-title {
             text-align: center;
-            padding: 15px;
-            margin-top: 20px;
-            font-size: 0.95rem;
-            border-radius: 8px;
+            margin-bottom: 60px;
         }
 
-        #loading-overlay {
-            text-align: center;
-            margin-top: 25px;
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 15px;
         }
 
-        #loading-overlay p {
-            text-align: center;
-            margin-top: 15px;
-            color: #666;
-            margin-bottom: 0;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--vermelho-principal, #c62828);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
+        .section-title p {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            max-width: 700px;
             margin: 0 auto;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
         }
 
-        .main-footer {
+        .feature-card {
+            background: var(--white);
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s;
             text-align: center;
-            margin-top: 25px;
-            padding: 15px;
-            color: #888;
-            font-size: 0.85rem;
-            background: transparent;
-            border: none;
+            border: 1px solid var(--gray-200);
         }
 
-        .main-footer p {
-            margin: 0;
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(198,40,40,0.1);
+            border-color: var(--primary-light);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(198,40,40,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--gray-800);
+        }
+
+        .feature-card p {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        /* ===== PLANOS ===== */
+        .pricing {
+            padding: 80px 0;
+            background: var(--gray-100);
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .pricing-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 40px 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            position: relative;
+            border: 1px solid var(--gray-200);
+        }
+
+        .pricing-card.featured {
+            transform: scale(1.05);
+            border: 2px solid var(--primary);
+            box-shadow: 0 10px 30px rgba(198,40,40,0.15);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: var(--white);
+            padding: 5px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .pricing-header h3 {
+            font-size: 1.8rem;
+            color: var(--gray-800);
+            margin-bottom: 15px;
+        }
+
+        .price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--gray-600);
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .pricing-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pricing-features i {
+            color: var(--primary);
+            font-size: 1rem;
+            width: 20px;
+        }
+
+        .pricing-features .nao-inclui {
+            color: var(--gray-400);
+        }
+
+        .pricing-features .nao-inclui i {
+            color: var(--gray-400);
+        }
+
+        .pricing-card .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* ===== DEPOIMENTOS ===== */
+        .testimonials {
+            padding: 80px 0;
+            background: var(--white);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .testimonial-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--gray-200);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .testimonial-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--gray-800);
+        }
+
+        .testimonial-info p {
+            color: var(--gray-600);
+            font-size: 0.9rem;
+        }
+
+        .testimonial-text {
+            color: var(--gray-700);
+            font-style: italic;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .testimonial-rating {
+            color: #ffc107;
+            font-size: 0.9rem;
+        }
+
+        /* ===== CTA ===== */
+        .cta {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--white);
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .cta p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .cta .btn {
+            background: var(--white);
+            color: var(--primary);
+            font-size: 1.2rem;
+            padding: 15px 50px;
+        }
+
+        .cta .btn:hover {
+            background: var(--gray-100);
+            transform: translateY(-2px);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--gray-800);
+            color: var(--white);
+            padding: 60px 0 20px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--white);
+        }
+
+        .footer-col p {
+            color: var(--gray-400);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--gray-400);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-light);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--gray-400);
+            font-size: 0.9rem;
+        }
+
+        /* ===== RESPONSIVO ===== */
+        @media (max-width: 992px) {
+            .hero .container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .features-grid,
+            .pricing-grid,
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background: var(--white);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+                gap: 15px;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+
+            .features-grid,
+            .pricing-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta h2 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
-
 <body>
-    <div class="container">
-        <header class="main-header">
-        </header>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="img/logo.png" alt="AutoFlow Logo" onerror="this.style.display='none'">
+                <h1>AutoFlow</h1>
+            </div>
+            <nav>
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#home" class="active">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#planos">Planos</a></li>
+                    <li><a href="#depoimentos">Depoimentos</a></li>
+                    <li><a href="#contato">Contato</a></li>
+                    <li><a href="html/login.html" class="btn btn-outline" style="padding: 8px 20px;">Login</a></li>
+                </ul>
+            </nav>
+            <div class="mobile-menu-btn" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </header>
 
-        <main class="main-content">
-            <div class="welcome-section">
-                
-                <!-- Logo -->
-                <img src="../img/logo.png" alt="AutoFlow Logo" class="logo-img" onerror="this.style.display='none'">
-                
-                <p>Faça login para acessar o sistema</p>
-
-                <form id="login-form" class="login-form">
-                    <div class="form-group">
-                        <label for="email">E-mail</label>
-                        <input type="email" id="email" required placeholder="seu@email.com" autocomplete="email">
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Senha</label>
-                        <input type="password" id="password" required placeholder="Digite sua senha"
-                            autocomplete="current-password">
-                    </div>
-                    <button type="submit" class="btn-block" id="btn-entrar">Entrar</button>
-                </form>
-
-                <!-- Mensagens de erro/sucesso -->
-                <div id="message-box" class="alert-box" style="display: none;"></div>
-
-                <!-- Loading overlay -->
-                <div id="loading-overlay" style="display: none;">
-                    <div class="spinner"></div>
-                    <p>Verificando acesso...</p>
+    <!-- HERO SECTION -->
+    <section id="home" class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Gestão completa para <span>oficinas mecânicas</span></h1>
+                <p>Controle clientes, veículos, orçamentos e finanças em um só lugar. Mais de 30 oficinas já confiam na AutoFlow.</p>
+                <div class="hero-buttons">
+                    <a href="#planos" class="btn btn-primary btn-large">Começar Agora</a>
+                    <a href="#recursos" class="btn btn-outline btn-large">Conhecer Recursos</a>
                 </div>
             </div>
-        </main>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1619642751034-765dfdf87ef9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80" 
+                     alt="Oficina mecânica moderna" 
+                     onerror="this.src='https://via.placeholder.com/600x400?text=AutoFlow'">
+            </div>
+        </div>
+    </section>
 
-        <footer class="main-footer">
-            <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
-        </footer>
-    </div>
+    <!-- FEATURES -->
+    <section id="recursos" class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Tudo que sua oficina precisa</h2>
+                <p>Ferramentas completas para otimizar sua gestão e aumentar seus lucros</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Gestão de Clientes</h3>
+                    <p>Cadastre e gerencie todos os seus clientes com histórico completo de serviços.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <h3>Controle de Veículos</h3>
+                    <p>Histórico completo de cada veículo, serviços realizados e manutenções futuras.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <h3>Orçamentos Profissionais</h3>
+                    <p>Crie orçamentos detalhados e envie por PDF para seus clientes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Controle Financeiro</h3>
+                    <p>Acompanhe receitas, despesas e lucros com gráficos e relatórios.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Acesso Mobile</h3>
+                    <p>Sistema responsivo, acesse de qualquer lugar pelo celular.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Suporte Especializado</h3>
+                    <p>Suporte via WhatsApp para ajudar no que precisar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Configuração do Firebase -->
-    <script src="../js/firebase-config.js"></script>
-    <script src="../js/verificar-plano.js"></script>
+    <!-- PRICING -->
+    <section id="planos" class="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>Planos para todos os tamanhos</h2>
+                <p>Escolha o plano ideal para sua oficina, do básico ao completo</p>
+            </div>
+            <div class="pricing-grid">
+                <!-- Plano Básico -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Básico</h3>
+                        <div class="price">R$30 <span>/mês</span></div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Orçamentos ilimitados</li>
+                        <li class="nao-inclui"><i class="fas fa-times"></i> Cadastro de clientes</li>
+                        <li class="nao-inclui"><i class="fas fa-times"></i> Cadastro de veículos</li>
+                        <li class="nao-inclui"><i class="fas fa-times"></i> Controle financeiro</li>
+                    </ul>
+                    <a href="html/primeiro-acesso.html" class="btn btn-outline">Contratar</a>
+                </div>
+
+                <!-- Plano Intermediário (Destaque) -->
+                <div class="pricing-card featured">
+                    <div class="popular-badge">Mais Popular</div>
+                    <div class="pricing-header">
+                        <h3>Intermediário</h3>
+                        <div class="price">R$50 <span>/mês</span></div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Orçamentos ilimitados</li>
+                        <li><i class="fas fa-check"></i> Cadastro de clientes</li>
+                        <li><i class="fas fa-check"></i> Cadastro de veículos</li>
+                        <li class="nao-inclui"><i class="fas fa-times"></i> Controle financeiro</li>
+                    </ul>
+                    <a href="html/primeiro-acesso.html" class="btn btn-primary">Contratar</a>
+                </div>
+
+                <!-- Plano Completo -->
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <h3>Completo</h3>
+                        <div class="price">R$70 <span>/mês</span></div>
+                    </div>
+                    <ul class="pricing-features">
+                        <li><i class="fas fa-check"></i> Orçamentos ilimitados</li>
+                        <li><i class="fas fa-check"></i> Cadastro de clientes</li>
+                        <li><i class="fas fa-check"></i> Cadastro de veículos</li>
+                        <li><i class="fas fa-check"></i> Controle financeiro</li>
+                    </ul>
+                    <a href="html/primeiro-acesso.html" class="btn btn-outline">Contratar</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section id="depoimentos" class="testimonials">
+        <div class="container">
+            <div class="section-title">
+                <h2>O que nossos clientes dizem</h2>
+                <p>Mais de 500 oficinas já transformaram sua gestão com a AutoFlow</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h4>João Silva</h4>
+                            <p>Silva & Cia. Auto Center</p>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"O sistema transformou minha oficina. Antes eu usava planilhas, agora tenho tudo organizado. O controle financeiro me ajudou a ver onde estava perdendo dinheiro."</p>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h4>Maria Santos</h4>
+                            <p>Oficina Central</p>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"O melhor sistema que já usei. Meus clientes adoram receber os orçamentos em PDF, dá um ar muito profissional. Recomendo demais!"</p>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="testimonial-info">
+                            <h4>Carlos Oliveira</h4>
+                            <p>Auto Express</p>
+                        </div>
+                    </div>
+                    <p class="testimonial-text">"Comecei com o plano básico e já fiz upgrade para o completo. O sistema é intuitivo e o suporte é excelente. Minha produtividade aumentou muito."</p>
+                    <div class="testimonial-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <h2>Pronto para transformar sua oficina?</h2>
+            <a href="#planos" class="btn">Quero mudar o nível da minha oficina</a>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contato" class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>AutoFlow</h3>
+                    <p>Sistema completo de gestão para oficinas mecânicas. Mais de 30 clientes satisfeitos em todo o Brasil.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h3>Links Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Início</a></li>
+                        <li><a href="#recursos">Recursos</a></li>
+                        <li><a href="#planos">Planos</a></li>
+                        <li><a href="#depoimentos">Depoimentos</a></li>
+                        <li><a href="html/login.html">Login</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Planos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#planos">Básico - R$30</a></li>
+                        <li><a href="#planos">Intermediário - R$50</a></li>
+                        <li><a href="#planos">Completo - R$70</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contato</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-envelope"></i> contato@autoflow.com</li>
+                        <li><i class="fas fa-phone"></i> (51) 3333-4444</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Porto Alegre, RS</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const loginForm = document.getElementById('login-form');
-            const messageBox = document.getElementById('message-box');
-            const loadingOverlay = document.getElementById('loading-overlay');
-            const btnEntrar = document.getElementById('btn-entrar');
+        function toggleMenu() {
+            const menu = document.getElementById('navMenu');
+            menu.classList.toggle('active');
+        }
 
-            // Lista de admins
-            const ADMIN_EMAILS = [
-                'admin@autoflow.com',
-                'rafael@gmail.com',
-                'admin@gmail.com'
-            ];
-
-            // MAPEAMENTO: plano básico vai para orcamento-rapido.html
-            const PLANOS_REDIRECT = {
-                'basico': 'orcamento-rapido.html',      // Plano R$30 vai para orçamento rápido
-                'intermediario': 'dashboard.html',       // Plano R$50 vai para dashboard
-                'completo': 'dashboard.html'             // Plano R$70 vai para dashboard
-            };
-
-            // Verificar se já está logado
-            auth.onAuthStateChanged(async function (user) {
-                if (user) {
-                    console.log('Usuário já logado:', user.email);
-                    await redirecionarUsuario(user);
-                }
+        // Fechar menu ao clicar em um link
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navMenu').classList.remove('active');
             });
+        });
 
-            // Manipular login
-            loginForm.addEventListener('submit', async function (e) {
+        // Smooth scroll para os links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
-
-                if (!email || !password) {
-                    showMessage('Preencha todos os campos!', 'error');
-                    return;
-                }
-
-                if (password.length < 6) {
-                    showMessage('A senha deve ter pelo menos 6 caracteres!', 'error');
-                    return;
-                }
-
-                const originalText = btnEntrar.textContent;
-                btnEntrar.textContent = 'Entrando...';
-                btnEntrar.disabled = true;
-                messageBox.style.display = 'none';
-                loadingOverlay.style.display = 'block';
-
-                try {
-                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                    const user = userCredential.user;
-
-                    console.log('Login bem-sucedido:', user.email);
-                    await redirecionarUsuario(user);
-
-                } catch (error) {
-                    console.error('Erro no login:', error);
-
-                    btnEntrar.textContent = originalText;
-                    btnEntrar.disabled = false;
-                    loadingOverlay.style.display = 'none';
-
-                    let errorMsg = '';
-
-                    switch (error.code) {
-                        case 'auth/invalid-email':
-                            errorMsg = '❌ E-mail inválido. Verifique o formato.';
-                            break;
-                        case 'auth/user-disabled':
-                            errorMsg = '❌ Esta conta foi desativada. Entre em contato com o suporte.';
-                            break;
-                        case 'auth/user-not-found':
-                            errorMsg = '❌ Usuário não encontrado. Verifique o e-mail.';
-                            break;
-                        case 'auth/wrong-password':
-                            errorMsg = '❌ Senha incorreta. Tente novamente.';
-                            break;
-                        case 'auth/too-many-requests':
-                            errorMsg = '❌ Muitas tentativas. Aguarde alguns minutos.';
-                            break;
-                        case 'auth/network-request-failed':
-                            errorMsg = '❌ Erro de conexão. Verifique sua internet.';
-                            break;
-                        default:
-                            errorMsg = '❌ Erro ao fazer login: ' + error.message;
-                    }
-
-                    showMessage(errorMsg, 'error');
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
             });
-
-            async function redirecionarUsuario(user) {
-                try {
-                    // Verificar se é ADMIN
-                    if (ADMIN_EMAILS.includes(user.email)) {
-                        console.log('✅ Admin detectado. Redirecionando...');
-                        showMessage('✅ Bem-vindo, Administrador!', 'success');
-
-                        sessionStorage.removeItem('oficinaId');
-
-                        setTimeout(() => {
-                            // ✅ CORRIGIDO: sem pasta html/ porque os arquivos estão na mesma pasta
-                            window.location.href = 'admin-oficinas.html';
-                        }, 1000);
-                        return;
-                    }
-
-                    console.log('Verificando vínculo com oficina...');
-
-                    const snapshot = await db.collection('oficinas')
-                        .where('emailDono', '==', user.email)
-                        .limit(1)
-                        .get();
-
-                    if (!snapshot.empty) {
-                        const oficinaDoc = snapshot.docs[0];
-                        const oficina = oficinaDoc.data();
-
-                        if (oficina.status === 'bloqueada') {
-                            showMessage('❌ Sua oficina está bloqueada. Entre em contato com o suporte.', 'error');
-                            await auth.signOut();
-                            return;
-                        }
-
-                        if (oficina.status === 'inativa') {
-                            showMessage('❌ Sua oficina está inativa. Ative seu plano para acessar.', 'error');
-                            await auth.signOut();
-                            return;
-                        }
-
-                        const plano = oficina.plano || 'basico';
-
-                        sessionStorage.setItem('oficinaId', oficinaDoc.id);
-                        sessionStorage.setItem('oficinaNome', oficina.nome);
-                        sessionStorage.setItem('planoAtual', plano);
-
-                        const planoInfo = window.permissoes?.PLANOS_CONFIG[plano] || {
-                            nome: 'Básico',
-                            preco: 30
-                        };
-
-                        sessionStorage.setItem('planoNome', planoInfo.nome);
-                        sessionStorage.setItem('planoPreco', planoInfo.preco);
-
-                        console.log(`✅ Dono de oficina detectado. Plano: ${plano}`);
-
-                        let mensagem = `✅ Bem-vindo, ${oficina.nome}!`;
-                        if (plano === 'basico') {
-                            mensagem = `✅ Plano Básico - Acesso apenas a orçamentos rápidos.`;
-                        } else if (plano === 'intermediario') {
-                            mensagem = `✅ Plano Intermediário - Acesso a clientes e veículos.`;
-                        } else if (plano === 'completo') {
-                            mensagem = `✅ Plano Completo - Todos os recursos liberados (inclui Financeiro).`;
-                        }
-
-                        showMessage(mensagem, 'success');
-
-                        setTimeout(() => {
-                            window.location.href = PLANOS_REDIRECT[plano];
-                        }, 1500);
-
-                    } else {
-                        console.log('❌ Usuário sem vínculo com oficina');
-                        showMessage('❌ Você não tem permissão para acessar o sistema.', 'error');
-                        await auth.signOut();
-                    }
-
-                } catch (error) {
-                    console.error('Erro ao verificar permissões:', error);
-                    showMessage('❌ Erro ao verificar suas permissões. Tente novamente.', 'error');
-                    await auth.signOut();
-                }
-            }
-
-            function showMessage(message, type) {
-                messageBox.textContent = message;
-                messageBox.className = 'alert-box';
-                messageBox.style.display = 'block';
-
-                if (type === 'success') {
-                    messageBox.style.backgroundColor = '#e8f5e9';
-                    messageBox.style.color = '#1b5e20';
-                    messageBox.style.border = '1px solid #a5d6a7';
-                } else {
-                    messageBox.style.backgroundColor = '#ffebee';
-                    messageBox.style.color = '#c62828';
-                    messageBox.style.border = '1px solid #ef9a9a';
-                }
-            }
         });
     </script>
 </body>
-
 </html>
