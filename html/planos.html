@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Planos - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .planos-container {
+            max-width: 1200px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .planos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+        .plano-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s;
+            background: white;
+            position: relative;
+        }
+        .plano-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .plano-card.basico { border-top: 5px solid #cd7f32; }
+        .plano-card.intermediario { border-top: 5px solid #c0c0c0; }
+        .plano-card.completo { border-top: 5px solid #ffd700; }
+        
+        .plano-preco {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .plano-preco small {
+            font-size: 16px;
+            font-weight: normal;
+        }
+        .btn-upgrade {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+        .btn-upgrade:hover {
+            background: #218838;
+        }
+        .plano-atual {
+            background: #6c757d;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 5px;
+            font-size: 18px;
+            width: 100%;
+        }
+        .plano-badge {
+            position: absolute;
+            top: -10px;
+            right: 20px;
+            background: #ffd700;
+            color: #000;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .feature-list {
+            text-align: left;
+            margin: 30px 0;
+            padding: 0;
+            list-style: none;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-disabled {
+            color: #999;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo">
+                <h1>AutoFlow</h1>
+            </div>
+            <nav class="main-nav">
+                <ul id="main-menu"></ul>
+            </nav>
+        </header>
+
+        <main>
+            <div class="planos-container">
+                <h1 class="text-center">Escolha o plano ideal para sua oficina</h1>
+                <p class="text-center">Todos os planos incluem orçamentos ilimitados</p>
+                
+                <div class="planos-grid">
+                    <!-- Básico -->
+                    <div class="plano-card basico" id="plano-basico">
+                        <h2>Básico</h2>
+                        <div class="plano-preco">R$ 30 <small>/mês</small></div>
+                        <ul class="feature-list">
+                            <li>✅ Orçamentos ilimitados</li>
+                            <li class="feature-disabled">❌ Cadastro de clientes</li>
+                            <li class="feature-disabled">❌ Cadastro de veículos</li>
+                            <li class="feature-disabled">❌ Financeiro</li>
+                            <li class="feature-disabled">❌ Relatórios</li>
+                        </ul>
+                        <div id="btn-basico"></div>
+                    </div>
+                    
+                    <!-- Intermediário -->
+                    <div class="plano-card intermediario" id="plano-intermediario">
+                        <h2>Intermediário</h2>
+                        <div class="plano-preco">R$ 50 <small>/mês</small></div>
+                        <ul class="feature-list">
+                            <li>✅ Orçamentos ilimitados</li>
+                            <li>✅ Até 100 clientes</li>
+                            <li>✅ Até 200 veículos</li>
+                            <li class="feature-disabled">❌ Financeiro</li>
+                            <li class="feature-disabled">❌ Relatórios</li>
+                        </ul>
+                        <div id="btn-intermediario"></div>
+                    </div>
+                    
+                    <!-- Completo -->
+                    <div class="plano-card completo" id="plano-completo">
+                        <h2>Completo</h2>
+                        <div class="plano-preco">R$ 70 <small>/mês</small></div>
+                        <ul class="feature-list">
+                            <li>✅ Orçamentos ilimitados</li>
+                            <li>✅ Clientes ilimitados</li>
+                            <li>✅ Veículos ilimitados</li>
+                            <li>✅ Financeiro completo</li>
+                            <li>✅ Relatórios avançados</li>
+                        </ul>
+                        <div id="btn-completo"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            const planoAtual = sessionStorage.getItem('planoAtual') || 'basico';
+            
+            // Verificar login
+            auth.onAuthStateChanged(async function(user) {
+                if (!user || !oficinaId) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Gerar menu
+                const menu = document.getElementById('main-menu');
+                menu.innerHTML = `
+                    <li><a href="dashboard.html">📊 Dashboard</a></li>
+                    <li><a href="planos.html" class="active">💰 Planos</a></li>
+                `;
+                
+                // Mostrar botões baseado no plano atual
+                const botoes = {
+                    basico: document.getElementById('btn-basico'),
+                    intermediario: document.getElementById('btn-intermediario'),
+                    completo: document.getElementById('btn-completo')
+                };
+                
+                if (planoAtual === 'basico') {
+                    botoes.basico.innerHTML = '<div class="plano-atual">✅ Plano Atual</div>';
+                    botoes.intermediario.innerHTML = '<button class="btn-upgrade" onclick="fazerUpgrade(\'intermediario\')">Fazer Upgrade (R$50)</button>';
+                    botoes.completo.innerHTML = '<button class="btn-upgrade" onclick="fazerUpgrade(\'completo\')">Fazer Upgrade (R$70)</button>';
+                } else if (planoAtual === 'intermediario') {
+                    botoes.basico.innerHTML = '<button class="btn-upgrade" onclick="fazerUpgrade(\'basico\')">Rebaixar (R$30)</button>';
+                    botoes.intermediario.innerHTML = '<div class="plano-atual">✅ Plano Atual</div>';
+                    botoes.completo.innerHTML = '<button class="btn-upgrade" onclick="fazerUpgrade(\'completo\')">Fazer Upgrade (R$70)</button>';
+                } else {
+                    botoes.basico.innerHTML = '<button class="btn-upgrade" onclick="fazerUpgrade(\'basico\')">Rebaixar (R$30)</button>';
+                    botoes.intermediario.innerHTML = '<button class="btn-upgrade" onclick="fazerUpgrade(\'intermediario\')">Rebaixar (R$50)</button>';
+                    botoes.completo.innerHTML = '<div class="plano-atual">✅ Plano Atual</div>';
+                }
+            });
+            
+            window.fazerUpgrade = async function(novoPlano) {
+                const oficinaId = sessionStorage.getItem('oficinaId');
+                const precos = { basico: 30, intermediario: 50, completo: 70 };
+                const nomes = { basico: 'Básico', intermediario: 'Intermediário', completo: 'Completo' };
+                
+                const confirmar = confirm(`Deseja mudar para o plano ${nomes[novoPlano]} (R$ ${precos[novoPlano]}/mês)?`);
+                
+                if (!confirmar) return;
+                
+                try {
+                    await db.collection('oficinas').doc(oficinaId).update({
+                        plano: novoPlano,
+                        updatedAt: new Date().toISOString()
+                    });
+                    
+                    sessionStorage.setItem('planoAtual', novoPlano);
+                    sessionStorage.setItem('planoNome', nomes[novoPlano]);
+                    sessionStorage.setItem('planoPreco', precos[novoPlano]);
+                    
+                    alert(`✅ Plano alterado para ${nomes[novoPlano]} com sucesso!`);
+                    
+                    // Redirecionar baseado no novo plano
+                    if (novoPlano === 'basico') {
+                        window.location.href = 'orcamentos.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                    
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('❌ Erro ao alterar plano');
+                }
+            };
+        });
+    </script>
+</body>
+</html>

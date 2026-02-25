@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Oficina - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <!-- Mascaras para inputs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="main-header">
+           <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+                <img src="../img/logo.png" alt="AutoFlow Logo"
+                    style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                    onerror="this.style.display='none'">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li><a href="veiculos.html">Veículos</a></li>
+                    <li><a href="orcamentos.html">Orçamentos</a></li>
+                    <li><a href="financeiro.html">Financeiro</a></li>
+                    <li><a href="adicionaroficina.html" class="active">Oficinas</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Breadcrumb -->
+            <div class="breadcrumb">
+                <a href="dashboard.html">Dashboard</a> > 
+                <span>Gerenciamento de Oficinas</span>
+            </div>
+
+            <!-- Seção de Oficinas -->
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="icon-office"></i> Gerenciamento de Oficinas</h2>
+                    <button id="btn-nova-oficina" class="btn btn-success">
+                        <i class="icon-plus"></i> + Nova Oficina
+                    </button>
+                </div>
+
+                <!-- Abas de visualização -->
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="lista">Lista de Oficinas</button>
+                        <button class="tab-btn" data-tab="mapa">Visualizar Mapa</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="tab-lista">
+                        <!-- Filtros -->
+                        <div class="filters-bar">
+                            <div class="search-box">
+                                <input type="text" id="search-oficina" placeholder="Buscar por nome, cidade ou serviço...">
+                                <button id="btn-search" class="btn btn-primary">Buscar</button>
+                            </div>
+                            <div class="filter-options">
+                                <select id="filter-status">
+                                    <option value="">Todos os status</option>
+                                    <option value="ativa">Ativa</option>
+                                    <option value="inativa">Inativa</option>
+                                </select>
+                                <select id="filter-especialidade">
+                                    <option value="">Todas especialidades</option>
+                                    <option value="mecanica">Mecânica</option>
+                                    <option value="funilaria">Funilaria e Pintura</option>
+                                    <option value="eletrica">Elétrica</option>
+                                    <option value="suspensao">Suspensão</option>
+                                    <option value="trocaoleo">Troca de Óleo</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de oficinas -->
+                        <div class="table-container">
+                            <div class="table-responsive">
+                                <table class="data-table" id="oficinas-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nome</th>
+                                            <th>CNPJ</th>
+                                            <th>Telefone</th>
+                                            <th>Cidade/UF</th>
+                                            <th>Especialidades</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="oficinas-body">
+                                        <!-- Dados serão carregados aqui -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="loader" id="oficinas-loader"></div>
+                        
+                        <!-- Paginação -->
+                        <div class="pagination" id="pagination">
+                            <button class="btn-pagination" id="prev-page" disabled>Anterior</button>
+                            <span class="page-info" id="page-info">Página 1</span>
+                            <button class="btn-pagination" id="next-page">Próxima</button>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="tab-mapa">
+                        <div class="map-container">
+                            <div id="map" style="height: 500px; background: #f5f5f5; display: flex; align-items: center; justify-content: center;">
+                                <p>Mapa será carregado aqui (integração com Google Maps ou Leaflet)</p>
+                                <p><small>Em desenvolvimento...</small></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estatísticas Rápidas -->
+            <div class="stats-grid" style="margin-top: 20px;">
+                <div class="stat-card">
+                    <div class="stat-icon">🏪</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="total-oficinas">0</span>
+                        <span class="stat-label">Total de Oficinas</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="oficinas-ativas">0</span>
+                        <span class="stat-label">Oficinas Ativas</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📍</div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="cidades-atuacao">0</span>
+                        <span class="stat-label">Cidades de Atuação</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- Modal para Oficina -->
+    <div id="oficina-modal" class="modal">
+        <div class="modal-content modal-lg">
+            <button class="modal-close">&times;</button>
+            <h2 class="modal-title" id="modal-title">Nova Oficina</h2>
+            
+            <form id="form-oficina">
+                <div class="form-tabs">
+                    <button type="button" class="form-tab-btn active" data-form-tab="basico">Informações Básicas</button>
+                    <button type="button" class="form-tab-btn" data-form-tab="endereco">Endereço</button>
+                    <button type="button" class="form-tab-btn" data-form-tab="servicos">Serviços</button>
+                    <button type="button" class="form-tab-btn" data-form-tab="contato">Contato</button>
+                </div>
+
+                <!-- Aba 1: Informações Básicas -->
+                <div class="form-tab-content active" id="form-tab-basico">
+                    <div class="form-row">
+                        <div class="form-group col-md-8">
+                            <label for="oficina-nome">Nome da Oficina *</label>
+                            <input type="text" id="oficina-nome" required placeholder="Ex: Auto Mecânica Silva">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="oficina-status">Status</label>
+                            <select id="oficina-status">
+                                <option value="ativa">Ativa</option>
+                                <option value="inativa">Inativa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="oficina-cnpj">CNPJ</label>
+                            <input type="text" id="oficina-cnpj" placeholder="00.000.000/0000-00">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="oficina-ie">Inscrição Estadual</label>
+                            <input type="text" id="oficina-ie" placeholder="Isento se não houver">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oficina-razao-social">Razão Social</label>
+                        <input type="text" id="oficina-razao-social" placeholder="Nome completo da empresa">
+                    </div>
+                </div>
+
+                <!-- Aba 2: Endereço -->
+                <div class="form-tab-content" id="form-tab-endereco">
+                    <div class="form-row">
+                        <div class="form-group col-md-2">
+                            <label for="oficina-cep">CEP</label>
+                            <input type="text" id="oficina-cep" placeholder="00000-000">
+                            <button type="button" id="btn-buscar-cep" class="btn btn-sm btn-secondary" style="margin-top: 5px;">Buscar</button>
+                        </div>
+                        <div class="form-group col-md-7">
+                            <label for="oficina-endereco">Endereço</label>
+                            <input type="text" id="oficina-endereco" placeholder="Rua, Av, etc">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="oficina-numero">Número</label>
+                            <input type="text" id="oficina-numero" placeholder="123">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-5">
+                            <label for="oficina-complemento">Complemento</label>
+                            <input type="text" id="oficina-complemento" placeholder="Sala, Loja, etc">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="oficina-bairro">Bairro</label>
+                            <input type="text" id="oficina-bairro" placeholder="Centro">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="oficina-cidade">Cidade</label>
+                            <input type="text" id="oficina-cidade" placeholder="São Paulo">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-2">
+                            <label for="oficina-uf">UF</label>
+                            <select id="oficina-uf">
+                                <option value="">Selecione</option>
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AM">AM</option>
+                                <option value="AP">AP</option><option value="BA">BA</option><option value="CE">CE</option>
+                                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                <option value="MA">MA</option><option value="MG">MG</option><option value="MS">MS</option>
+                                <option value="MT">MT</option><option value="PA">PA</option><option value="PB">PB</option>
+                                <option value="PE">PE</option><option value="PI">PI</option><option value="PR">PR</option>
+                                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RO">RO</option>
+                                <option value="RR">RR</option><option value="RS">RS</option><option value="SC">SC</option>
+                                <option value="SE">SE</option><option value="SP">SP</option><option value="TO">TO</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="oficina-pais">País</label>
+                            <input type="text" id="oficina-pais" value="Brasil" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba 3: Serviços -->
+                <div class="form-tab-content" id="form-tab-servicos">
+                    <div class="form-group">
+                        <label>Especialidades da Oficina</label>
+                        <div class="checkbox-grid">
+                            <label><input type="checkbox" value="mecanica"> Mecânica Geral</label>
+                            <label><input type="checkbox" value="funilaria"> Funilaria e Pintura</label>
+                            <label><input type="checkbox" value="eletrica"> Elétrica Automotiva</label>
+                            <label><input type="checkbox" value="suspensao"> Suspensão e Alinhamento</label>
+                            <label><input type="checkbox" value="trocaoleo"> Troca de Óleo</label>
+                            <label><input type="checkbox" value="injecao"> Injeção Eletrônica</label>
+                            <label><input type="checkbox" value="arcondicionado"> Ar Condicionado</label>
+                            <label><input type="checkbox" value="freios"> Freios</label>
+                            <label><input type="checkbox" value="transmissao"> Câmbio/Transmissão</label>
+                            <label><input type="checkbox" value="diagnostico"> Diagnóstico Computadorizado</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oficina-descricao">Descrição da Oficina</label>
+                        <textarea id="oficina-descricao" rows="4" placeholder="Descreva os serviços, diferenciais, etc..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oficina-horario">Horário de Funcionamento</label>
+                        <input type="text" id="oficina-horario" placeholder="Ex: Segunda a Sexta 8h-18h, Sábado 8h-12h">
+                    </div>
+                </div>
+
+                <!-- Aba 4: Contato -->
+                <div class="form-tab-content" id="form-tab-contato">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="oficina-telefone1">Telefone Principal *</label>
+                            <input type="tel" id="oficina-telefone1" required placeholder="(11) 3333-4444">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="oficina-telefone2">Telefone Secundário</label>
+                            <input type="tel" id="oficina-telefone2" placeholder="(11) 99999-8888">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="oficina-email">E-mail</label>
+                            <input type="email" id="oficina-email" placeholder="contato@oficina.com.br">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="oficina-site">Site</label>
+                            <input type="url" id="oficina-site" placeholder="https://www.oficina.com.br">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oficina-whatsapp">WhatsApp</label>
+                        <input type="tel" id="oficina-whatsapp" placeholder="(11) 98888-7777">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="oficina-redes">Redes Sociais</label>
+                        <input type="text" id="oficina-redes" placeholder="@oficina (Instagram, Facebook, etc)">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btn-salvar-oficina">Salvar Oficina</button>
+                    <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de detalhes da oficina -->
+    <div id="oficina-detalhes-modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2 class="modal-title" id="detalhes-modal-title">Detalhes da Oficina</h2>
+            <div id="oficina-detalhes-content">
+                <!-- Conteúdo preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/adicionaroficina.js"></script>
+</body>
+</html>

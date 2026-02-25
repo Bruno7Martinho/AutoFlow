@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financeiro - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+                <img src="../img/logo.png" alt="AutoFlow Logo"
+                    style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                    onerror="this.style.display='none'">
+            </div>
+            <nav class="main-nav">
+                <ul id="main-menu">
+                    <!-- Menu será carregado dinamicamente -->
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-line"></i> Gerenciamento Financeiro</h2>
+                    <div>
+                        <button id="btn-nova-despesa" class="btn btn-secondary">+ Nova Despesa</button>
+                        <button id="btn-registrar-pagamento" class="btn btn-success">+ Registrar Pagamento</button>
+                    </div>
+                </div>
+
+                <!-- Filtro por mês -->
+                <div class="filtro-container" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e0e0e0;">
+                    <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <label for="filtro-mes" style="font-weight: 600;">Filtrar por Período:</label>
+                        <select id="filtro-mes" style="padding: 8px 15px; border: 1px solid #ddd; min-width: 150px;">
+                            <option value="todos">Todos os meses</option>
+                            <option value="01">Janeiro</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="03">Março</option>
+                            <option value="04">Abril</option>
+                            <option value="05">Maio</option>
+                            <option value="06">Junho</option>
+                            <option value="07">Julho</option>
+                            <option value="08">Agosto</option>
+                            <option value="09">Setembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="11">Novembro</option>
+                            <option value="12">Dezembro</option>
+                        </select>
+                        <select id="filtro-ano" style="padding: 8px 15px; border: 1px solid #ddd; min-width: 120px;">
+                            <!-- Anos serão carregados dinamicamente -->
+                        </select>
+                        <button id="btn-aplicar-filtro" class="btn btn-primary">Aplicar</button>
+                        <button id="btn-limpar-filtro" class="btn btn-secondary">Limpar</button>
+                    </div>
+                </div>
+
+                <!-- Cards de Estatísticas -->
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="receita-total">R$ 0</div>
+                        <div class="stat-label">Receita Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="despesas-total">R$ 0</div>
+                        <div class="stat-label">Despesas Totais</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="liquido-total">R$ 0</div>
+                        <div class="stat-label">Lucro Líquido</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="margem-lucro">0%</div>
+                        <div class="stat-label">Margem de Lucro</div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de análise mensal -->
+                <div style="margin: 30px 0; padding: 20px; background: white; border: 1px solid #e0e0e0;">
+                    <h3 style="margin-bottom: 20px;">Análise Financeira Mensal</h3>
+                    <div style="height: 350px;">
+                        <canvas id="grafico-financeiro"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabelas de Receitas e Despesas do Mês -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                    <!-- Receitas do Mês -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Receitas do Mês</h3>
+                            <span class="badge" id="mes-atual-label"></span>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        <th>Cliente</th>
+                                        <th>Valor</th>
+                                        <th>Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="receitas-mes-body">
+                                    <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                            <div style="padding: 15px; text-align: center; border-top: 1px solid #e0e0e0;">
+                                <small id="receitas-message">Carregando receitas...</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Despesas do Mês -->
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3>Despesas do Mês</h3>
+                            <button id="btn-ver-todas-despesas" class="btn btn-sm btn-secondary">Ver Todas</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Descrição</th>
+                                        <th>Valor</th>
+                                        <th>Data</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="despesas-mes-body">
+                                    <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                                </tbody>
+                            </table>
+                            <div style="padding: 15px; text-align: center; border-top: 1px solid #e0e0e0;">
+                                <small id="despesas-message">Carregando despesas...</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Financeiro do Mês -->
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border: 1px solid #e0e0e0;">
+                    <h3 style="margin-bottom: 15px;">Resumo do Período</h3>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+                        <div style="text-align: center; padding: 15px; background: white; border: 1px solid #e0e0e0;">
+                            <div style="font-size: 1.8rem; font-weight: 600; color: #28a745;" id="receita-mes">R$ 0</div>
+                            <div style="color: #666; margin-top: 5px;">Receita</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: white; border: 1px solid #e0e0e0;">
+                            <div style="font-size: 1.8rem; font-weight: 600; color: #dc3545;" id="despesas-mes">R$ 0</div>
+                            <div style="color: #666; margin-top: 5px;">Despesas</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: white; border: 1px solid #e0e0e0;">
+                            <div style="font-size: 1.8rem; font-weight: 600;" id="liquido-mes">R$ 0</div>
+                            <div style="color: #666; margin-top: 5px;">Lucro</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: white; border: 1px solid #e0e0e0;">
+                            <div style="font-size: 1.8rem; font-weight: 600;" id="margem-mes">0%</div>
+                            <div style="color: #666; margin-top: 5px;">Margem</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loader" id="financeiro-loader"></div>
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- Modal para registrar pagamento -->
+    <div id="pagamento-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Registrar Pagamento</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-pagamento">
+                    <div class="form-group">
+                        <label for="pagamento-orcamento">Orçamento *</label>
+                        <select id="pagamento-orcamento" required>
+                            <option value="">Carregando orçamentos pendentes...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pagamento-valor">Valor Recebido *</label>
+                        <input type="number" id="pagamento-valor" required step="0.01" min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="pagamento-forma">Forma de Pagamento *</label>
+                        <select id="pagamento-forma" required>
+                            <option value="">Selecione</option>
+                            <option value="dinheiro">Dinheiro</option>
+                            <option value="cartao_credito">Cartão de Crédito</option>
+                            <option value="cartao_debito">Cartão de Débito</option>
+                            <option value="pix">PIX</option>
+                            <option value="transferencia">Transferência Bancária</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pagamento-data">Data do Pagamento *</label>
+                        <input type="date" id="pagamento-data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pagamento-observacoes">Observações</label>
+                        <textarea id="pagamento-observacoes" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Registrar Pagamento</button>
+                        <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para despesa -->
+    <div id="despesa-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nova Despesa</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-despesa">
+                    <div class="form-group">
+                        <label for="despesa-tipo">Tipo de Despesa *</label>
+                        <select id="despesa-tipo" required>
+                            <option value="">Selecione</option>
+                            <option value="pecas">Peças e Materiais</option>
+                            <option value="aluguel">Aluguel</option>
+                            <option value="energia">Energia Elétrica</option>
+                            <option value="agua">Água</option>
+                            <option value="salario">Salários</option>
+                            <option value="manutencao">Manutenção</option>
+                            <option value="combustivel">Combustível</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="despesa-descricao">Descrição *</label>
+                        <input type="text" id="despesa-descricao" required placeholder="Ex: Compra de peças">
+                    </div>
+                    <div class="form-group">
+                        <label for="despesa-valor">Valor *</label>
+                        <input type="number" id="despesa-valor" required step="0.01" min="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="despesa-data">Data *</label>
+                        <input type="date" id="despesa-data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="despesa-documento">Nº Documento</label>
+                        <input type="text" id="despesa-documento" placeholder="Nota fiscal">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar Despesa</button>
+                        <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para listar todas as despesas -->
+    <div id="todas-despesas-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2>Todas as Despesas</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Filtros no modal -->
+                <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                    <select id="filtro-mes-modal" style="padding: 8px; flex: 1; border: 1px solid #ddd;">
+                        <option value="">Todos os meses</option>
+                        <option value="01">Janeiro</option>
+                        <option value="02">Fevereiro</option>
+                        <option value="03">Março</option>
+                        <option value="04">Abril</option>
+                        <option value="05">Maio</option>
+                        <option value="06">Junho</option>
+                        <option value="07">Julho</option>
+                        <option value="08">Agosto</option>
+                        <option value="09">Setembro</option>
+                        <option value="10">Outubro</option>
+                        <option value="11">Novembro</option>
+                        <option value="12">Dezembro</option>
+                    </select>
+                    <select id="filtro-ano-modal" style="padding: 8px; flex: 1; border: 1px solid #ddd;">
+                        <option value="">Todos os anos</option>
+                    </select>
+                    <button id="btn-filtrar-modal" class="btn btn-primary">Filtrar</button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Documento</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="todas-despesas-body">
+                            <tr><td colspan="6" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary modal-close">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/verificar-plano.js"></script>
+    <script>
+        // Gerenciamento Financeiro
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verificar permissão da página
+            const temPermissao = await window.permissoes.verificarPermissaoPagina();
+            if (!temPermissao) return;
+
+            // Verificar se tem acesso ao financeiro (plano completo)
+            if (!window.permissoes.temFuncionalidade('financeiro')) {
+                alert('⛔ Seu plano não permite acesso ao Financeiro.');
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            // Gerar menu dinâmico
+            const menuHtml = await window.permissoes.gerarMenu();
+            document.getElementById('main-menu').innerHTML = menuHtml;
+            
+            
+
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            if (!oficinaId) {
+                alert('Oficina não identificada');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            let filtroMesAtual = null;
+            let filtroAnoAtual = null;
+            let chartFinanceiro = null;
+
+            // Verificar autenticação
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    loadUserInfo(user);
+                    carregarAnosDisponiveis();
+                    carregarDadosFinanceirosCompletos();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+
+            function loadUserInfo(user) {
+                const userInfo = document.getElementById('user-info');
+                if (userInfo) {
+                    userInfo.innerHTML = `
+                        <span class="user-email">${user.email}</span>
+                        <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
+                    `;
+                    
+                    document.getElementById('logout-btn').addEventListener('click', function() {
+                        auth.signOut().then(() => {
+                            window.location.href = 'login.html';
+                        });
+                    });
+                }
+            }
+
+            function carregarAnosDisponiveis() {
+                const anoAtual = new Date().getFullYear();
+                const selectAno = document.getElementById('filtro-ano');
+                const selectAnoModal = document.getElementById('filtro-ano-modal');
+                
+                let html = `<option value="${anoAtual}">${anoAtual}</option>`;
+                for (let i = 1; i <= 3; i++) {
+                    const ano = anoAtual - i;
+                    html += `<option value="${ano}">${ano}</option>`;
+                }
+                
+                if (selectAno) selectAno.innerHTML = html;
+                if (selectAnoModal) selectAnoModal.innerHTML = `<option value="">Todos os anos</option>` + html;
+                
+                const mesAtual = String(new Date().getMonth() + 1).padStart(2, '0');
+                document.getElementById('filtro-mes').value = mesAtual;
+                
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                document.getElementById('mes-atual-label').textContent = `${meses[parseInt(mesAtual) - 1]}/${anoAtual}`;
+            }
+
+            async function carregarDadosFinanceirosCompletos() {
+                const loader = document.getElementById('financeiro-loader');
+                if (loader) loader.style.display = 'block';
+                
+                try {
+                    const [orcamentosSnapshot, despesasSnapshot] = await Promise.all([
+                        db.collection('oficinas').doc(oficinaId).collection('orcamentos').get(),
+                        db.collection('oficinas').doc(oficinaId).collection('despesas').get()
+                    ]);
+                    
+                    processarDadosFinanceiros(orcamentosSnapshot, despesasSnapshot);
+                    criarGraficoFinanceiro(orcamentosSnapshot, despesasSnapshot);
+                    
+                    if (loader) loader.style.display = 'none';
+                } catch (error) {
+                    console.error('Erro ao carregar dados financeiros:', error);
+                    if (loader) loader.style.display = 'none';
+                }
+            }
+
+            function processarDadosFinanceiros(orcamentosSnapshot, despesasSnapshot) {
+                let receitaTotal = 0;
+                let despesasTotal = 0;
+                let receitaMes = 0;
+                let despesasMes = 0;
+                
+                const mesFiltro = filtroMesAtual || String(new Date().getMonth() + 1).padStart(2, '0');
+                const anoFiltro = filtroAnoAtual || new Date().getFullYear();
+                
+                const receitasMesArray = [];
+                const despesasMesArray = [];
+                
+                // Processar orçamentos
+                orcamentosSnapshot.forEach(doc => {
+                    const orc = doc.data();
+                    const valor = parseFloat(orc.valorTotal) || 0;
+                    const dataPagamento = orc.dataPagamento || '';
+                    
+                    if (orc.status === 'pago' || orc.status === 'concluido') {
+                        receitaTotal += valor;
+                        
+                        if (dataPagamento && verificarMesAno(dataPagamento, mesFiltro, anoFiltro)) {
+                            receitaMes += valor;
+                            receitasMesArray.push({
+                                id: doc.id,
+                                numero: orc.numero || 'N/A',
+                                cliente: orc.cliente?.nome || orc.clienteNome || 'Cliente',
+                                valor: valor,
+                                data: dataPagamento
+                            });
+                        }
+                    }
+                });
+                
+                // Processar despesas
+                despesasSnapshot.forEach(doc => {
+                    const despesa = doc.data();
+                    const valor = parseFloat(despesa.valor) || 0;
+                    const dataDespesa = despesa.data || '';
+                    
+                    despesasTotal += valor;
+                    
+                    if (dataDespesa && verificarMesAno(dataDespesa, mesFiltro, anoFiltro)) {
+                        despesasMes += valor;
+                        despesasMesArray.push({
+                            id: doc.id,
+                            descricao: despesa.descricao,
+                            valor: valor,
+                            data: dataDespesa,
+                            tipo: despesa.tipo
+                        });
+                    }
+                });
+                
+                const liquidoTotal = receitaTotal - despesasTotal;
+                const liquidoMes = receitaMes - despesasMes;
+                const margemTotal = receitaTotal > 0 ? ((liquidoTotal / receitaTotal) * 100) : 0;
+                const margemMes = receitaMes > 0 ? ((liquidoMes / receitaMes) * 100) : 0;
+                
+                atualizarEstatisticas(receitaTotal, despesasTotal, liquidoTotal, margemTotal);
+                atualizarEstatisticasMes(receitaMes, despesasMes, liquidoMes, margemMes);
+                atualizarTabelaReceitas(receitasMesArray);
+                atualizarTabelaDespesas(despesasMesArray);
+            }
+
+            function verificarMesAno(dataString, mes, ano) {
+                try {
+                    const data = new Date(dataString);
+                    const dataMes = String(data.getMonth() + 1).padStart(2, '0');
+                    const dataAno = data.getFullYear();
+                    return dataMes === mes && dataAno.toString() === ano.toString();
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function atualizarEstatisticas(receita, despesas, liquido, margem) {
+                document.getElementById('receita-total').textContent = formatarMoeda(receita);
+                document.getElementById('despesas-total').textContent = formatarMoeda(despesas);
+                
+                const liquidoElement = document.getElementById('liquido-total');
+                liquidoElement.textContent = formatarMoeda(liquido);
+                liquidoElement.style.color = liquido >= 0 ? '#28a745' : '#dc3545';
+                
+                const margemElement = document.getElementById('margem-lucro');
+                margemElement.textContent = `${margem.toFixed(1)}%`;
+                margemElement.style.color = margem >= 0 ? '#28a745' : '#dc3545';
+            }
+
+            function atualizarEstatisticasMes(receita, despesas, liquido, margem) {
+                document.getElementById('receita-mes').textContent = formatarMoeda(receita);
+                document.getElementById('despesas-mes').textContent = formatarMoeda(despesas);
+                
+                const liquidoElement = document.getElementById('liquido-mes');
+                liquidoElement.textContent = formatarMoeda(liquido);
+                liquidoElement.style.color = liquido >= 0 ? '#28a745' : '#dc3545';
+                
+                const margemElement = document.getElementById('margem-mes');
+                margemElement.textContent = `${margem.toFixed(1)}%`;
+                margemElement.style.color = margem >= 0 ? '#28a745' : '#dc3545';
+            }
+
+            function atualizarTabelaReceitas(receitas) {
+                const tbody = document.getElementById('receitas-mes-body');
+                const message = document.getElementById('receitas-message');
+                
+                tbody.innerHTML = '';
+                
+                if (receitas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhuma receita neste período</td></tr>';
+                    message.textContent = 'Nenhuma receita neste período';
+                } else {
+                    receitas.sort((a, b) => new Date(b.data) - new Date(a.data));
+                    
+                    receitas.forEach(receita => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${receita.numero}</td>
+                            <td>${receita.cliente}</td>
+                            <td>${formatarMoeda(receita.valor)}</td>
+                            <td>${formatarData(receita.data)}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    
+                    message.textContent = `${receitas.length} receitas encontradas`;
+                }
+            }
+
+            function atualizarTabelaDespesas(despesas) {
+                const tbody = document.getElementById('despesas-mes-body');
+                const message = document.getElementById('despesas-message');
+                
+                tbody.innerHTML = '';
+                
+                if (despesas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhuma despesa neste período</td></tr>';
+                    message.textContent = 'Nenhuma despesa neste período';
+                } else {
+                    despesas.sort((a, b) => new Date(b.data) - new Date(a.data));
+                    
+                    despesas.forEach(despesa => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${despesa.descricao}</td>
+                            <td>${formatarMoeda(despesa.valor)}</td>
+                            <td>${formatarData(despesa.data)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${despesa.id}')">Excluir</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    
+                    message.textContent = `${despesas.length} despesas encontradas`;
+                }
+            }
+
+            function criarGraficoFinanceiro(orcamentosSnapshot, despesasSnapshot) {
+                const ctx = document.getElementById('grafico-financeiro').getContext('2d');
+                
+                const mesesDados = obterDadosUltimosMeses(orcamentosSnapshot, despesasSnapshot, 6);
+                
+                if (chartFinanceiro) {
+                    chartFinanceiro.destroy();
+                }
+                
+                chartFinanceiro = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: mesesDados.labels,
+                        datasets: [
+                            {
+                                label: 'Receitas',
+                                data: mesesDados.receitas,
+                                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                                borderColor: 'rgba(40, 167, 69, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Despesas',
+                                data: mesesDados.despesas,
+                                backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                                borderColor: 'rgba(220, 53, 69, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Lucro',
+                                data: mesesDados.lucros,
+                                type: 'line',
+                                fill: false,
+                                borderColor: 'rgba(0, 123, 255, 1)',
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'R$ ' + value.toFixed(2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function obterDadosUltimosMeses(orcamentosSnapshot, despesasSnapshot, meses) {
+                const hoje = new Date();
+                const labels = [];
+                const receitas = [];
+                const despesas = [];
+                const lucros = [];
+                
+                for (let i = meses - 1; i >= 0; i--) {
+                    const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                    const mes = String(data.getMonth() + 1).padStart(2, '0');
+                    const ano = data.getFullYear();
+                    
+                    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+                                       'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                    labels.push(`${mesesNomes[data.getMonth()]}/${ano.toString().slice(-2)}`);
+                    
+                    let receitaMes = 0;
+                    let despesaMes = 0;
+                    
+                    orcamentosSnapshot.forEach(doc => {
+                        const orc = doc.data();
+                        if ((orc.status === 'pago' || orc.status === 'concluido') && orc.dataPagamento) {
+                            if (verificarMesAno(orc.dataPagamento, mes, ano)) {
+                                receitaMes += parseFloat(orc.valorTotal) || 0;
+                            }
+                        }
+                    });
+                    
+                    despesasSnapshot.forEach(doc => {
+                        const despesa = doc.data();
+                        if (despesa.data && verificarMesAno(despesa.data, mes, ano)) {
+                            despesaMes += parseFloat(despesa.valor) || 0;
+                        }
+                    });
+                    
+                    receitas.push(receitaMes);
+                    despesas.push(despesaMes);
+                    lucros.push(receitaMes - despesaMes);
+                }
+                
+                return { labels, receitas, despesas, lucros };
+            }
+
+            function formatarData(dataInput) {
+                if (!dataInput) return '-';
+                try {
+                    const data = new Date(dataInput);
+                    if (isNaN(data.getTime())) return '-';
+                    return data.toLocaleDateString('pt-BR');
+                } catch (error) {
+                    return '-';
+                }
+            }
+
+            function formatarMoeda(valor) {
+                return 'R$ ' + valor.toFixed(2).replace('.', ',');
+            }
+
+            function formatarTipoDespesa(tipo) {
+                const tipos = {
+                    'pecas': 'Peças',
+                    'aluguel': 'Aluguel',
+                    'energia': 'Energia',
+                    'agua': 'Água',
+                    'salario': 'Salários',
+                    'manutencao': 'Manutenção',
+                    'combustivel': 'Combustível',
+                    'outros': 'Outros'
+                };
+                return tipos[tipo] || tipo;
+            }
+
+            function configurarDataAtual() {
+                const hoje = new Date();
+                const ano = hoje.getFullYear();
+                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoje.getDate()).padStart(2, '0');
+                const dataFormatada = `${ano}-${mes}-${dia}`;
+                
+                document.getElementById('pagamento-data').value = dataFormatada;
+                document.getElementById('despesa-data').value = dataFormatada;
+            }
+
+            async function carregarOrcamentosParaPagamento() {
+                const select = document.getElementById('pagamento-orcamento');
+                if (!select) return;
+                
+                select.innerHTML = '<option value="">Carregando...</option>';
+                
+                try {
+                    const snapshot = await db.collection('oficinas').doc(oficinaId).collection('orcamentos').get();
+                    
+                    let html = '<option value="">Selecione um orçamento</option>';
+                    let encontrados = 0;
+                    
+                    snapshot.forEach(doc => {
+                        const orc = doc.data();
+                        if (orc.status !== 'pago' && orc.status !== 'cancelado') {
+                            encontrados++;
+                            const valor = parseFloat(orc.valorTotal) || 0;
+                            const numero = orc.numero || ('ORC-' + doc.id.substring(0, 6));
+                            const cliente = orc.cliente?.nome || orc.clienteNome || 'Cliente';
+                            
+                            html += `<option value="${doc.id}" data-valor="${valor}">
+                                ${numero} - ${cliente} - R$ ${valor.toFixed(2)}
+                            </option>`;
+                        }
+                    });
+                    
+                    if (encontrados === 0) {
+                        html = '<option value="">Nenhum orçamento pendente</option>';
+                    }
+                    
+                    select.innerHTML = html;
+                    
+                    select.addEventListener('change', function() {
+                        const option = this.options[this.selectedIndex];
+                        if (option.value) {
+                            const valor = option.getAttribute('data-valor') || 0;
+                            document.getElementById('pagamento-valor').value = valor;
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.error('Erro:', error);
+                    select.innerHTML = '<option value="">Erro ao carregar</option>';
+                }
+            }
+
+            async function carregarTodasDespesas() {
+                const tbody = document.getElementById('todas-despesas-body');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">Carregando...</td></tr>';
+                
+                try {
+                    const snapshot = await db.collection('oficinas').doc(oficinaId).collection('despesas').orderBy('data', 'desc').get();
+                    
+                    if (snapshot.empty) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma despesa</td></tr>';
+                    } else {
+                        tbody.innerHTML = '';
+                        snapshot.forEach(doc => {
+                            const d = doc.data();
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${formatarData(d.data)}</td>
+                                <td>${formatarTipoDespesa(d.tipo)}</td>
+                                <td>${d.descricao}</td>
+                                <td>${formatarMoeda(parseFloat(d.valor))}</td>
+                                <td>${d.documento || '-'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${doc.id}')">Excluir</button>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Erro ao carregar</td></tr>';
+                }
+            }
+
+            // Event Listeners
+            document.getElementById('btn-aplicar-filtro').addEventListener('click', function() {
+                filtroMesAtual = document.getElementById('filtro-mes').value;
+                filtroAnoAtual = document.getElementById('filtro-ano').value;
+                if (filtroMesAtual === 'todos') filtroMesAtual = null;
+                carregarDadosFinanceirosCompletos();
+            });
+
+            document.getElementById('btn-limpar-filtro').addEventListener('click', function() {
+                filtroMesAtual = null;
+                filtroAnoAtual = null;
+                document.getElementById('filtro-mes').value = String(new Date().getMonth() + 1).padStart(2, '0');
+                carregarDadosFinanceirosCompletos();
+            });
+
+            document.getElementById('btn-registrar-pagamento').addEventListener('click', function() {
+                carregarOrcamentosParaPagamento();
+                document.getElementById('pagamento-modal').classList.add('active');
+            });
+
+            document.getElementById('btn-nova-despesa').addEventListener('click', function() {
+                configurarDataAtual();
+                document.getElementById('despesa-modal').classList.add('active');
+            });
+
+            document.getElementById('btn-ver-todas-despesas').addEventListener('click', function() {
+                carregarTodasDespesas();
+                document.getElementById('todas-despesas-modal').classList.add('active');
+            });
+
+            document.getElementById('btn-filtrar-modal').addEventListener('click', function() {
+                carregarTodasDespesas();
+            });
+
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+                });
+            });
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) modal.classList.remove('active');
+                });
+            });
+
+            document.getElementById('form-pagamento').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const orcamentoId = document.getElementById('pagamento-orcamento').value;
+                const valor = parseFloat(document.getElementById('pagamento-valor').value);
+                const forma = document.getElementById('pagamento-forma').value;
+                const data = document.getElementById('pagamento-data').value;
+                const obs = document.getElementById('pagamento-observacoes').value;
+                
+                if (!orcamentoId || !valor || !forma || !data) {
+                    alert('Preencha todos os campos obrigatórios!');
+                    return;
+                }
+                
+                try {
+                    await db.collection('oficinas').doc(oficinaId).collection('orcamentos').doc(orcamentoId).update({
+                        status: 'pago',
+                        dataPagamento: data,
+                        formaPagamento: forma,
+                        observacoesPagamento: obs,
+                        updatedAt: new Date().toISOString()
+                    });
+                    
+                    alert('✅ Pagamento registrado!');
+                    document.getElementById('pagamento-modal').classList.remove('active');
+                    this.reset();
+                    configurarDataAtual();
+                    carregarDadosFinanceirosCompletos();
+                    
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('❌ Erro ao registrar pagamento');
+                }
+            });
+
+            document.getElementById('form-despesa').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const tipo = document.getElementById('despesa-tipo').value;
+                const desc = document.getElementById('despesa-descricao').value.trim();
+                const valor = parseFloat(document.getElementById('despesa-valor').value);
+                const data = document.getElementById('despesa-data').value;
+                const documento = document.getElementById('despesa-documento').value.trim();
+                
+                if (!tipo || !desc || isNaN(valor) || !data) {
+                    alert('Preencha todos os campos!');
+                    return;
+                }
+                
+                try {
+                    await db.collection('oficinas').doc(oficinaId).collection('despesas').add({
+                        tipo: tipo,
+                        descricao: desc,
+                        valor: valor,
+                        data: data,
+                        documento: documento || '',
+                        createdAt: new Date().toISOString()
+                    });
+                    
+                    alert('✅ Despesa salva!');
+                    document.getElementById('despesa-modal').classList.remove('active');
+                    this.reset();
+                    configurarDataAtual();
+                    carregarDadosFinanceirosCompletos();
+                    
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('❌ Erro ao salvar despesa');
+                }
+            });
+
+            window.excluirDespesa = async function(id) {
+                if (confirm('Excluir esta despesa?')) {
+                    try {
+                        await db.collection('oficinas').doc(oficinaId).collection('despesas').doc(id).delete();
+                        alert('✅ Despesa excluída!');
+                        carregarDadosFinanceirosCompletos();
+                        carregarTodasDespesas();
+                    } catch (error) {
+                        console.error('Erro:', error);
+                        alert('❌ Erro ao excluir');
+                    }
+                }
+            };
+
+            configurarDataAtual();
+        });
+    </script>
+</body>
+
+</html>s

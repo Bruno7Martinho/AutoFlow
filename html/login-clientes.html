@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        /* Centralização completa da tela de login */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-header {
+            text-align: center;
+            margin-bottom: 25px;
+            background: transparent;
+            box-shadow: none;
+            border-bottom: none;
+            padding: 0;
+        }
+
+        .logo h1 {
+            font-size: 2.2rem;
+            color: var(--vermelho-principal, #c62828);
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .main-content {
+            background: white;
+            padding: 40px 35px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin: 0;
+        }
+
+        .welcome-section {
+            text-align: center;
+        }
+
+        .welcome-section h2 {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        /* Estilo para a logo */
+        .logo-img {
+            max-width: 220px;
+            height: auto;
+            margin: 0 auto 25px auto;
+            display: block;
+        }
+
+        .welcome-section p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+
+        .login-form {
+            text-align: left;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            border-color: var(--vermelho-principal, #c62828);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+
+        .btn-block {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            margin-top: 10px;
+            background-color: var(--vermelho-principal, #c62828);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-block:hover {
+            background-color: #8b1e1e;
+        }
+
+        .btn-block:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .alert-box {
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+        }
+
+        #loading-overlay {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        #loading-overlay p {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            margin-bottom: 0;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--vermelho-principal, #c62828);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .main-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            color: #888;
+            font-size: 0.85rem;
+            background: transparent;
+            border: none;
+        }
+
+        .main-footer p {
+            margin: 0;
+        }
+
+        /* Link de primeiro acesso */
+        .primeiro-acesso {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .primeiro-acesso p {
+            margin: 0;
+            color: #666;
+        }
+
+        .primeiro-acesso a {
+            color: var(--vermelho-principal, #c62828);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .primeiro-acesso a:hover {
+            color: #8b1e1e;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="main-header">
+        </header>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                
+                <!-- Logo -->
+                <img src="../img/logo.png" alt="AutoFlow Logo" class="logo-img" onerror="this.style.display='none'">
+                
+                <p>Faça login para acessar o sistema</p>
+
+                <form id="login-form" class="login-form">
+                    <div class="form-group">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" required placeholder="seu@email.com" autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Senha</label>
+                        <input type="password" id="password" required placeholder="Digite sua senha"
+                            autocomplete="current-password">
+                    </div>
+                    <button type="submit" class="btn-block" id="btn-entrar">Entrar</button>
+                </form>
+
+                <!-- Mensagens de erro/sucesso -->
+                <div id="message-box" class="alert-box" style="display: none;"></div>
+
+                <!-- Loading overlay -->
+                <div id="loading-overlay" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Verificando acesso...</p>
+                </div>
+
+            
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- Configuração do Firebase -->
+    <script src="../js/firebase-config.js"></script>
+    <script src="../js/verificar-plano.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const loginForm = document.getElementById('login-form');
+            const messageBox = document.getElementById('message-box');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const btnEntrar = document.getElementById('btn-entrar');
+
+            // Lista de admins
+            const ADMIN_EMAILS = [
+                'admin@autoflow.com',
+                'rafael@gmail.com',
+                'admin@gmail.com'
+            ];
+
+            // MAPEAMENTO: plano básico vai para orcamento-rapido.html
+            const PLANOS_REDIRECT = {
+                'basico': 'orcamento-rapido.html',      // Plano R$30 vai para orçamento rápido
+                'intermediario': 'dashboard.html',       // Plano R$50 vai para dashboard
+                'completo': 'dashboard.html'             // Plano R$70 vai para dashboard
+            };
+
+            // Verificar se já está logado
+            auth.onAuthStateChanged(async function (user) {
+                if (user) {
+                    console.log('Usuário já logado:', user.email);
+                    await redirecionarUsuario(user);
+                }
+            });
+
+            // Manipular login
+            loginForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+
+                if (!email || !password) {
+                    showMessage('Preencha todos os campos!', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showMessage('A senha deve ter pelo menos 6 caracteres!', 'error');
+                    return;
+                }
+
+                const originalText = btnEntrar.textContent;
+                btnEntrar.textContent = 'Entrando...';
+                btnEntrar.disabled = true;
+                messageBox.style.display = 'none';
+                loadingOverlay.style.display = 'block';
+
+                try {
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+
+                    console.log('Login bem-sucedido:', user.email);
+                    await redirecionarUsuario(user);
+
+                } catch (error) {
+                    console.error('Erro no login:', error);
+
+                    btnEntrar.textContent = originalText;
+                    btnEntrar.disabled = false;
+                    loadingOverlay.style.display = 'none';
+
+                    let errorMsg = '';
+
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                            errorMsg = '❌ E-mail inválido. Verifique o formato.';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMsg = '❌ Esta conta foi desativada. Entre em contato com o suporte.';
+                            break;
+                        case 'auth/user-not-found':
+                            errorMsg = '❌ Usuário não encontrado. Verifique o e-mail.';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMsg = '❌ Senha incorreta. Tente novamente.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMsg = '❌ Muitas tentativas. Aguarde alguns minutos.';
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMsg = '❌ Erro de conexão. Verifique sua internet.';
+                            break;
+                        default:
+                            errorMsg = '❌ Erro ao fazer login: ' + error.message;
+                    }
+
+                    showMessage(errorMsg, 'error');
+                }
+            });
+
+            async function redirecionarUsuario(user) {
+                try {
+                    if (ADMIN_EMAILS.includes(user.email)) {
+                        console.log('✅ Admin detectado. Redirecionando...');
+                        showMessage('✅ Bem-vindo, Administrador!', 'success');
+
+                        sessionStorage.removeItem('oficinaId');
+
+                        setTimeout(() => {
+                            window.location.href = 'admin-oficinas.html';
+                        }, 1000);
+                        return;
+                    }
+
+                    console.log('Verificando vínculo com oficina...');
+
+                    const snapshot = await db.collection('oficinas')
+                        .where('emailDono', '==', user.email)
+                        .limit(1)
+                        .get();
+
+                    if (!snapshot.empty) {
+                        const oficinaDoc = snapshot.docs[0];
+                        const oficina = oficinaDoc.data();
+
+                        if (oficina.status === 'bloqueada') {
+                            showMessage('❌ Sua oficina está bloqueada. Entre em contato com o suporte.', 'error');
+                            await auth.signOut();
+                            return;
+                        }
+
+                        if (oficina.status === 'inativa') {
+                            showMessage('❌ Sua oficina está inativa. Ative seu plano para acessar.', 'error');
+                            await auth.signOut();
+                            return;
+                        }
+
+                        const plano = oficina.plano || 'basico';
+
+                        sessionStorage.setItem('oficinaId', oficinaDoc.id);
+                        sessionStorage.setItem('oficinaNome', oficina.nome);
+                        sessionStorage.setItem('planoAtual', plano);
+
+                        const planoInfo = window.permissoes?.PLANOS_CONFIG[plano] || {
+                            nome: 'Básico',
+                            preco: 30
+                        };
+
+                        sessionStorage.setItem('planoNome', planoInfo.nome);
+                        sessionStorage.setItem('planoPreco', planoInfo.preco);
+
+                        console.log(`✅ Dono de oficina detectado. Plano: ${plano}`);
+
+                        let mensagem = `✅ Bem-vindo, ${oficina.nome}!`;
+                        if (plano === 'basico') {
+                            mensagem = `✅ Plano Básico - Acesso apenas a orçamentos rápidos.`;
+                        } else if (plano === 'intermediario') {
+                            mensagem = `✅ Plano Intermediário - Acesso a clientes e veículos.`;
+                        } else if (plano === 'completo') {
+                            mensagem = `✅ Plano Completo - Todos os recursos liberados (inclui Financeiro).`;
+                        }
+
+                        showMessage(mensagem, 'success');
+
+                        setTimeout(() => {
+                            window.location.href = PLANOS_REDIRECT[plano];
+                        }, 1500);
+
+                    } else {
+                        console.log('❌ Usuário sem vínculo com oficina');
+                        showMessage('❌ Você não tem permissão para acessar o sistema.', 'error');
+                        await auth.signOut();
+                    }
+
+                } catch (error) {
+                    console.error('Erro ao verificar permissões:', error);
+                    showMessage('❌ Erro ao verificar suas permissões. Tente novamente.', 'error');
+                    await auth.signOut();
+                }
+            }
+
+            function showMessage(message, type) {
+                messageBox.textContent = message;
+                messageBox.className = 'alert-box';
+                messageBox.style.display = 'block';
+
+                if (type === 'success') {
+                    messageBox.style.backgroundColor = '#e8f5e9';
+                    messageBox.style.color = '#1b5e20';
+                    messageBox.style.border = '1px solid #a5d6a7';
+                } else {
+                    messageBox.style.backgroundColor = '#ffebee';
+                    messageBox.style.color = '#c62828';
+                    messageBox.style.border = '1px solid #ef9a9a';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

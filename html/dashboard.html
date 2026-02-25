@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+                <img src="../img/logo.png" alt="AutoFlow Logo"
+                    style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                    onerror="this.style.display='none'">
+            </div>
+            <nav class="main-nav" id="main-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li><a href="veiculos.html">Veículos</a></li>
+                    <li><a href="orcamentos.html">Orçamentos</a></li>
+                    <li><a href="financeiro.html">Financeiro</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-section">
+                <h2>Dashboard</h2>
+                <p id="welcome-message">Carregando...</p>
+
+                <div class="stats-container" id="stats-container">
+                    <div class="loader"></div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid" id="dashboard-grid">
+                <!-- Cards do dashboard serão carregados aqui -->
+            </div>
+
+            <div class="recent-activity" id="recent-activity">
+                <div class="dashboard-section">
+                    <h3>Atividade Recente</h3>
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        // ===========================================
+        // DASHBOARD - APENAS DADOS REAIS
+        // ===========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticação
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    loadDashboard(user);
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+        });
+
+        // ===========================================
+        // CARREGAR DASHBOARD
+        // ===========================================
+        function loadDashboard(user) {
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            
+            if (!oficinaId) {
+                console.error('ID da oficina não encontrado');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // Atualizar informações do usuário
+            const userInfo = document.getElementById('user-info');
+            if (userInfo) {
+                userInfo.innerHTML = `
+                    <span class="user-email">${user.email}</span>
+                    <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
+                `;
+
+                document.getElementById('logout-btn').addEventListener('click', function() {
+                    auth.signOut().then(() => {
+                        window.location.href = 'login.html';
+                    });
+                });
+            }
+
+            // Atualizar mensagem de boas-vindas
+            const welcomeMessage = document.getElementById('welcome-message');
+            if (welcomeMessage) {
+                const hora = new Date().getHours();
+                let saudacao = "Boa noite";
+                if (hora < 12) saudacao = "Bom dia";
+                else if (hora < 18) saudacao = "Boa tarde";
+
+                const nomeUsuario = user.email.split('@')[0];
+                welcomeMessage.textContent = `${saudacao}, ${nomeUsuario.charAt(0).toUpperCase() + nomeUsuario.slice(1)}`;
+            }
+
+            // Carregar estatísticas REAIS da oficina
+            carregarEstatisticasReais(oficinaId);
+
+            // Carregar cards do dashboard
+            carregarCardsDashboard();
+
+            // Carregar atividade recente REAL da oficina
+            carregarAtividadeRecenteReal(oficinaId);
+        }
+
+        // ===========================================
+        // CARREGAR ESTATÍSTICAS REAIS
+        // ===========================================
+        function carregarEstatisticasReais(oficinaId) {
+            const statsContainer = document.getElementById('stats-container');
+            if (!statsContainer) return;
+
+            // Mostrar loader
+            statsContainer.innerHTML = '<div class="loader"></div>';
+
+            // Buscar contagens REAIS da oficina
+            Promise.all([
+                // Total de clientes da oficina
+                db.collection('oficinas').doc(oficinaId).collection('clientes').get()
+                    .then(snapshot => snapshot.size)
+                    .catch(() => 0),
+
+                // Total de veículos da oficina
+                db.collection('oficinas').doc(oficinaId).collection('veiculos').get()
+                    .then(snapshot => snapshot.size)
+                    .catch(() => 0),
+
+                // Total de orçamentos da oficina
+                db.collection('oficinas').doc(oficinaId).collection('orcamentos').get()
+                    .then(snapshot => snapshot.size)
+                    .catch(() => 0),
+
+                // Orçamentos pendentes da oficina
+                db.collection('oficinas').doc(oficinaId).collection('orcamentos')
+                    .where('status', 'in', ['pendente', 'aprovado'])
+                    .get()
+                    .then(snapshot => snapshot.size)
+                    .catch(() => 0),
+
+                // Receita total (soma dos orçamentos pagos da oficina)
+                db.collection('oficinas').doc(oficinaId).collection('orcamentos')
+                    .where('status', '==', 'pago')
+                    .get()
+                    .then(snapshot => {
+                        let total = 0;
+                        snapshot.forEach(doc => {
+                            const orcamento = doc.data();
+                            total += parseFloat(orcamento.valorTotal) || 0;
+                        });
+                        return total;
+                    })
+                    .catch(() => 0),
+
+                // Receita do mês atual da oficina
+                (async () => {
+                    try {
+                        const hoje = new Date();
+                        const primeiroDiaMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                        const ultimoDiaMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+                        const snapshot = await db.collection('oficinas').doc(oficinaId).collection('orcamentos')
+                            .where('status', '==', 'pago')
+                            .get();
+
+                        let totalMes = 0;
+                        snapshot.forEach(doc => {
+                            const orcamento = doc.data();
+                            const dataPagamento = orcamento.dataPagamento || orcamento.data;
+                            
+                            if (dataPagamento) {
+                                const data = new Date(dataPagamento);
+                                if (data >= primeiroDiaMes && data <= ultimoDiaMes) {
+                                    totalMes += parseFloat(orcamento.valorTotal) || 0;
+                                }
+                            }
+                        });
+                        return totalMes;
+                    } catch (error) {
+                        console.log('Erro ao calcular receita do mês:', error);
+                        return 0;
+                    }
+                })()
+            ])
+                .then(([totalClientes, totalVeiculos, totalOrcamentos, orcamentosPendentes, receitaTotal, receitaMes]) => {
+                    statsContainer.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-value">${totalClientes}</div>
+                            <div class="stat-label">Clientes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${totalVeiculos}</div>
+                            <div class="stat-label">Veículos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${totalOrcamentos}</div>
+                            <div class="stat-label">Orçamentos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">${orcamentosPendentes}</div>
+                            <div class="stat-label">Pendentes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">R$ ${receitaTotal.toFixed(2)}</div>
+                            <div class="stat-label">Receita Total</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">R$ ${receitaMes.toFixed(2)}</div>
+                            <div class="stat-label">Receita Mês</div>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar estatísticas:', error);
+                    statsContainer.innerHTML = `
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Clientes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Veículos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Orçamentos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Pendentes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">R$ 0,00</div>
+                            <div class="stat-label">Receita</div>
+                        </div>
+                    `;
+                });
+        }
+
+        // ===========================================
+        // CARREGAR CARDS DO DASHBOARD
+        // ===========================================
+        function carregarCardsDashboard() {
+            const dashboardGrid = document.getElementById('dashboard-grid');
+            if (!dashboardGrid) return;
+
+            dashboardGrid.innerHTML = `
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">👥</span> Gerenciar Clientes</h3>
+                    <p>Cadastre novos clientes e visualize todos os clientes cadastrados no sistema.</p>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <a href="clientes.html" class="btn btn-primary">Ver Clientes</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">🚗</span> Gerenciar Veículos</h3>
+                    <p>Controle a frota de veículos, histórico de serviços e próximas revisões.</p>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <a href="veiculos.html" class="btn btn-primary">Ver Veículos</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">💰</span> Criar Orçamento</h3>
+                    <p>Gere novos orçamentos para seus clientes de forma rápida e profissional.</p>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <a href="orcamentos.html" class="btn btn-primary">Ver Orçamentos</a>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">📊</span> Controle Financeiro</h3>
+                    <p>Acompanhe receitas, despesas e tenha uma visão completa das finanças.</p>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <a href="financeiro.html" class="btn btn-primary">Ver Financeiro</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ===========================================
+        // CARREGAR ATIVIDADE RECENTE REAL
+        // ===========================================
+        function carregarAtividadeRecenteReal(oficinaId) {
+            const recentActivity = document.getElementById('recent-activity');
+            if (!recentActivity) return;
+
+            // Mostrar loader
+            recentActivity.innerHTML = `
+                <div class="dashboard-section">
+                    <h3>Atividade Recente</h3>
+                    <div class="loader"></div>
+                </div>
+            `;
+
+            // Carregar últimos orçamentos da oficina
+            db.collection('oficinas').doc(oficinaId).collection('orcamentos')
+                .orderBy('data', 'desc')
+                .limit(10)
+                .get()
+                .then(async (snapshot) => {
+                    if (snapshot.empty) {
+                        recentActivity.innerHTML = `
+                            <div class="dashboard-section">
+                                <h3>Atividade Recente</h3>
+                                <p class="text-center">Nenhum orçamento encontrado.</p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // Carregar nomes dos clientes
+                    const clientesMap = new Map();
+                    const clientesPromises = [];
+
+                    snapshot.forEach(doc => {
+                        const orcamento = doc.data();
+                        if (orcamento.clienteId && !clientesMap.has(orcamento.clienteId)) {
+                            clientesPromises.push(
+                                db.collection('oficinas').doc(oficinaId).collection('clientes').doc(orcamento.clienteId).get()
+                                    .then(clienteDoc => {
+                                        if (clienteDoc.exists) {
+                                            clientesMap.set(orcamento.clienteId, clienteDoc.data().nome);
+                                        }
+                                    })
+                                    .catch(() => {
+                                        clientesMap.set(orcamento.clienteId, 'Cliente não encontrado');
+                                    })
+                            );
+                        }
+                    });
+
+                    await Promise.all(clientesPromises);
+
+                    // Construir tabela com dados reais
+                    let tableHTML = `
+                        <div class="dashboard-section">
+                            <h3>Atividade Recente - Últimos Orçamentos</h3>
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Número</th>
+                                            <th>Cliente</th>
+                                            <th>Valor</th>
+                                            <th>Status</th>
+                                            <th>Data</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+
+                    snapshot.forEach(doc => {
+                        const orcamento = doc.data();
+
+                        // Formatar data
+                        let dataFormatada = 'N/A';
+                        try {
+                            if (orcamento.data) {
+                                dataFormatada = new Date(orcamento.data).toLocaleDateString('pt-BR');
+                            }
+                        } catch (e) {
+                            console.log('Erro ao formatar data:', e);
+                        }
+
+                        // Obter nome do cliente
+                        let nomeCliente = orcamento.clienteNome || 'Cliente';
+                        if (orcamento.clienteId && clientesMap.has(orcamento.clienteId)) {
+                            nomeCliente = clientesMap.get(orcamento.clienteId);
+                        }
+
+                        // Status badge
+                        const status = orcamento.status || 'pendente';
+                        const statusText = {
+                            'pendente': 'Pendente',
+                            'aprovado': 'Aprovado',
+                            'recusado': 'Recusado',
+                            'pago': 'Pago',
+                            'concluido': 'Concluído'
+                        }[status] || status;
+
+                        tableHTML += `
+                            <tr>
+                                <td>${orcamento.numero || 'N/A'}</td>
+                                <td>${nomeCliente}</td>
+                                <td>R$ ${(orcamento.valorTotal || 0).toFixed(2)}</td>
+                                <td><span class="status-badge status-${status}">${statusText}</span></td>
+                                <td>${dataFormatada}</td>
+                                <td>
+                                    <a href="orcamentos.html?view=${doc.id}" class="btn btn-sm btn-primary">Ver</a>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div style="text-align: center; margin-top: 15px;">
+                                <a href="orcamentos.html" class="btn btn-secondary">Ver Todos os Orçamentos</a>
+                            </div>
+                        </div>
+                    `;
+
+                    recentActivity.innerHTML = tableHTML;
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar atividade recente:', error);
+                    recentActivity.innerHTML = `
+                        <div class="dashboard-section">
+                            <h3>Atividade Recente</h3>
+                            <p class="text-center" style="color: #c62828;">
+                                Erro ao carregar dados.
+                            </p>
+                        </div>
+                    `;
+                });
+        }
+    </script>
+    
+</body>
+
+</html>

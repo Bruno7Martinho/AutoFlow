@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+                <img src="../img/logo.png" alt="AutoFlow Logo"
+                    style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                    onerror="this.style.display='none'">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="clientes.html" class="active">Clientes</a></li>
+                    <li><a href="veiculos.html">Veículos</a></li>
+                    <li><a href="orcamentos.html">Orçamentos</a></li>
+                    <li><a href="financeiro.html">Financeiro</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2>Gerenciamento de Clientes</h2>
+                    <button id="btn-novo-cliente" class="btn btn-success">+ Novo Cliente</button>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="data-table" id="clientes-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Telefone</th>
+                                    <th>E-mail</th>
+                                    <th>CPF</th>
+                                    <th>Endereço</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clientes-body">
+                                <tr><td colspan="6" class="text-center">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="loader" id="clientes-loader" style="display: none;"></div>
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- Modal para cliente -->
+    <div id="cliente-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">Novo Cliente</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-cliente">
+                    <div class="form-group">
+                        <label for="cliente-nome">Nome Completo *</label>
+                        <input type="text" id="cliente-nome" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-cpf">CPF</label>
+                        <input type="text" id="cliente-cpf" placeholder="000.000.000-00">
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-telefone">Telefone *</label>
+                        <input type="tel" id="cliente-telefone" required placeholder="(51) 99999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-email">E-mail</label>
+                        <input type="email" id="cliente-email">
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-endereco">Endereço</label>
+                        <textarea id="cliente-endereco" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-observacoes">Observações</label>
+                        <textarea id="cliente-observacoes" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btn-salvar-cliente">Salvar Cliente</button>
+                        <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        // ===========================================
+        // VERIFICAÇÃO DE PLANO
+        // ===========================================
+        async function verificarPlano() {
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            const plano = sessionStorage.getItem('planoAtual') || 'basico';
+            
+            // Se for plano básico, redireciona
+            if (plano === 'basico') {
+                alert('⛔ Seu plano Básico (R$30) não permite acesso a clientes.');
+                window.location.href = 'orcamentos.html';
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // ===========================================
+        // INICIALIZAÇÃO
+        // ===========================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            const podeAcessar = await verificarPlano();
+            if (!podeAcessar) return;
+            
+            // Verificar autenticação
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    loadUserInfo(user);
+                    loadClientes();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+            
+            // Configurar eventos
+            document.getElementById('btn-novo-cliente').addEventListener('click', showNovoClienteForm);
+            
+            // Fechar modal
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.getElementById('cliente-modal').classList.remove('active');
+                });
+            });
+            
+            // Fechar modal ao clicar fora
+            document.getElementById('cliente-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+
+        // ===========================================
+        // VARIÁVEIS GLOBAIS
+        // ===========================================
+        let clienteAtualId = null;
+        let carregandoClientes = false;
+
+        // ===========================================
+        // FUNÇÕES AUXILIARES
+        // ===========================================
+        function loadUserInfo(user) {
+            const userInfo = document.getElementById('user-info');
+            if (userInfo) {
+                userInfo.innerHTML = `
+                    <span class="user-email">${user.email}</span>
+                    <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
+                `;
+                
+                document.getElementById('logout-btn').addEventListener('click', function() {
+                    auth.signOut().then(() => {
+                        window.location.href = 'login.html';
+                    });
+                });
+            }
+        }
+
+        // ===========================================
+        // CARREGAR CLIENTES
+        // ===========================================
+        function loadClientes() {
+            if (carregandoClientes) return;
+            
+            const loader = document.getElementById('clientes-loader');
+            const clientesBody = document.getElementById('clientes-body');
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            
+            if (!oficinaId) {
+                console.error('ID da oficina não encontrado');
+                return;
+            }
+            
+            carregandoClientes = true;
+            
+            if (loader) loader.style.display = 'block';
+            if (clientesBody) clientesBody.innerHTML = '<tr><td colspan="6" class="text-center">Carregando...</td></tr>';
+            
+            db.collection('oficinas').doc(oficinaId).collection('clientes').orderBy('nome').get()
+                .then((snapshot) => {
+                    carregandoClientes = false;
+                    if (loader) loader.style.display = 'none';
+                    
+                    if (!clientesBody) return;
+                    
+                    if (snapshot.empty) {
+                        clientesBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    Nenhum cliente cadastrado nesta oficina.<br>
+                                    <button onclick="showNovoClienteForm()" class="btn btn-sm btn-primary" style="margin-top: 10px;">
+                                        + Cadastrar Primeiro Cliente
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    clientesBody.innerHTML = '';
+                    
+                    snapshot.forEach((doc) => {
+                        const cliente = doc.data();
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${cliente.nome || ''}</td>
+                            <td>${cliente.telefone || ''}</td>
+                            <td>${cliente.email || ''}</td>
+                            <td>${cliente.cpf || ''}</td>
+                            <td>${cliente.endereco ? cliente.endereco.substring(0, 30) + '...' : ''}</td>
+                            <td class="actions">
+                                <button class="btn btn-sm btn-primary" onclick="editarCliente('${doc.id}')">Editar</button>
+                                <button class="btn btn-sm btn-danger" onclick="excluirCliente('${doc.id}')">Excluir</button>
+                            </td>
+                        `;
+                        clientesBody.appendChild(row);
+                    });
+                })
+                .catch((error) => {
+                    carregandoClientes = false;
+                    console.error('Erro ao carregar clientes:', error);
+                    if (loader) loader.style.display = 'none';
+                    if (clientesBody) {
+                        clientesBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center">Erro ao carregar clientes</td>
+                            </tr>
+                        `;
+                    }
+                });
+        }
+
+        // ===========================================
+        // MOSTRAR FORMULÁRIO DE NOVO CLIENTE
+        // ===========================================
+        window.showNovoClienteForm = function() {
+            clienteAtualId = null;
+            document.getElementById('modal-title').textContent = 'Novo Cliente';
+            document.getElementById('btn-salvar-cliente').textContent = 'Salvar Cliente';
+            
+            document.getElementById('form-cliente').reset();
+            document.getElementById('cliente-modal').classList.add('active');
+        };
+
+        // ===========================================
+        // VERIFICAR LIMITE DE CLIENTES
+        // ===========================================
+        async function verificarLimiteClientes(oficinaId) {
+            try {
+                const oficinaDoc = await db.collection('oficinas').doc(oficinaId).get();
+                const oficina = oficinaDoc.data();
+                const plano = oficina.plano || 'basico';
+                
+                if (plano === 'intermediario') {
+                    const clientesSnap = await db.collection('oficinas').doc(oficinaId).collection('clientes').get();
+                    const totalClientes = clientesSnap.size;
+                    
+                    if (totalClientes >= 100) {
+                        return {
+                            permitido: false,
+                            mensagem: 'Limite de 100 clientes atingido. Faça upgrade para o plano Completo!'
+                        };
+                    }
+                }
+                
+                return { permitido: true };
+                
+            } catch (error) {
+                console.error('Erro ao verificar limite:', error);
+                return { permitido: true };
+            }
+        }
+
+        // ===========================================
+        // SALVAR CLIENTE
+        // ===========================================
+        document.getElementById('form-cliente').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            
+            if (!oficinaId) {
+                alert('Erro: ID da oficina não encontrado');
+                return;
+            }
+            
+            const clienteData = {
+                nome: document.getElementById('cliente-nome').value,
+                cpf: document.getElementById('cliente-cpf').value,
+                telefone: document.getElementById('cliente-telefone').value,
+                email: document.getElementById('cliente-email').value,
+                endereco: document.getElementById('cliente-endereco').value,
+                observacoes: document.getElementById('cliente-observacoes').value,
+                updatedAt: new Date().toISOString()
+            };
+            
+            const limite = await verificarLimiteClientes(oficinaId);
+            
+            if (!limite.permitido) {
+                alert(limite.mensagem);
+                return;
+            }
+            
+            const btnSalvar = document.getElementById('btn-salvar-cliente');
+            const textoOriginal = btnSalvar.textContent;
+            btnSalvar.disabled = true;
+            btnSalvar.textContent = 'Salvando...';
+            
+            try {
+                if (clienteAtualId) {
+                    await db.collection('oficinas').doc(oficinaId).collection('clientes').doc(clienteAtualId).update(clienteData);
+                    alert('Cliente atualizado com sucesso!');
+                } else {
+                    clienteData.createdAt = new Date().toISOString();
+                    await db.collection('oficinas').doc(oficinaId).collection('clientes').add(clienteData);
+                    alert('Cliente salvo com sucesso!');
+                }
+                
+                document.getElementById('cliente-modal').classList.remove('active');
+                loadClientes();
+                
+            } catch (error) {
+                console.error('Erro ao salvar cliente:', error);
+                alert('Erro ao salvar cliente. Tente novamente.');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.textContent = textoOriginal;
+            }
+        });
+
+        // ===========================================
+        // EDITAR CLIENTE
+        // ===========================================
+        window.editarCliente = async function(clienteId) {
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            
+            if (!oficinaId) {
+                alert('Erro: ID da oficina não encontrado');
+                return;
+            }
+            
+            try {
+                const doc = await db.collection('oficinas').doc(oficinaId).collection('clientes').doc(clienteId).get();
+                
+                if (!doc.exists) {
+                    alert('Cliente não encontrado.');
+                    return;
+                }
+                
+                const cliente = doc.data();
+                clienteAtualId = clienteId;
+                
+                document.getElementById('modal-title').textContent = 'Editar Cliente';
+                document.getElementById('btn-salvar-cliente').textContent = 'Atualizar Cliente';
+                
+                document.getElementById('cliente-nome').value = cliente.nome || '';
+                document.getElementById('cliente-cpf').value = cliente.cpf || '';
+                document.getElementById('cliente-telefone').value = cliente.telefone || '';
+                document.getElementById('cliente-email').value = cliente.email || '';
+                document.getElementById('cliente-endereco').value = cliente.endereco || '';
+                document.getElementById('cliente-observacoes').value = cliente.observacoes || '';
+                
+                document.getElementById('cliente-modal').classList.add('active');
+                
+            } catch (error) {
+                console.error('Erro ao carregar cliente:', error);
+                alert('Erro ao carregar dados do cliente.');
+            }
+        };
+
+        // ===========================================
+        // EXCLUIR CLIENTE
+        // ===========================================
+        window.excluirCliente = async function(clienteId) {
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            
+            if (!oficinaId) {
+                alert('Erro: ID da oficina não encontrado');
+                return;
+            }
+            
+            if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
+            
+            try {
+                await db.collection('oficinas').doc(oficinaId).collection('clientes').doc(clienteId).delete();
+                alert('Cliente excluído com sucesso!');
+                loadClientes();
+            } catch (error) {
+                console.error('Erro ao excluir cliente:', error);
+                alert('Erro ao excluir cliente. Tente novamente.');
+            }
+        };
+    </script>
+</body>
+</html>

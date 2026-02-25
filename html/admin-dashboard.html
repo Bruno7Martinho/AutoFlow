@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .admin-container {
+            padding: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            font-size: 48px;
+            margin-right: 20px;
+            width: 60px;
+            text-align: center;
+        }
+
+        .stat-info {
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .trend-up {
+            color: #28a745;
+        }
+
+        .trend-down {
+            color: #dc3545;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+
+        .recent-list {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .recent-item:last-child {
+            border-bottom: none;
+        }
+
+        .recent-info h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .recent-info p {
+            margin: 0;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .recent-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-ativa {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-bloqueada {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-inativa {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .planos-chart {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .plano-item {
+            text-align: center;
+        }
+
+        .plano-quantidade {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .plano-nome {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .plano-basico {
+            color: #cd7f32;
+        }
+
+        .plano-intermediario {
+            color: #c0c0c0;
+        }
+
+        .plano-completo {
+            color: #ffd700;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .action-btn:hover {
+            background: #007bff;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .action-btn i {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+                <img src="../img/logo.png" alt="AutoFlow Logo"
+                    style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                    onerror="this.style.display='none'">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="admin-dashboard.html" class="active">Dashboard</a></li>
+                    <li><a href="admin-oficinas.html">Oficinas</a></li>
+                    <li><a href="admin-usuarios.html">Usuários</a></li>
+                    <li><a href="admin-relatorios.html">Relatórios</a></li>
+                    <li><a href="primeiro-acesso.html">Criar acesso Admin</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info"></div>
+        </header>
+
+        <main class="main-content">
+            <div class="admin-container">
+                <h2>👑 Painel Administrativo</h2>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🏪</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-oficinas">0</div>
+                            <div class="stat-label">Total de Oficinas</div>
+                            <div class="stat-trend" id="variacao-oficinas"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-clientes">0</div>
+                            <div class="stat-label">Clientes Cadastrados</div>
+                            <div class="stat-trend" id="variacao-clientes"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="faturamento-mensal">R$ 0</div>
+                            <div class="stat-label">Faturamento Mensal</div>
+                            <div class="stat-trend" id="variacao-faturamento"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-info">
+                            <div class="stat-value" id="total-orcamentos">0</div>
+                            <div class="stat-label">Orçamentos</div>
+                            <div class="stat-trend" id="variacao-orcamentos"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-title">📊 Distribuição de Planos</div>
+                        <div class="planos-chart">
+                            <div class="plano-item">
+                                <div class="plano-quantidade plano-basico" id="qtd-basico">0</div>
+                                <div class="plano-nome">Básico (R$30)</div>
+                            </div>
+                            <div class="plano-item">
+                                <div class="plano-quantidade plano-intermediario" id="qtd-intermediario">0</div>
+                                <div class="plano-nome">Intermediário (R$50)</div>
+                            </div>
+                            <div class="plano-item">
+                                <div class="plano-quantidade plano-completo" id="qtd-completo">0</div>
+                                <div class="plano-nome">Completo (R$70)</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <span id="faturamento-planos">R$ 0</span> em planos/mês
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-title">📈 Status das Oficinas</div>
+                        <div class="planos-chart">
+                            <div class="plano-item">
+                                <div class="plano-quantidade" style="color: #28a745;" id="status-ativas">0</div>
+                                <div class="plano-nome">Ativas</div>
+                            </div>
+                            <div class="plano-item">
+                                <div class="plano-quantidade" style="color: #ffc107;" id="status-bloqueadas">0</div>
+                                <div class="plano-nome">Bloqueadas</div>
+                            </div>
+                            <div class="plano-item">
+                                <div class="plano-quantidade" style="color: #dc3545;" id="status-inativas">0</div>
+                                <div class="plano-nome">Inativas</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <span id="taxa-ocupacao">0%</span> de ocupação
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Atividades Recentes -->
+                <div class="recent-list">
+                    <h3>🕐 Últimas Atividades</h3>
+                    <div id="atividades-recentes">
+                        <div class="recent-item">
+                            <div class="recent-info">
+                                <h4>Carregando...</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ações Rápidas -->
+                <div class="quick-actions">
+                    <a href="admin-oficinas.html" class="action-btn">
+                        <i>🏪</i>
+                        <span>Nova Oficina</span>
+                    </a>
+                    <a href="admin-relatorios.html" class="action-btn">
+                        <i>📊</i>
+                        <span>Relatórios</span>
+                    </a>
+                    <a href="admin-usuarios.html" class="action-btn">
+                        <i>👥</i>
+                        <span>Usuários</span>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            auth.onAuthStateChanged(function (user) {
+                if (user) {
+                    const ADMIN_EMAILS = ['admin@autoflow.com', 'rafael@gmail.com', 'admin@gmail.com'];
+
+                    if (!ADMIN_EMAILS.includes(user.email)) {
+                        alert('⛔ Acesso negado! Apenas administradores.');
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+
+                    loadUserInfo(user);
+                    carregarDadosReais();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+
+            function loadUserInfo(user) {
+                document.getElementById('user-info').innerHTML = `
+                    <span class="user-email">👑 ${user.email}</span>
+                    <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
+                `;
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    sessionStorage.clear();
+                    auth.signOut();
+                    window.location.href = 'login.html';
+                });
+            }
+
+            async function carregarDadosReais() {
+                try {
+                    // Datas para comparação
+                    const hoje = new Date();
+                    const mesPassado = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
+                    const inicioMesAtual = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+
+                    // Buscar todas as oficinas
+                    const oficinasSnap = await db.collection('oficinas').get();
+
+                    let totalOficinas = 0;
+                    let oficinasMesAtual = 0;
+                    let oficinasMesPassado = 0;
+                    let ativas = 0;
+                    let bloqueadas = 0;
+                    let inativas = 0;
+                    let totalClientes = 0;
+                    let totalOrcamentos = 0;
+
+                    let qtdBasico = 0;
+                    let qtdIntermediario = 0;
+                    let qtdCompleto = 0;
+
+                    let oficinasRecentes = [];
+
+                    // Para cada oficina
+                    for (const doc of oficinasSnap.docs) {
+                        totalOficinas++;
+                        const of = doc.data();
+                        const dataCriacao = of.createdAt ? (of.createdAt.toDate ? of.createdAt.toDate() : new Date(of.createdAt)) : null;
+
+                        // Contar por período
+                        if (dataCriacao) {
+                            if (dataCriacao >= inicioMesAtual) {
+                                oficinasMesAtual++;
+                            } else if (dataCriacao >= mesPassado && dataCriacao < inicioMesAtual) {
+                                oficinasMesPassado++;
+                            }
+                        }
+
+                        // Status
+                        if (of.status === 'ativa') ativas++;
+                        else if (of.status === 'bloqueada') bloqueadas++;
+                        else inativas++;
+
+                        // Planos
+                        if (of.plano === 'basico') qtdBasico++;
+                        else if (of.plano === 'intermediario') qtdIntermediario++;
+                        else if (of.plano === 'completo') qtdCompleto++;
+
+                        // Guardar para atividades recentes
+                        if (dataCriacao) {
+                            oficinasRecentes.push({
+                                nome: of.nome,
+                                email: of.emailDono,
+                                status: of.status,
+                                data: dataCriacao,
+                                plano: of.plano
+                            });
+                        }
+
+                        // Contar clientes
+                        try {
+                            const clientesSnap = await db.collection('oficinas').doc(doc.id).collection('clientes').get();
+                            totalClientes += clientesSnap.size;
+
+                            // Contar orçamentos
+                            const orcamentosSnap = await db.collection('oficinas').doc(doc.id).collection('orcamentos').get();
+                            totalOrcamentos += orcamentosSnap.size;
+                        } catch (e) { }
+                    }
+
+                    // Calcular variações
+                    const variacaoOficinas = calcularVariacao(oficinasMesAtual, oficinasMesPassado);
+                    const variacaoClientes = await calcularVariacaoClientes(mesPassado, inicioMesAtual);
+                    const variacaoOrcamentos = await calcularVariacaoOrcamentos(mesPassado, inicioMesAtual);
+
+                    // Faturamento
+                    const faturamentoAtual = (qtdBasico * 30) + (qtdIntermediario * 50) + (qtdCompleto * 70);
+                    const faturamentoPassado = await calcularFaturamentoPassado(mesPassado, inicioMesAtual);
+                    const variacaoFaturamento = calcularVariacao(faturamentoAtual, faturamentoPassado);
+
+                    // Atualizar UI
+                    document.getElementById('total-oficinas').textContent = totalOficinas;
+                    document.getElementById('total-clientes').textContent = totalClientes;
+                    document.getElementById('total-orcamentos').textContent = totalOrcamentos;
+                    document.getElementById('faturamento-mensal').textContent = `R$ ${faturamentoAtual.toFixed(2)}`;
+
+                    document.getElementById('variacao-oficinas').innerHTML = formatarVariacao(variacaoOficinas, 'oficinas');
+                    document.getElementById('variacao-clientes').innerHTML = formatarVariacao(variacaoClientes, 'clientes');
+                    document.getElementById('variacao-orcamentos').innerHTML = formatarVariacao(variacaoOrcamentos, 'orçamentos');
+                    document.getElementById('variacao-faturamento').innerHTML = formatarVariacao(variacaoFaturamento, 'faturamento');
+
+                    // Distribuição de planos
+                    document.getElementById('qtd-basico').textContent = qtdBasico;
+                    document.getElementById('qtd-intermediario').textContent = qtdIntermediario;
+                    document.getElementById('qtd-completo').textContent = qtdCompleto;
+
+                    // Status
+                    document.getElementById('status-ativas').textContent = ativas;
+                    document.getElementById('status-bloqueadas').textContent = bloqueadas;
+                    document.getElementById('status-inativas').textContent = inativas;
+
+                    // Taxa de ocupação
+                    const taxa = totalOficinas ? Math.round((ativas / totalOficinas) * 100) : 0;
+                    document.getElementById('taxa-ocupacao').textContent = `${taxa}%`;
+
+                    // Faturamento planos
+                    document.getElementById('faturamento-planos').textContent = `R$ ${faturamentoAtual.toFixed(2)}`;
+
+                    // Atividades recentes (últimas 5)
+                    oficinasRecentes.sort((a, b) => b.data - a.data);
+                    const recentes = oficinasRecentes.slice(0, 5);
+
+                    let html = '';
+                    recentes.forEach(of => {
+                        const dataStr = of.data.toLocaleDateString('pt-BR');
+                        html += `
+                            <div class="recent-item">
+                                <div class="recent-info">
+                                    <h4>🏪 ${of.nome || 'Oficina'}</h4>
+                                    <p>${dataStr} • ${of.email || 'Sem email'} • Plano: ${of.plano || 'basico'}</p>
+                                </div>
+                                <span class="recent-status status-${of.status || 'ativa'}">${of.status || 'ativa'}</span>
+                            </div>
+                        `;
+                    });
+
+                    if (!html) {
+                        html = '<div class="recent-item">Nenhuma atividade recente</div>';
+                    }
+
+                    document.getElementById('atividades-recentes').innerHTML = html;
+
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                }
+            }
+
+            function calcularVariacao(atual, passado) {
+                if (passado === 0) return atual > 0 ? 100 : 0;
+                return ((atual - passado) / passado) * 100;
+            }
+
+            function formatarVariacao(valor, tipo) {
+                const sinal = valor >= 0 ? '+' : '';
+                const classe = valor >= 0 ? 'trend-up' : 'trend-down';
+                const texto = valor >= 0 ? '↑' : '↓';
+
+                if (valor === 0) {
+                    return `<span class="${classe}">Estável em relação ao mês passado</span>`;
+                }
+
+                return `<span class="${classe}">${texto} ${sinal}${valor.toFixed(1)}% ${tipo} este mês</span>`;
+            }
+
+            async function calcularVariacaoClientes(mesPassado, inicioMesAtual) {
+                try {
+                    const oficinas = await db.collection('oficinas').get();
+                    let clientesAtual = 0;
+                    let clientesPassado = 0;
+
+                    for (const doc of oficinas.docs) {
+                        const clientesSnap = await db.collection('oficinas').doc(doc.id).collection('clientes').get();
+
+                        clientesSnap.forEach(clienteDoc => {
+                            const data = clienteDoc.data().createdAt;
+                            if (data) {
+                                const dataCliente = data.toDate ? data.toDate() : new Date(data);
+                                if (dataCliente >= inicioMesAtual) {
+                                    clientesAtual++;
+                                } else if (dataCliente >= mesPassado && dataCliente < inicioMesAtual) {
+                                    clientesPassado++;
+                                }
+                            }
+                        });
+                    }
+
+                    return calcularVariacao(clientesAtual, clientesPassado);
+
+                } catch (error) {
+                    console.error('Erro ao calcular variação de clientes:', error);
+                    return 0;
+                }
+            }
+
+            async function calcularVariacaoOrcamentos(mesPassado, inicioMesAtual) {
+                try {
+                    const oficinas = await db.collection('oficinas').get();
+                    let orcamentosAtual = 0;
+                    let orcamentosPassado = 0;
+
+                    for (const doc of oficinas.docs) {
+                        const orcamentosSnap = await db.collection('oficinas').doc(doc.id).collection('orcamentos').get();
+
+                        orcamentosSnap.forEach(orcDoc => {
+                            const data = orcDoc.data().data;
+                            if (data) {
+                                const dataOrc = new Date(data);
+                                if (dataOrc >= inicioMesAtual) {
+                                    orcamentosAtual++;
+                                } else if (dataOrc >= mesPassado && dataOrc < inicioMesAtual) {
+                                    orcamentosPassado++;
+                                }
+                            }
+                        });
+                    }
+
+                    return calcularVariacao(orcamentosAtual, orcamentosPassado);
+
+                } catch (error) {
+                    console.error('Erro ao calcular variação de orçamentos:', error);
+                    return 0;
+                }
+            }
+
+            async function calcularFaturamentoPassado(mesPassado, inicioMesAtual) {
+                try {
+                    const oficinas = await db.collection('oficinas').get();
+                    let faturamento = 0;
+
+                    for (const doc of oficinas.docs) {
+                        const of = doc.data();
+                        const dataCriacao = of.createdAt ? (of.createdAt.toDate ? of.createdAt.toDate() : new Date(of.createdAt)) : null;
+
+                        if (dataCriacao && dataCriacao >= mesPassado && dataCriacao < inicioMesAtual) {
+                            const precos = { basico: 30, intermediario: 50, completo: 70 };
+                            faturamento += precos[of.plano] || 30;
+                        }
+                    }
+
+                    return faturamento;
+
+                } catch (error) {
+                    console.error('Erro ao calcular faturamento passado:', error);
+                    return 0;
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Usuários - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .admin-container {
+            padding: 20px;
+        }
+
+        .filters-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+        }
+
+        .filter-options {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-options select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            flex: 1;
+            background: white;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px;
+            background: #f5f5f5;
+            border-bottom: 2px solid #ddd;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #c62828;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status-admin {
+            background: #ffd700;
+            color: #000;
+            border: 1px solid #e0a800;
+        }
+
+        .status-oficina {
+            background: #17a2b8;
+            color: white;
+            border: 1px solid #138496;
+        }
+
+        .status-bloqueado {
+            background: #dc3545;
+            color: white;
+            border: 1px solid #bd2130;
+        }
+
+        .status-ativo {
+            background: #28a745;
+            color: white;
+            border: 1px solid #1e7e34;
+        }
+
+        .role-badge {
+            padding: 4px 8px;
+            font-size: 11px;
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #f5f5f5;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: #c62828;
+        }
+
+        .modal-close {
+            font-size: 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #666;
+        }
+
+        .modal-close:hover {
+            color: #c62828;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #c62828;
+            outline: none;
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 5px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            margin: 0;
+            color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <img src="../img/logo.png" alt="AutoFlow Logo"
+                        style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                        onerror="this.style.display='none'">
+                </div>
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="admin-dashboard.html">Dashboard</a></li>
+                    <li><a href="admin-oficinas.html">Oficinas</a></li>
+                    <li><a href="admin-usuarios.html" class="active">Usuários</a></li>
+                    <li><a href="admin-relatorios.html">Relatórios</a></li>
+                    <li><a href="primeiro-acesso.html">Criar acesso Admin</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info"></div>
+        </header>
+
+        <main class="main-content">
+            <div class="admin-container">
+                <div class="section-header">
+                    <h2>👥 Gerenciar Usuários</h2>
+                    <button id="btn-novo-usuario" class="btn btn-success">+ Novo Usuário</button>
+                </div>
+
+                <!-- Filtros - CORRIGIDO -->
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <input type="text" id="search" placeholder="Buscar por nome ou email...">
+                    </div>
+                    <div class="filter-options">
+                        <select id="filter-tipo">
+                            <option value="">Todos os tipos</option>
+                            <option value="admin">Administradores</option>
+                            <option value="oficina">Donos de Oficina</option>
+                        </select>
+                        <select id="filter-status">
+                            <option value="">Todos os status</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="bloqueado">Bloqueado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabela de Usuários -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th>Tipo</th>
+                                <th>Oficina</th>
+                                <th>Status</th>
+                                <th>Último acesso</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuarios-body">
+                            <tr>
+                                <td colspan="7" class="text-center">Carregando...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginação -->
+                <div class="pagination">
+                    <button class="page-btn" id="prev-page" disabled>← Anterior</button>
+                    <span id="page-info">Página 1</span>
+                    <button class="page-btn" id="next-page">Próxima →</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Usuário -->
+    <div id="usuario-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Novo Usuário</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-usuario">
+                    <div class="form-group">
+                        <label>Nome *</label>
+                        <input type="text" id="usuario-nome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" id="usuario-email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="usuario-senha" placeholder="Deixe em branco para manter">
+                        <small>Mínimo 6 caracteres</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Usuário *</label>
+                        <select id="usuario-tipo" required>
+                            <option value="">Selecione...</option>
+                            <option value="admin">Administrador</option>
+                            <option value="oficina">Dono de Oficina</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="oficina-select-group" style="display: none;">
+                        <label>Vincular à Oficina</label>
+                        <select id="usuario-oficina">
+                            <option value="">Selecione uma oficina...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="usuario-status">
+                            <option value="ativo">Ativo</option>
+                            <option value="bloqueado">Bloqueado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                        <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Verificar admin
+            auth.onAuthStateChanged(function (user) {
+                if (user) {
+                    const ADMIN_EMAILS = ['admin@autoflow.com', 'admin@gmail.com', 'rafael@gmail.com'];
+
+                    if (!ADMIN_EMAILS.includes(user.email)) {
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+
+                    loadUserInfo(user);
+                    carregarUsuarios();
+                    carregarOficinas();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+
+            // ===========================================
+            // VARIÁVEIS GLOBAIS
+            // ===========================================
+            const modal = document.getElementById('usuario-modal');
+            const form = document.getElementById('form-usuario');
+            let usuarios = [];
+            let oficinas = [];
+            let usuarioEditando = null;
+            let paginaAtual = 1;
+            let itensPorPagina = 10;
+
+            // ===========================================
+            // CARREGAR OFICINAS PARA SELECT
+            // ===========================================
+            async function carregarOficinas() {
+                try {
+                    const snapshot = await db.collection('oficinas').get();
+                    oficinas = [];
+                    snapshot.forEach(doc => {
+                        oficinas.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+
+                    const select = document.getElementById('usuario-oficina');
+                    select.innerHTML = '<option value="">Selecione uma oficina...</option>';
+                    oficinas.forEach(of => {
+                        select.innerHTML += `<option value="${of.id}">${of.nome}</option>`;
+                    });
+
+                } catch (error) {
+                    console.error('Erro ao carregar oficinas:', error);
+                }
+            }
+
+            // ===========================================
+            // MOSTRAR/ESCONDER SELECT DE OFICINA
+            // ===========================================
+            document.getElementById('usuario-tipo').addEventListener('change', function () {
+                const grupo = document.getElementById('oficina-select-group');
+                if (this.value === 'oficina') {
+                    grupo.style.display = 'block';
+                } else {
+                    grupo.style.display = 'none';
+                }
+            });
+
+            // ===========================================
+            // CARREGAR USUÁRIOS
+            // ===========================================
+            async function carregarUsuarios() {
+                const tbody = document.getElementById('usuarios-body');
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Carregando...</td></tr>';
+
+                try {
+                    const oficinasSnap = await db.collection('oficinas').get();
+
+                    usuarios = [];
+
+                    // Adicionar admins fixos
+                    const admins = [
+                        { nome: 'Administrador', email: 'admin@autoflow.com', tipo: 'admin', status: 'ativo' },
+                        { nome: 'Admin', email: 'admin@gmail.com', tipo: 'admin', status: 'ativo' },
+                        { nome: 'Rafael', email: 'rafael@gmail.com', tipo: 'admin', status: 'ativo' }
+                    ];
+
+                    admins.forEach(admin => {
+                        usuarios.push({
+                            id: admin.email,
+                            nome: admin.nome,
+                            email: admin.email,
+                            tipo: 'admin',
+                            status: 'ativo',
+                            oficina: null,
+                            ultimoAcesso: new Date().toISOString()
+                        });
+                    });
+
+                    // Adicionar donos de oficina
+                    oficinasSnap.forEach(doc => {
+                        const of = doc.data();
+                        if (of.emailDono) {
+                            usuarios.push({
+                                id: of.emailDono,
+                                nome: of.nome,
+                                email: of.emailDono,
+                                tipo: 'oficina',
+                                status: of.status === 'bloqueada' ? 'bloqueado' : 'ativo',
+                                oficina: { id: doc.id, nome: of.nome },
+                                ultimoAcesso: of.updatedAt || of.createdAt
+                            });
+                        }
+                    });
+
+                    renderizarTabela(usuarios);
+
+                } catch (error) {
+                    console.error('Erro:', error);
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Erro ao carregar usuários</td></tr>';
+                }
+            }
+
+            // ===========================================
+            // RENDERIZAR TABELA
+            // ===========================================
+            function renderizarTabela(lista) {
+                const tbody = document.getElementById('usuarios-body');
+                
+                // Calcular página atual
+                const inicio = (paginaAtual - 1) * itensPorPagina;
+                const fim = inicio + itensPorPagina;
+                const paginaData = lista.slice(inicio, fim);
+
+                tbody.innerHTML = '';
+
+                if (paginaData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum usuário encontrado</td></tr>';
+                    return;
+                }
+
+                paginaData.forEach(usuario => {
+                    const row = document.createElement('tr');
+
+                    const iniciais = usuario.nome ? usuario.nome.substring(0, 2).toUpperCase() : '??';
+                    const dataAcesso = usuario.ultimoAcesso ? new Date(usuario.ultimoAcesso).toLocaleDateString('pt-BR') : '-';
+
+                    // Definir classe de status
+                    let statusClass = '';
+                    if (usuario.tipo === 'admin') {
+                        statusClass = 'status-admin';
+                    } else if (usuario.status === 'bloqueado') {
+                        statusClass = 'status-bloqueado';
+                    } else {
+                        statusClass = 'status-oficina';
+                    }
+
+                    row.innerHTML = `
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div class="user-avatar">${iniciais}</div>
+                                <div>
+                                    <strong>${usuario.nome || 'Sem nome'}</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${usuario.email}</td>
+                        <td><span class="role-badge">${usuario.tipo === 'admin' ? '👑 Admin' : '🏪 Dono'}</span></td>
+                        <td>${usuario.oficina ? usuario.oficina.nome : '-'}</td>
+                        <td>
+                            <span class="status-badge ${statusClass}">
+                                ${usuario.status === 'ativo' ? '✅ Ativo' : '⛔ Bloqueado'}
+                            </span>
+                        </td>
+                        <td>${dataAcesso}</td>
+                        <td class="actions">
+                            <button class="btn btn-sm btn-primary" onclick="editarUsuario('${usuario.email}')">✏️</button>
+                            ${usuario.status === 'ativo' ?
+                                `<button class="btn btn-sm btn-warning" onclick="bloquearUsuario('${usuario.email}')">🔒</button>` :
+                                `<button class="btn btn-sm btn-success" onclick="desbloquearUsuario('${usuario.email}')">🔓</button>`
+                            }
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Atualizar paginação
+                const totalPaginas = Math.ceil(lista.length / itensPorPagina);
+                document.getElementById('page-info').textContent = `Página ${paginaAtual} de ${totalPaginas || 1}`;
+                document.getElementById('prev-page').disabled = paginaAtual === 1;
+                document.getElementById('next-page').disabled = paginaAtual === totalPaginas || totalPaginas === 0;
+            }
+
+            // ===========================================
+            // FILTROS - CORRIGIDO
+            // ===========================================
+            const searchInput = document.getElementById('search');
+            const filterTipo = document.getElementById('filter-tipo');
+            const filterStatus = document.getElementById('filter-status');
+
+            if (searchInput) searchInput.addEventListener('input', aplicarFiltros);
+            if (filterTipo) filterTipo.addEventListener('change', aplicarFiltros);
+            if (filterStatus) filterStatus.addEventListener('change', aplicarFiltros);
+
+            function aplicarFiltros() {
+                const busca = searchInput?.value.toLowerCase() || '';
+                const tipo = filterTipo?.value || '';
+                const status = filterStatus?.value || '';
+
+                const filtrados = usuarios.filter(u => {
+                    const matchBusca = !busca || 
+                        (u.nome && u.nome.toLowerCase().includes(busca)) ||
+                        (u.email && u.email.toLowerCase().includes(busca));
+
+                    const matchTipo = !tipo || u.tipo === tipo;
+                    const matchStatus = !status || u.status === status;
+
+                    return matchBusca && matchTipo && matchStatus;
+                });
+
+                paginaAtual = 1;
+                renderizarTabela(filtrados);
+            }
+
+            // ===========================================
+            // PAGINAÇÃO
+            // ===========================================
+            document.getElementById('prev-page').addEventListener('click', () => {
+                if (paginaAtual > 1) {
+                    paginaAtual--;
+                    aplicarFiltros();
+                }
+            });
+
+            document.getElementById('next-page').addEventListener('click', () => {
+                const filtrados = usuarios.filter(u => {
+                    const busca = searchInput?.value.toLowerCase() || '';
+                    const tipo = filterTipo?.value || '';
+                    const status = filterStatus?.value || '';
+
+                    return (!busca || u.nome?.toLowerCase().includes(busca) || u.email?.toLowerCase().includes(busca)) &&
+                           (!tipo || u.tipo === tipo) &&
+                           (!status || u.status === status);
+                });
+                const totalPaginas = Math.ceil(filtrados.length / itensPorPagina);
+                if (paginaAtual < totalPaginas) {
+                    paginaAtual++;
+                    aplicarFiltros();
+                }
+            });
+
+            // ===========================================
+            // MODAL
+            // ===========================================
+            document.getElementById('btn-novo-usuario').addEventListener('click', function () {
+                usuarioEditando = null;
+                document.getElementById('modal-title').textContent = 'Novo Usuário';
+                form.reset();
+                document.getElementById('oficina-select-group').style.display = 'none';
+                modal.classList.add('active');
+            });
+
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', () => modal.classList.remove('active'));
+            });
+
+            // Fechar modal ao clicar fora
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+
+            // ===========================================
+            // SALVAR USUÁRIO
+            // ===========================================
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const tipo = document.getElementById('usuario-tipo').value;
+                const email = document.getElementById('usuario-email').value;
+                const senha = document.getElementById('usuario-senha').value;
+                const nome = document.getElementById('usuario-nome').value;
+                const status = document.getElementById('usuario-status').value;
+
+                if (!tipo || !email || !nome) {
+                    alert('Preencha todos os campos obrigatórios!');
+                    return;
+                }
+
+                if (!usuarioEditando && tipo === 'admin' && !senha) {
+                    alert('Digite uma senha para o novo administrador');
+                    return;
+                }
+
+                if (tipo === 'oficina' && !document.getElementById('usuario-oficina').value) {
+                    alert('Selecione uma oficina para vincular');
+                    return;
+                }
+
+                const btnSalvar = form.querySelector('button[type="submit"]');
+                const textoOriginal = btnSalvar.textContent;
+                btnSalvar.disabled = true;
+                btnSalvar.textContent = 'Salvando...';
+
+                try {
+                    if (!usuarioEditando && tipo === 'admin') {
+                        // Criar novo admin no Auth
+                        const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+                        await userCredential.user.updateProfile({ displayName: nome });
+                        
+                        // Salvar no Firestore
+                        await db.collection('usuarios').doc(userCredential.user.uid).set({
+                            nome: nome,
+                            email: email,
+                            role: 'admin',
+                            status: status,
+                            createdAt: new Date().toISOString()
+                        });
+                        
+                        alert('✅ Administrador criado com sucesso!');
+                        
+                    } else if (!usuarioEditando && tipo === 'oficina') {
+                        // Vincular dono à oficina existente
+                        const oficinaId = document.getElementById('usuario-oficina').value;
+                        await db.collection('oficinas').doc(oficinaId).update({
+                            emailDono: email,
+                            status: status === 'ativo' ? 'ativa' : 'bloqueada'
+                        });
+                        
+                        alert('✅ Usuário vinculado à oficina com sucesso!');
+                        
+                    } else if (usuarioEditando) {
+                        // Editar usuário existente
+                        if (usuarioEditando.tipo === 'oficina' && usuarioEditando.oficina) {
+                            await db.collection('oficinas').doc(usuarioEditando.oficina.id).update({
+                                status: status === 'ativo' ? 'ativa' : 'bloqueada'
+                            });
+                        }
+                        alert('✅ Usuário atualizado com sucesso!');
+                    }
+
+                    modal.classList.remove('active');
+                    carregarUsuarios();
+
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro ao salvar usuário: ' + (error.message || 'Erro desconhecido'));
+                } finally {
+                    btnSalvar.disabled = false;
+                    btnSalvar.textContent = textoOriginal;
+                }
+            });
+
+            // ===========================================
+            // FUNÇÕES GLOBAIS
+            // ===========================================
+            window.editarUsuario = function (email) {
+                const usuario = usuarios.find(u => u.email === email);
+                if (!usuario) return;
+
+                usuarioEditando = usuario;
+                document.getElementById('modal-title').textContent = 'Editar Usuário';
+
+                document.getElementById('usuario-nome').value = usuario.nome || '';
+                document.getElementById('usuario-email').value = usuario.email;
+                document.getElementById('usuario-tipo').value = usuario.tipo;
+                document.getElementById('usuario-status').value = usuario.status || 'ativo';
+                document.getElementById('usuario-senha').value = '';
+
+                if (usuario.tipo === 'oficina' && usuario.oficina) {
+                    document.getElementById('usuario-oficina').value = usuario.oficina.id;
+                    document.getElementById('oficina-select-group').style.display = 'block';
+                } else {
+                    document.getElementById('oficina-select-group').style.display = 'none';
+                }
+
+                modal.classList.add('active');
+            };
+
+            window.bloquearUsuario = async function (email) {
+                if (!confirm(`Bloquear usuário ${email}?`)) return;
+
+                try {
+                    const usuario = usuarios.find(u => u.email === email);
+                    
+                    if (usuario.tipo === 'oficina' && usuario.oficina) {
+                        await db.collection('oficinas').doc(usuario.oficina.id).update({
+                            status: 'bloqueada'
+                        });
+                    } else if (usuario.tipo === 'admin') {
+                        // Para admin, talvez só desabilitar no Firestore
+                        // Como não podemos bloquear no Auth diretamente, apenas registramos
+                        alert('Admin não pode ser bloqueado diretamente no Auth pelo frontend');
+                        return;
+                    }
+                    
+                    alert('✅ Usuário bloqueado');
+                    carregarUsuarios();
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro: ' + error.message);
+                }
+            };
+
+            window.desbloquearUsuario = async function (email) {
+                if (!confirm(`Desbloquear usuário ${email}?`)) return;
+
+                try {
+                    const usuario = usuarios.find(u => u.email === email);
+                    
+                    if (usuario.tipo === 'oficina' && usuario.oficina) {
+                        await db.collection('oficinas').doc(usuario.oficina.id).update({
+                            status: 'ativa'
+                        });
+                    }
+                    
+                    alert('✅ Usuário desbloqueado');
+                    carregarUsuarios();
+                } catch (error) {
+                    console.error('Erro:', error);
+                    alert('Erro: ' + error.message);
+                }
+            };
+
+            function loadUserInfo(user) {
+                document.getElementById('user-info').innerHTML = `
+                    <span class="user-email">👑 ${user.email}</span>
+                    <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
+                `;
+                document.getElementById('logout-btn').addEventListener('click', () => {
+                    sessionStorage.clear();
+                    auth.signOut();
+                    window.location.href = 'login.html';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

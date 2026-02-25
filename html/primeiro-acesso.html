@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Administrador - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-container {
+            max-width: 450px;
+            width: 100%;
+            margin: 20px;
+        }
+        
+        .admin-card {
+            background: white;
+            padding: 40px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 2.2rem;
+            color: #c62828;
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid transparent;
+        }
+        
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+            border-left-color: #2e7d32;
+        }
+        
+        .alert-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left-color: #c62828;
+        }
+        
+        .alert-info {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            border-left-color: #1976d2;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+        
+        .form-group input:focus {
+            border-color: #c62828;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            background-color: #c62828;
+            color: white;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #8b1e1e;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #888;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-card">
+            <div class="logo">
+                <h1>AutoFlow</h1>
+            </div>
+            
+            <h2>Criar Administrador</h2>
+            <div class="subtitle">Crie a conta do administrador do sistema</div>
+            
+            <div id="messageBox" class="alert alert-info">
+                ⚠️ Esta página cria apenas o ADMIN do sistema.
+            </div>
+            
+            <form id="adminForm">
+                <div class="form-group">
+                    <label for="nome">Nome do Admin</label>
+                    <input type="text" id="nome" required placeholder="Ex: Rafael">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">E-mail do Admin</label>
+                    <input type="email" id="email" required placeholder="admin@autoflow.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Senha</label>
+                    <input type="password" id="password" required placeholder="Mínimo 6 caracteres">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Senha</label>
+                    <input type="password" id="confirmPassword" required placeholder="Digite novamente">
+                </div>
+                
+                <button type="submit" class="btn" id="submitBtn">
+                    <span id="btnText">Criar Administrador</span>
+                    <span id="btnLoading" style="display: none;">⏳ Criando...</span>
+                </button>
+            </form>
+            
+            <button class="btn btn-secondary" onclick="window.location.href='login.html'" id="loginBtn">
+                Ir para Login
+            </button>
+            
+            <div class="footer">
+                <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('adminForm');
+            const messageBox = document.getElementById('messageBox');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnLoading = document.getElementById('btnLoading');
+            
+            // Se já estiver logado, mostra opção de ir para admin
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    document.getElementById('loginBtn').textContent = 'Ir para Painel Admin';
+                    document.getElementById('loginBtn').onclick = () => window.location.href = 'admin-oficinas.html';
+                }
+            });
+            
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const nome = document.getElementById('nome').value.trim();
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                // Validações
+                if (!nome || !email || !password || !confirmPassword) {
+                    showMessage('Preencha todos os campos!', 'error');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showMessage('As senhas não coincidem!', 'error');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showMessage('A senha deve ter no mínimo 6 caracteres!', 'error');
+                    return;
+                }
+                
+                // Mostrar loading
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'inline';
+                submitBtn.disabled = true;
+                
+                try {
+                    // CRIAR USUÁRIO ADMIN NO AUTH
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    const user = userCredential.user;
+                    
+                    // Atualizar perfil com nome
+                    await user.updateProfile({
+                        displayName: nome
+                    });
+                    
+                    // Salvar no Firestore marcando como ADMIN
+                    await db.collection('usuarios').doc(user.uid).set({
+                        nome: nome,
+                        email: email,
+                        role: 'admin', // IMPORTANTE: marca como admin
+                        criadoEm: new Date().toISOString()
+                    });
+                    
+                    // AVISO DE SUCESSO
+                    showMessage('✅ ADMINISTRADOR CRIADO COM SUCESSO!', 'success');
+                    
+                    // Limpar formulário
+                    form.reset();
+                    
+                    // Esconder botão de criar
+                    submitBtn.style.display = 'none';
+                    
+                    // Mostrar botão de login para admin
+                    document.getElementById('loginBtn').textContent = 'Ir para Painel Admin';
+                    document.getElementById('loginBtn').onclick = () => window.location.href = 'admin-oficinas.html';
+                    document.getElementById('loginBtn').style.backgroundColor = '#2e7d32';
+                    
+                } catch (error) {
+                    console.error('Erro:', error);
+                    
+                    let errorMsg = '';
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMsg = 'Este e-mail já está em uso.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMsg = 'E-mail inválido.';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMsg = 'Senha muito fraca. Use pelo menos 6 caracteres.';
+                    } else {
+                        errorMsg = error.message;
+                    }
+                    
+                    showMessage('❌ ' + errorMsg, 'error');
+                    
+                    // Restaurar botão
+                    btnText.style.display = 'inline';
+                    btnLoading.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
+            });
+            
+            function showMessage(msg, type) {
+                messageBox.textContent = msg;
+                messageBox.className = 'alert';
+                
+                if (type === 'success') {
+                    messageBox.classList.add('alert-success');
+                } else if (type === 'error') {
+                    messageBox.classList.add('alert-error');
+                } else {
+                    messageBox.classList.add('alert-info');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Gerenciar Oficinas | AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Ícones Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+                <img src="../img/logo.png" alt="AutoFlow Logo"
+                    style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                    onerror="this.style.display='none'">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="admin-dashboard.html">Dashboard</a></li>
+                    <li><a href="admin-oficinas.html" class="active">Oficinas</a></li>
+                    <li><a href="admin-usuarios.html">Usuários</a></li>
+                    <li><a href="admin-relatorios.html">Relatórios</a></li>
+                    <li><a href="primeiro-acesso.html">Criar acesso Admin</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info"></div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-building"></i> Gerenciar Oficinas</h2>
+                    <button id="btn-nova-oficina" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Nova Oficina
+                    </button>
+                </div>
+
+                <!-- Cards de Estatísticas -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: white; padding: 20px; border: 1px solid #e0e0e0; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #c62828;" id="total-oficinas">0</div>
+                        <div style="color: #666; margin-top: 5px;">Total de Oficinas</div>
+                    </div>
+                    <div style="background: white; padding: 20px; border: 1px solid #e0e0e0; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #28a745;" id="oficinas-ativas">0</div>
+                        <div style="color: #666; margin-top: 5px;">Ativas</div>
+                    </div>
+                    <div style="background: white; padding: 20px; border: 1px solid #e0e0e0; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #ffc107;" id="oficinas-bloqueadas">0</div>
+                        <div style="color: #666; margin-top: 5px;">Bloqueadas</div>
+                    </div>
+                    <div style="background: white; padding: 20px; border: 1px solid #e0e0e0; text-align: center;">
+                        <div style="font-size: 2rem; font-weight: bold; color: #17a2b8;" id="total-clientes">0</div>
+                        <div style="color: #666; margin-top: 5px;">Total Clientes</div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-oficina" placeholder="Buscar por nome, email ou CNPJ...">
+                    </div>
+                    <div class="filter-options">
+                        <select id="filter-status">
+                            <option value="">Todos os status</option>
+                            <option value="ativa">Ativas</option>
+                            <option value="bloqueada">Bloqueadas</option>
+                            <option value="inativa">Inativas</option>
+                        </select>
+                        <select id="filter-plano">
+                            <option value="">Todos os planos</option>
+                            <option value="basico">Básico (R$30)</option>
+                            <option value="intermediario">Intermediário (R$50)</option>
+                            <option value="completo">Completo (R$70)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tabela de Oficinas -->
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="data-table" id="oficinas-table">
+                            <thead>
+                                <tr>
+                                    <th>Oficina</th>
+                                    <th>Contato</th>
+                                    <th>CNPJ</th>
+                                    <th>Plano</th>
+                                    <th>Status</th>
+                                    <th>Cadastro</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="oficinas-body">
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        <div class="loader" id="loader"></div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Paginação -->
+                <div class="pagination" id="pagination">
+                    <button class="btn-pagination" id="prev-page" disabled><i class="fas fa-chevron-left"></i> Anterior</button>
+                    <span class="page-info" id="page-info">Página 1</span>
+                    <button class="btn-pagination" id="next-page">Próxima <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: Nova/Editar Oficina -->
+    <div id="oficina-modal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="modal-title">Nova Oficina</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            
+            <form id="form-oficina">
+                <div class="form-tabs">
+                    <button type="button" class="form-tab-btn active" data-tab="basico">Básico</button>
+                    <button type="button" class="form-tab-btn" data-tab="endereco">Endereço</button>
+                    <button type="button" class="form-tab-btn" data-tab="plano">Plano</button>
+                </div>
+
+                <!-- Aba Básico -->
+                <div class="form-tab-content active" id="tab-basico">
+                    <div class="form-group">
+                        <label>Nome da Oficina *</label>
+                        <input type="text" id="oficina-nome" required placeholder="Ex: Auto Mecânica Silva">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Email do Dono *</label>
+                            <input type="email" id="oficina-email" required placeholder="contato@oficina.com">
+                            <small>Este email será usado para login</small>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Senha do Dono *</label>
+                            <input type="text" id="oficina-senha" class="form-control" value="123456" required>
+                            <small>Senha padrão: 123456 (pode alterar)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>CNPJ</label>
+                            <input type="text" id="oficina-cnpj" placeholder="00.000.000/0000-00">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Telefone *</label>
+                            <input type="tel" id="oficina-telefone" required placeholder="(51) 3333-4444">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>WhatsApp</label>
+                            <input type="tel" id="oficina-whatsapp" placeholder="(51) 99999-8888">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Endereço -->
+                <div class="form-tab-content" id="tab-endereco">
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label>CEP</label>
+                            <input type="text" id="oficina-cep" placeholder="00000-000">
+                            <button type="button" id="btn-buscar-cep" class="btn btn-sm btn-secondary">Buscar</button>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Endereço</label>
+                            <input type="text" id="oficina-endereco" placeholder="Rua, Av...">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Número</label>
+                            <input type="text" id="oficina-numero" placeholder="123">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label>Complemento</label>
+                            <input type="text" id="oficina-complemento" placeholder="Sala 1">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Bairro</label>
+                            <input type="text" id="oficina-bairro" placeholder="Centro">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Cidade</label>
+                            <input type="text" id="oficina-cidade" placeholder="Porto Alegre">
+                        </div>
+                        <div class="form-group col-md-1">
+                            <label>UF</label>
+                            <select id="oficina-uf">
+                                <option value="">UF</option>
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AM">AM</option>
+                                <option value="AP">AP</option><option value="BA">BA</option><option value="CE">CE</option>
+                                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                <option value="MA">MA</option><option value="MG">MG</option><option value="MS">MS</option>
+                                <option value="MT">MT</option><option value="PA">PA</option><option value="PB">PB</option>
+                                <option value="PE">PE</option><option value="PI">PI</option><option value="PR">PR</option>
+                                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RO">RO</option>
+                                <option value="RR">RR</option><option value="RS">RS</option><option value="SC">SC</option>
+                                <option value="SE">SE</option><option value="SP">SP</option><option value="TO">TO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Plano e Status -->
+                <div class="form-tab-content" id="tab-plano">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Plano *</label>
+                            <select id="oficina-plano" required>
+                                <option value="">Selecione um plano</option>
+                                <option value="basico">Básico - R$ 30/mês (Apenas orçamentos)</option>
+                                <option value="intermediario">Intermediário - R$ 50/mês (Clientes e Veículos)</option>
+                                <option value="completo">Completo - R$ 70/mês (Todas funcionalidades)</option>
+                            </select>
+                            <small>Escolha o plano adequado para esta oficina</small>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Status</label>
+                            <select id="oficina-status">
+                                <option value="ativa">✅ Ativa</option>
+                                <option value="bloqueada">⛔ Bloqueada</option>
+                                <option value="inativa">⚠️ Inativa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Cards de resumo dos planos -->
+                    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <h4 style="margin-top: 0;">📊 Comparativo de Planos:</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
+                            <div style="border: 1px solid #cd7f32; border-radius: 8px; padding: 15px; text-align: center;">
+                                <div style="font-size: 32px;">📝</div>
+                                <h4 style="color: #cd7f32; margin: 10px 0;">Básico</h4>
+                                <div style="font-size: 24px; font-weight: bold;">R$ 30</div>
+                                <div style="margin: 10px 0; font-size: 13px;">
+                                    <p>✅ Orçamentos</p>
+                                    <p>❌ Clientes</p>
+                                    <p>❌ Veículos</p>
+                                    <p>❌ Financeiro</p>
+                                </div>
+                            </div>
+                            
+                            <div style="border: 1px solid #c0c0c0; border-radius: 8px; padding: 15px; text-align: center;">
+                                <div style="font-size: 32px;">🚗</div>
+                                <h4 style="color: #666; margin: 10px 0;">Intermediário</h4>
+                                <div style="font-size: 24px; font-weight: bold;">R$ 50</div>
+                                <div style="margin: 10px 0; font-size: 13px;">
+                                    <p>✅ Orçamentos</p>
+                                    <p>✅ Clientes</p>
+                                    <p>✅ Veículos</p>
+                                    <p>❌ Financeiro</p>
+                                </div>
+                            </div>
+                            
+                            <div style="border: 1px solid #ffd700; border-radius: 8px; padding: 15px; text-align: center; background: #fff9e6;">
+                                <div style="font-size: 32px;">👑</div>
+                                <h4 style="color: #b8860b; margin: 10px 0;">Completo</h4>
+                                <div style="font-size: 24px; font-weight: bold;">R$ 70</div>
+                                <div style="margin: 10px 0; font-size: 13px;">
+                                    <p>✅ Orçamentos</p>
+                                    <p>✅ Clientes</p>
+                                    <p>✅ Veículos</p>
+                                    <p>✅ Financeiro</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Data de Vencimento (próximo pagamento)</label>
+                        <input type="date" id="oficina-vencimento">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <textarea id="oficina-observacoes" rows="3" placeholder="Observações sobre a oficina..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="oficina-enviar-acesso" checked> 
+                            Criar acesso e enviar email com dados de login para o dono
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btn-salvar-oficina">
+                        <i class="fas fa-save"></i> Salvar Oficina
+                    </button>
+                    <button type="button" class="btn btn-secondary modal-close">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Visualizar Oficina -->
+    <div id="view-oficina-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalhes da Oficina</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="oficina-detalhes" class="detalhes-container">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+            <div class="form-actions" style="padding: 20px; border-top: 1px solid var(--cinza-300);">
+                <button type="button" class="btn btn-secondary modal-close">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Confirmar Bloqueio -->
+    <div id="bloquear-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle" style="color: #dc3545;"></i> Confirmar Ação</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <p id="bloquear-mensagem">Tem certeza que deseja bloquear esta oficina?</p>
+            <div class="form-actions">
+                <button id="confirmar-bloqueio" class="btn btn-danger">Sim, Bloquear</button>
+                <button class="btn btn-secondary modal-close">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        // admin-oficinas.js - VERSÃO COM CRIAÇÃO DE USUÁRIO
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Iniciando admin-oficinas...');
+            
+            // Verificar se é admin
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    console.log('👤 Usuário logado:', user.email);
+                    
+                    // Lista de admins
+                    const ADMIN_EMAILS = [
+                        'admin@autoflow.com',
+                        'rafael@gmail.com',
+                        'admin@gmail.com'
+                    ];
+                    
+                    if (!ADMIN_EMAILS.includes(user.email)) {
+                        alert('⛔ Acesso negado! Apenas administradores.');
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+                    
+                    loadUserInfo(user);
+                    loadOficinas();
+                    loadEstatisticas();
+                    
+                } else {
+                    console.log('🔒 Usuário não logado');
+                    window.location.href = 'login.html';
+                }
+            });
+
+            // Elementos do DOM
+            const oficinasBody = document.getElementById('oficinas-body');
+            const loader = document.getElementById('loader');
+            const modal = document.getElementById('oficina-modal');
+            const viewModal = document.getElementById('view-oficina-modal');
+            const bloquearModal = document.getElementById('bloquear-modal');
+            const form = document.getElementById('form-oficina');
+            const btnSalvar = document.getElementById('btn-salvar-oficina');
+            
+            // Variáveis de estado
+            let oficinas = [];
+            let oficinasFiltradas = [];
+            let paginaAtual = 1;
+            let itensPorPagina = 10;
+            let oficinaSelecionadaId = null;
+
+            // Mapeamento de planos
+            const PLANOS = {
+                basico: { nome: 'Básico', preco: 30, cor: '#cd7f32' },
+                intermediario: { nome: 'Intermediário', preco: 50, cor: '#6c757d' },
+                completo: { nome: 'Completo', preco: 70, cor: '#ffc107' }
+            };
+
+            function loadUserInfo(user) {
+                const userInfo = document.getElementById('user-info');
+                if (userInfo) {
+                    userInfo.innerHTML = `
+                        <span class="user-email">👑 ${user.email}</span>
+                        <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
+                    `;
+                    
+                    document.getElementById('logout-btn').addEventListener('click', function() {
+                        auth.signOut().then(() => {
+                            window.location.href = 'login.html';
+                        });
+                    });
+                }
+            }
+
+            async function loadEstatisticas() {
+                try {
+                    const snapshot = await db.collection('oficinas').get();
+                    
+                    let ativas = 0;
+                    let bloqueadas = 0;
+                    let inativas = 0;
+                    let totalClientes = 0;
+                    
+                    for (const doc of snapshot.docs) {
+                        const oficina = doc.data();
+                        
+                        if (oficina.status === 'ativa') ativas++;
+                        else if (oficina.status === 'bloqueada') bloqueadas++;
+                        else if (oficina.status === 'inativa') inativas++;
+                        
+                        // Contar clientes desta oficina
+                        try {
+                            const clientesSnap = await db.collection('oficinas').doc(doc.id).collection('clientes').get();
+                            totalClientes += clientesSnap.size;
+                        } catch (e) {}
+                    }
+                    
+                    document.getElementById('total-oficinas').textContent = snapshot.size;
+                    document.getElementById('oficinas-ativas').textContent = ativas;
+                    document.getElementById('oficinas-bloqueadas').textContent = bloqueadas;
+                    document.getElementById('total-clientes').textContent = totalClientes;
+                    
+                } catch (error) {
+                    console.error('Erro ao carregar estatísticas:', error);
+                }
+            }
+
+            async function loadOficinas() {
+                if (loader) loader.style.display = 'block';
+                if (oficinasBody) oficinasBody.innerHTML = '<tr><td colspan="7" class="text-center">Carregando...</td></tr>';
+                
+                try {
+                    const snapshot = await db.collection('oficinas').get();
+                    
+                    if (loader) loader.style.display = 'none';
+                    
+                    if (snapshot.empty) {
+                        oficinasBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    📭 Nenhuma oficina cadastrada.<br>
+                                    <button onclick="criarOficinaTeste()" class="btn btn-sm btn-success" style="margin-top: 10px;">
+                                        + Criar Primeira Oficina
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+                    
+                    oficinas = [];
+                    snapshot.forEach(doc => {
+                        oficinas.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                    
+                    oficinas.sort((a, b) => {
+                        const nomeA = (a.nome || '').toLowerCase();
+                        const nomeB = (b.nome || '').toLowerCase();
+                        return nomeA.localeCompare(nomeB);
+                    });
+                    
+                    oficinasFiltradas = [...oficinas];
+                    renderizarTabela();
+                    
+                } catch (error) {
+                    console.error('❌ ERRO:', error);
+                    if (loader) loader.style.display = 'none';
+                    oficinasBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center">
+                                ❌ Erro ao carregar oficinas: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+
+            function renderizarTabela() {
+                const inicio = (paginaAtual - 1) * itensPorPagina;
+                const fim = inicio + itensPorPagina;
+                const paginaData = oficinasFiltradas.slice(inicio, fim);
+                
+                oficinasBody.innerHTML = '';
+                
+                if (paginaData.length === 0) {
+                    oficinasBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma oficina encontrada.</td></tr>';
+                    return;
+                }
+                
+                paginaData.forEach(oficina => {
+                    const row = document.createElement('tr');
+                    const planoInfo = PLANOS[oficina.plano] || PLANOS.basico;
+                    
+                    row.innerHTML = `
+                        <td>
+                            <strong>${oficina.nome || 'Sem nome'}</strong><br>
+                            <small>${oficina.id?.substring(0, 8) || ''}...</small>
+                        </td>
+                        <td>
+                            📧 ${oficina.emailDono || '-'}<br>
+                            📞 ${formatarTelefone(oficina.telefone) || '-'}
+                        </td>
+                        <td>${formatarCNPJ(oficina.cnpj) || '-'}</td>
+                        <td>
+                            <span style="color: ${planoInfo.cor}; font-weight: bold;">
+                                ${planoInfo.nome} - R$ ${planoInfo.preco}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge status-${oficina.status || 'ativa'}">
+                                ${traduzirStatus(oficina.status || 'ativa')}
+                            </span>
+                        </td>
+                        <td>${formatarData(oficina.createdAt)}</td>
+                        <td class="actions">
+                            <button class="btn btn-sm btn-info" onclick="verOficina('${oficina.id}')" title="Visualizar">👁️</button>
+                            <button class="btn btn-sm btn-primary" onclick="editarOficina('${oficina.id}')" title="Editar">✏️</button>
+                            ${oficina.status === 'bloqueada' ? 
+                                `<button class="btn btn-sm btn-success" onclick="desbloquearOficina('${oficina.id}')" title="Desbloquear">🔓</button>` : 
+                                `<button class="btn btn-sm btn-warning" onclick="bloquearOficina('${oficina.id}')" title="Bloquear">🔒</button>`
+                            }
+                            <button class="btn btn-sm btn-danger" onclick="excluirOficina('${oficina.id}')" title="Excluir">🗑️</button>
+                            <button class="btn btn-sm btn-secondary" onclick="acessarComoAdmin('${oficina.id}')" title="Acessar como">👑</button>
+                        </td>
+                    `;
+                    oficinasBody.appendChild(row);
+                });
+                
+                const totalPaginas = Math.ceil(oficinasFiltradas.length / itensPorPagina);
+                document.getElementById('page-info').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+                document.getElementById('prev-page').disabled = paginaAtual === 1;
+                document.getElementById('next-page').disabled = paginaAtual === totalPaginas || totalPaginas === 0;
+            }
+
+            function traduzirStatus(status) {
+                const map = {
+                    'ativa': '✅ Ativa',
+                    'bloqueada': '⛔ Bloqueada',
+                    'inativa': '⚠️ Inativa'
+                };
+                return map[status] || status;
+            }
+
+            function formatarTelefone(tel) {
+                if (!tel) return '';
+                const nums = tel.replace(/\D/g, '');
+                if (nums.length === 10) return nums.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+                if (nums.length === 11) return nums.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+                return tel;
+            }
+
+            function formatarCNPJ(cnpj) {
+                if (!cnpj) return '';
+                const nums = cnpj.replace(/\D/g, '');
+                if (nums.length === 14) return nums.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+                return cnpj;
+            }
+
+            function formatarData(timestamp) {
+                if (!timestamp) return '-';
+                try {
+                    if (timestamp.toDate) {
+                        return timestamp.toDate().toLocaleDateString('pt-BR');
+                    }
+                    return new Date(timestamp).toLocaleDateString('pt-BR');
+                } catch (e) {
+                    return '-';
+                }
+            }
+
+            // Filtros
+            document.getElementById('search-oficina')?.addEventListener('input', aplicarFiltros);
+            document.getElementById('filter-status')?.addEventListener('change', aplicarFiltros);
+            document.getElementById('filter-plano')?.addEventListener('change', aplicarFiltros);
+
+            function aplicarFiltros() {
+                const busca = document.getElementById('search-oficina')?.value.toLowerCase() || '';
+                const status = document.getElementById('filter-status')?.value || '';
+                const plano = document.getElementById('filter-plano')?.value || '';
+                
+                oficinasFiltradas = oficinas.filter(oficina => {
+                    const matchBusca = !busca || 
+                        (oficina.nome && oficina.nome.toLowerCase().includes(busca)) ||
+                        (oficina.emailDono && oficina.emailDono.toLowerCase().includes(busca));
+                    
+                    const matchStatus = !status || oficina.status === status;
+                    const matchPlano = !plano || oficina.plano === plano;
+                    
+                    return matchBusca && matchStatus && matchPlano;
+                });
+                
+                paginaAtual = 1;
+                renderizarTabela();
+            }
+
+            // Paginação
+            document.getElementById('prev-page')?.addEventListener('click', () => {
+                if (paginaAtual > 1) {
+                    paginaAtual--;
+                    renderizarTabela();
+                }
+            });
+
+            document.getElementById('next-page')?.addEventListener('click', () => {
+                const totalPaginas = Math.ceil(oficinasFiltradas.length / itensPorPagina);
+                if (paginaAtual < totalPaginas) {
+                    paginaAtual++;
+                    renderizarTabela();
+                }
+            });
+
+            // Abas do formulário
+            document.querySelectorAll('.form-tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.form-tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    const tab = this.getAttribute('data-tab');
+                    document.getElementById(`tab-${tab}`).classList.add('active');
+                });
+            });
+
+            // Buscar CEP
+            document.getElementById('btn-buscar-cep')?.addEventListener('click', function() {
+                const cep = document.getElementById('oficina-cep').value.replace(/\D/g, '');
+                if (cep.length === 8) {
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (!data.erro) {
+                                document.getElementById('oficina-endereco').value = data.logradouro || '';
+                                document.getElementById('oficina-bairro').value = data.bairro || '';
+                                document.getElementById('oficina-cidade').value = data.localidade || '';
+                                document.getElementById('oficina-uf').value = data.uf || '';
+                            } else {
+                                alert('❌ CEP não encontrado');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Erro ao buscar CEP:', err);
+                            alert('❌ Erro ao buscar CEP');
+                        });
+                } else {
+                    alert('❌ CEP inválido');
+                }
+            });
+
+            // Nova oficina
+            document.getElementById('btn-nova-oficina')?.addEventListener('click', function() {
+                oficinaSelecionadaId = null;
+                document.getElementById('modal-title').textContent = 'Nova Oficina';
+                document.getElementById('btn-salvar-oficina').innerHTML = '<i class="fas fa-save"></i> Salvar Oficina';
+                
+                if (form) form.reset();
+                
+                document.getElementById('oficina-status').value = 'ativa';
+                document.getElementById('oficina-plano').value = 'basico';
+                document.getElementById('oficina-senha').value = '123456';
+                
+                document.querySelectorAll('.form-tab-btn')[0]?.click();
+                
+                if (modal) modal.classList.add('active');
+            });
+
+            // ===========================================
+            // FUNÇÃO PARA CRIAR USUÁRIO NO FIREBASE AUTH
+            // ===========================================
+            async function criarUsuarioFirebase(email, senha) {
+                try {
+                    // Criar usuário no Firebase Auth
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
+                    console.log('✅ Usuário criado no Firebase Auth:', userCredential.user.email);
+                    
+                    return { 
+                        sucesso: true, 
+                        mensagem: 'Usuário criado com sucesso!',
+                        uid: userCredential.user.uid
+                    };
+                } catch (error) {
+                    console.error('❌ Erro ao criar usuário:', error);
+                    
+                    // Tratar erros específicos
+                    let mensagem = '';
+                    if (error.code === 'auth/email-already-in-use') {
+                        mensagem = 'Este email já está em uso por outra oficina.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        mensagem = 'Email inválido.';
+                    } else if (error.code === 'auth/weak-password') {
+                        mensagem = 'Senha muito fraca. Use pelo menos 6 caracteres.';
+                    } else {
+                        mensagem = error.message;
+                    }
+                    
+                    return { 
+                        sucesso: false, 
+                        mensagem: mensagem
+                    };
+                }
+            }
+
+            // Salvar oficina (com criação de usuário)
+            form?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const nome = document.getElementById('oficina-nome')?.value;
+                const email = document.getElementById('oficina-email')?.value;
+                const senha = document.getElementById('oficina-senha')?.value;
+                const telefone = document.getElementById('oficina-telefone')?.value;
+                const plano = document.getElementById('oficina-plano')?.value;
+                
+                if (!nome || !email || !telefone || !plano || !senha) {
+                    alert('❌ Preencha todos os campos obrigatórios!');
+                    return;
+                }
+                
+                if (senha.length < 6) {
+                    alert('❌ A senha deve ter pelo menos 6 caracteres!');
+                    return;
+                }
+                
+                const criarAcesso = document.getElementById('oficina-enviar-acesso')?.checked || true;
+                
+                const oficinaData = {
+                    nome: nome,
+                    emailDono: email,
+                    telefone: telefone,
+                    plano: plano,
+                    status: document.getElementById('oficina-status')?.value || 'ativa',
+                    cnpj: document.getElementById('oficina-cnpj')?.value || '',
+                    whatsapp: document.getElementById('oficina-whatsapp')?.value || '',
+                    cep: document.getElementById('oficina-cep')?.value || '',
+                    endereco: document.getElementById('oficina-endereco')?.value || '',
+                    numero: document.getElementById('oficina-numero')?.value || '',
+                    complemento: document.getElementById('oficina-complemento')?.value || '',
+                    bairro: document.getElementById('oficina-bairro')?.value || '',
+                    cidade: document.getElementById('oficina-cidade')?.value || '',
+                    uf: document.getElementById('oficina-uf')?.value || '',
+                    dataVencimento: document.getElementById('oficina-vencimento')?.value || '',
+                    observacoes: document.getElementById('oficina-observacoes')?.value || '',
+                    updatedAt: new Date().toISOString()
+                };
+                
+                if (btnSalvar) {
+                    btnSalvar.disabled = true;
+                    btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                }
+                
+                try {
+                    if (oficinaSelecionadaId) {
+                        // ATUALIZAR - não recria usuário
+                        await db.collection('oficinas').doc(oficinaSelecionadaId).update(oficinaData);
+                        alert('✅ Oficina atualizada com sucesso!');
+                        
+                    } else {
+                        // CRIAR NOVA OFICINA
+                        
+                        // 1. Primeiro criar usuário no Firebase Auth (se marcado)
+                        if (criarAcesso) {
+                            const resultado = await criarUsuarioFirebase(email, senha);
+                            
+                            if (!resultado.sucesso) {
+                                // Se erro ao criar usuário, não prossegue
+                                alert(`❌ Erro ao criar acesso: ${resultado.mensagem}`);
+                                if (btnSalvar) {
+                                    btnSalvar.disabled = false;
+                                    btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar Oficina';
+                                }
+                                return;
+                            }
+                            
+                            // Adicionar UID do usuário aos dados da oficina
+                            oficinaData.uid = resultado.uid;
+                            oficinaData.senhaCriada = true;
+                            
+                            alert(`✅ Usuário criado! Email: ${email} | Senha: ${senha}`);
+                        }
+                        
+                        // 2. Depois criar documento da oficina no Firestore
+                        oficinaData.createdAt = new Date().toISOString();
+                        const docRef = await db.collection('oficinas').add(oficinaData);
+                        
+                        alert('✅ Oficina criada com sucesso!');
+                    }
+                    
+                    if (modal) modal.classList.remove('active');
+                    loadOficinas();
+                    loadEstatisticas();
+                    
+                } catch (error) {
+                    console.error('❌ Erro:', error);
+                    alert('❌ Erro ao salvar oficina: ' + error.message);
+                } finally {
+                    if (btnSalvar) {
+                        btnSalvar.disabled = false;
+                        btnSalvar.innerHTML = oficinaSelecionadaId ? 
+                            '<i class="fas fa-save"></i> Atualizar Oficina' : 
+                            '<i class="fas fa-save"></i> Salvar Oficina';
+                    }
+                }
+            });
+
+            // Fechar modais
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (modal) modal.classList.remove('active');
+                    if (viewModal) viewModal.classList.remove('active');
+                    if (bloquearModal) bloquearModal.classList.remove('active');
+                });
+            });
+
+            // Fechar ao clicar fora
+            modal?.addEventListener('click', function(e) {
+                if (e.target === modal) modal.classList.remove('active');
+            });
+
+            viewModal?.addEventListener('click', function(e) {
+                if (e.target === viewModal) viewModal.classList.remove('active');
+            });
+
+            bloquearModal?.addEventListener('click', function(e) {
+                if (e.target === bloquearModal) bloquearModal.classList.remove('active');
+            });
+
+            // Funções globais
+            window.verOficina = async function(oficinaId) {
+                try {
+                    const doc = await db.collection('oficinas').doc(oficinaId).get();
+                    if (!doc.exists) {
+                        alert('❌ Oficina não encontrada');
+                        return;
+                    }
+                    
+                    const of = doc.data();
+                    const planoInfo = PLANOS[of.plano] || PLANOS.basico;
+                    
+                    const detalhesDiv = document.getElementById('oficina-detalhes');
+                    if (!detalhesDiv) return;
+                    
+                    detalhesDiv.innerHTML = `
+                        <div style="padding: 20px;">
+                            <h3 style="margin-top: 0; color: #c62828;">${of.nome || 'Sem nome'}</h3>
+                            <p><strong>ID:</strong> ${oficinaId}</p>
+                            <p><strong>Email:</strong> ${of.emailDono || '-'}</p>
+                            <p><strong>Telefone:</strong> ${formatarTelefone(of.telefone) || '-'}</p>
+                            <p><strong>CNPJ:</strong> ${formatarCNPJ(of.cnpj) || '-'}</p>
+                            <p><strong>Plano:</strong> ${planoInfo.nome} - R$ ${planoInfo.preco}</p>
+                            <p><strong>Status:</strong> ${traduzirStatus(of.status || 'ativa')}</p>
+                            <p><strong>Endereço:</strong> ${of.endereco || ''}, ${of.numero || ''}</p>
+                            <p><strong>Cidade/UF:</strong> ${of.cidade || ''}/${of.uf || ''}</p>
+                        </div>
+                    `;
+                    
+                    if (viewModal) viewModal.classList.add('active');
+                    
+                } catch (error) {
+                    console.error('❌ Erro:', error);
+                    alert('❌ Erro ao carregar detalhes');
+                }
+            };
+
+            window.editarOficina = async function(oficinaId) {
+                try {
+                    const doc = await db.collection('oficinas').doc(oficinaId).get();
+                    if (!doc.exists) return;
+                    
+                    const of = doc.data();
+                    oficinaSelecionadaId = oficinaId;
+                    
+                    document.getElementById('modal-title').textContent = 'Editar Oficina';
+                    document.getElementById('btn-salvar-oficina').innerHTML = '<i class="fas fa-save"></i> Atualizar Oficina';
+                    
+                    document.getElementById('oficina-nome').value = of.nome || '';
+                    document.getElementById('oficina-email').value = of.emailDono || '';
+                    document.getElementById('oficina-senha').value = '••••••'; // Senha não é editável
+                    document.getElementById('oficina-cnpj').value = of.cnpj || '';
+                    document.getElementById('oficina-telefone').value = of.telefone || '';
+                    document.getElementById('oficina-whatsapp').value = of.whatsapp || '';
+                    document.getElementById('oficina-cep').value = of.cep || '';
+                    document.getElementById('oficina-endereco').value = of.endereco || '';
+                    document.getElementById('oficina-numero').value = of.numero || '';
+                    document.getElementById('oficina-complemento').value = of.complemento || '';
+                    document.getElementById('oficina-bairro').value = of.bairro || '';
+                    document.getElementById('oficina-cidade').value = of.cidade || '';
+                    document.getElementById('oficina-uf').value = of.uf || '';
+                    document.getElementById('oficina-plano').value = of.plano || 'basico';
+                    document.getElementById('oficina-status').value = of.status || 'ativa';
+                    document.getElementById('oficina-vencimento').value = of.dataVencimento || '';
+                    document.getElementById('oficina-observacoes').value = of.observacoes || '';
+                    
+                    document.querySelectorAll('.form-tab-btn')[0]?.click();
+                    
+                    if (modal) modal.classList.add('active');
+                    
+                } catch (error) {
+                    console.error('❌ Erro:', error);
+                    alert('❌ Erro ao carregar oficina');
+                }
+            };
+
+            window.bloquearOficina = function(oficinaId) {
+                oficinaSelecionadaId = oficinaId;
+                document.getElementById('bloquear-mensagem').innerHTML = `
+                    <p><strong>Bloquear esta oficina?</strong></p>
+                    <p>O dono não conseguirá mais acessar o sistema.</p>
+                `;
+                bloquearModal.classList.add('active');
+                
+                document.getElementById('confirmar-bloqueio').onclick = async function() {
+                    try {
+                        await db.collection('oficinas').doc(oficinaId).update({
+                            status: 'bloqueada',
+                            updatedAt: new Date().toISOString()
+                        });
+                        
+                        alert('✅ Oficina bloqueada!');
+                        bloquearModal.classList.remove('active');
+                        loadOficinas();
+                        loadEstatisticas();
+                        
+                    } catch (error) {
+                        console.error('❌ Erro:', error);
+                        alert('❌ Erro ao bloquear');
+                    }
+                };
+            };
+
+            window.desbloquearOficina = function(oficinaId) {
+                oficinaSelecionadaId = oficinaId;
+                document.getElementById('bloquear-mensagem').innerHTML = `
+                    <p><strong>Desbloquear esta oficina?</strong></p>
+                    <p>O dono poderá acessar o sistema novamente.</p>
+                `;
+                bloquearModal.classList.add('active');
+                
+                document.getElementById('confirmar-bloqueio').onclick = async function() {
+                    try {
+                        await db.collection('oficinas').doc(oficinaId).update({
+                            status: 'ativa',
+                            updatedAt: new Date().toISOString()
+                        });
+                        
+                        alert('✅ Oficina desbloqueada!');
+                        bloquearModal.classList.remove('active');
+                        loadOficinas();
+                        loadEstatisticas();
+                        
+                    } catch (error) {
+                        console.error('❌ Erro:', error);
+                        alert('❌ Erro ao desbloquear');
+                    }
+                };
+            };
+
+            window.excluirOficina = function(oficinaId) {
+                if (confirm('⚠️ Excluir esta oficina? Todos os dados serão perdidos.')) {
+                    db.collection('oficinas').doc(oficinaId).delete()
+                        .then(() => {
+                            alert('✅ Oficina excluída!');
+                            loadOficinas();
+                        })
+                        .catch(error => {
+                            console.error('❌ Erro:', error);
+                            alert('❌ Erro ao excluir');
+                        });
+                }
+            };
+
+            window.acessarComoAdmin = function(oficinaId) {
+                sessionStorage.setItem('adminMode', 'true');
+                sessionStorage.setItem('oficinaId', oficinaId);
+                window.location.href = 'dashboard.html';
+            };
+
+            window.criarOficinaTeste = async function() {
+                const emailTeste = `teste${Date.now()}@oficina.com`;
+                const oficinaTeste = {
+                    nome: 'Oficina Teste',
+                    emailDono: emailTeste,
+                    telefone: '(51) 99999-8888',
+                    plano: 'basico',
+                    status: 'ativa',
+                    createdAt: new Date().toISOString()
+                };
+                
+                try {
+                    // Criar usuário
+                    const resultado = await criarUsuarioFirebase(emailTeste, '123456');
+                    
+                    if (resultado.sucesso) {
+                        oficinaTeste.uid = resultado.uid;
+                        await db.collection('oficinas').add(oficinaTeste);
+                        alert(`✅ Oficina de teste criada! Email: ${emailTeste} | Senha: 123456`);
+                    } else {
+                        alert('❌ Erro ao criar usuário: ' + resultado.mensagem);
+                    }
+                    
+                    loadOficinas();
+                    loadEstatisticas();
+                } catch (error) {
+                    alert('❌ Erro: ' + error.message);
+                }
+            };
+        });
+    </script>
+</body>
+</html>
