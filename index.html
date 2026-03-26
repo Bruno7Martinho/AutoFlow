@@ -46,45 +46,54 @@
             padding: 0 20px;
         }
 
-        /* ===== HEADER ===== */
+        /* ===== HEADER MODERNIZADO ===== */
         .header {
-            background: var(--white);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
+            transition: all 0.3s ease;
         }
 
         .header .container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            padding: 12px 20px;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            text-decoration: none;
         }
 
         .logo img {
-            height: 50px;
+            height: 45px;
             width: auto;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover img {
+            transform: scale(1.05);
         }
 
         .logo h1 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: var(--primary);
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
 
         .nav-menu {
             display: flex;
-            gap: 30px;
+            gap: 32px;
             list-style: none;
+            align-items: center;
         }
 
         .nav-menu a {
@@ -93,6 +102,24 @@
             font-weight: 500;
             transition: color 0.3s;
             font-size: 1rem;
+            padding: 8px 0;
+            position: relative;
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after,
+        .nav-menu a.active::after {
+            width: 100%;
         }
 
         .nav-menu a:hover,
@@ -100,43 +127,24 @@
             color: var(--primary);
         }
 
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
+        /* Botão de login no menu */
+        .btn-login-nav {
             background: var(--primary);
-            color: var(--white);
+            color: var(--white) !important;
+            padding: 8px 24px !important;
+            border-radius: 30px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .btn-primary:hover {
+        .btn-login-nav:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(198,40,40,0.3);
+            box-shadow: 0 4px 12px rgba(198,40,40,0.3);
         }
 
-        .btn-outline {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            background: transparent;
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
-            color: var(--white);
-        }
-
-        .btn-large {
-            padding: 15px 40px;
-            font-size: 1.1rem;
+        .btn-login-nav::after {
+            display: none;
         }
 
         .mobile-menu-btn {
@@ -144,6 +152,57 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--primary);
+            background: none;
+            border: none;
+            transition: transform 0.3s;
+        }
+
+        .mobile-menu-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* ===== BOTÕES REFINADOS ===== */
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(198,40,40,0.25);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(198,40,40,0.2);
+        }
+
+        .btn-large {
+            padding: 14px 36px;
+            font-size: 1.1rem;
         }
 
         /* ===== HERO SECTION COM BACKGROUND SLIDESHOW ===== */
@@ -156,7 +215,6 @@
             overflow: hidden;
         }
 
-        /* Slideshow de fundo */
         .hero-background {
             position: absolute;
             top: 0;
@@ -184,10 +242,9 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: brightness(0.6); /* escurece a imagem para contraste com o texto */
+            filter: brightness(0.6);
         }
 
-        /* Botões do slideshow */
         .hero .prev, .hero .next {
             cursor: pointer;
             position: absolute;
@@ -215,7 +272,6 @@
             background-color: rgba(0,0,0,0.8);
         }
 
-        /* Indicadores (pontinhos) */
         .hero .dots-container {
             position: absolute;
             bottom: 30px;
@@ -240,7 +296,6 @@
             background-color: var(--primary);
         }
 
-        /* Conteúdo sobreposto */
         .hero .container {
             position: relative;
             z-index: 10;
@@ -274,8 +329,9 @@
 
         .hero-buttons {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .hero-buttons .btn-outline {
@@ -453,7 +509,7 @@
 
         .pricing-card .btn {
             width: 100%;
-            text-align: center;
+            margin-top: 10px;
         }
 
         /* ===== DEPOIMENTOS ===== */
@@ -533,22 +589,20 @@
             margin-bottom: 20px;
         }
 
-        .cta p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
-
         .cta .btn {
             background: var(--white);
             color: var(--primary);
             font-size: 1.2rem;
             padding: 15px 50px;
+            border-radius: 50px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .cta .btn:hover {
             background: var(--gray-100);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
         }
 
         /* ===== FOOTER ===== */
@@ -629,15 +683,6 @@
 
         /* ===== RESPONSIVO ===== */
         @media (max-width: 992px) {
-            .hero .container {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .hero-buttons {
-                justify-content: center;
-            }
-
             .features-grid,
             .pricing-grid,
             .testimonials-grid {
@@ -656,23 +701,57 @@
 
             .nav-menu {
                 display: none;
-                position: absolute;
-                top: 80px;
+                position: fixed;
+                top: 70px;
                 left: 0;
                 width: 100%;
                 background: var(--white);
                 flex-direction: column;
                 padding: 20px;
-                box-shadow: 0 5px 10px rgba(0,0,0,0.1);
-                gap: 15px;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                gap: 20px;
+                z-index: 999;
+                border-top: 1px solid var(--gray-200);
+                animation: slideDown 0.3s ease;
             }
 
             .nav-menu.active {
                 display: flex;
             }
 
+            .nav-menu a {
+                width: 100%;
+                text-align: center;
+                padding: 12px;
+                border-radius: 8px;
+            }
+
+            .nav-menu a::after {
+                display: none;
+            }
+
+            .nav-menu a:hover {
+                background: rgba(198,40,40,0.1);
+            }
+
+            .btn-login-nav {
+                margin-top: 10px;
+                width: 100%;
+                text-align: center;
+            }
+
             .hero-content h1 {
                 font-size: 2.5rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .hero-buttons .btn {
+                width: 100%;
+                text-align: center;
             }
 
             .features-grid,
@@ -711,25 +790,28 @@
             .section-title h2 {
                 font-size: 2rem;
             }
+        }
 
-            .hero-buttons {
-                flex-direction: column;
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
             }
-
-            .btn {
-                width: 100%;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
+    <!-- HEADER MODERNIZADO -->
     <header class="header">
         <div class="container">
-            <div class="logo">
+            <a href="#home" class="logo">
                 <img src="img/logo.png" alt="AutoFlow Logo" onerror="this.style.display='none'">
                 <h1>AutoFlow</h1>
-            </div>
+            </a>
             <nav>
                 <ul class="nav-menu" id="navMenu">
                     <li><a href="#home" class="active">Início</a></li>
@@ -737,46 +819,34 @@
                     <li><a href="#planos">Planos</a></li>
                     <li><a href="#depoimentos">Depoimentos</a></li>
                     <li><a href="#contato">Contato</a></li>
-                    <li><a href="html/login.html" class="btn btn-outline" style="padding: 8px 20px;">Login</a></li>
+                    <li><a href="html/login.html" class="btn-login-nav">Login</a></li>
                 </ul>
             </nav>
-            <div class="mobile-menu-btn" onclick="toggleMenu()">
+            <button class="mobile-menu-btn" onclick="toggleMenu()">
                 <i class="fas fa-bars"></i>
-            </div>
+            </button>
         </div>
     </header>
 
     <!-- HERO SECTION COM BACKGROUND SLIDESHOW -->
     <section id="home" class="hero">
-        <!-- Slideshow de fundo -->
         <div class="hero-background">
             <div class="slide active">
-                <img src="img/foto10.png" 
-                     alt="Oficina mecânica moderna"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+1'">
+                <img src="img/foto10.png" alt="Oficina mecânica moderna" onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+1'">
             </div>
             <div class="slide">
-                <img src="img/foto2.jpg" 
-                     alt="Diagnóstico automotivo"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+2'">
+                <img src="img/foto2.jpg" alt="Diagnóstico automotivo" onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+2'">
             </div>
             <div class="slide">
-                <img src="img/foto3.jpg" 
-                     alt="Equipamentos de última geração"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+3'">
+                <img src="img/foto3.jpg" alt="Equipamentos de última geração" onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+3'">
             </div>
             <div class="slide">
-                <img src="img/foto9.png" 
-                     alt="Atendimento especializado"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+4'">
+                <img src="img/foto9.png" alt="Atendimento especializado" onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+4'">
             </div>
         </div>
 
-        <!-- Botões de navegação do slideshow -->
         <a class="prev" onclick="mudarSlide(-1)">&#10094;</a>
         <a class="next" onclick="mudarSlide(1)">&#10095;</a>
-
-        <!-- Indicadores -->
         <div class="dots-container">
             <span class="dot" onclick="irParaSlide(1)"></span>
             <span class="dot" onclick="irParaSlide(2)"></span>
@@ -784,7 +854,6 @@
             <span class="dot" onclick="irParaSlide(4)"></span>
         </div>
 
-        <!-- Conteúdo principal -->
         <div class="container">
             <div class="hero-content">
                 <h1>Gestão completa para <span>oficinas mecânicas</span></h1>
@@ -806,44 +875,32 @@
             </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
                     <h3>Gestão de Clientes</h3>
                     <p>Cadastre e gerencie todos os seus clientes com histórico completo de serviços.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-car"></i>
-                    </div>
+                    <div class="feature-icon"><i class="fas fa-car"></i></div>
                     <h3>Controle de Veículos</h3>
                     <p>Histórico completo de cada veículo, serviços realizados e manutenções futuras.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-file-invoice"></i>
-                    </div>
+                    <div class="feature-icon"><i class="fas fa-file-invoice"></i></div>
                     <h3>Orçamentos Profissionais</h3>
                     <p>Crie orçamentos detalhados e envie por PDF para seus clientes.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
                     <h3>Controle Financeiro</h3>
                     <p>Acompanhe receitas, despesas e lucros com gráficos e relatórios.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
+                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
                     <h3>Acesso Mobile</h3>
                     <p>Sistema responsivo, acesse de qualquer lugar pelo celular.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
+                    <div class="feature-icon"><i class="fas fa-headset"></i></div>
                     <h3>Suporte Especializado</h3>
                     <p>Suporte via WhatsApp para ajudar no que precisar.</p>
                 </div>
@@ -859,7 +916,6 @@
                 <p>Escolha o plano ideal para sua oficina, do básico ao completo</p>
             </div>
             <div class="pricing-grid">
-                <!-- Plano Básico -->
                 <div class="pricing-card">
                     <div class="pricing-header">
                         <h3>Básico</h3>
@@ -874,7 +930,6 @@
                     <a href="html/primeiro-acesso.html" class="btn btn-outline">Contratar</a>
                 </div>
 
-                <!-- Plano Intermediário (Destaque) -->
                 <div class="pricing-card featured">
                     <div class="popular-badge">Mais Popular</div>
                     <div class="pricing-header">
@@ -890,7 +945,6 @@
                     <a href="html/primeiro-acesso.html" class="btn btn-primary">Contratar</a>
                 </div>
 
-                <!-- Plano Completo -->
                 <div class="pricing-card">
                     <div class="pricing-header">
                         <h3>Completo</h3>
@@ -918,9 +972,7 @@
             <div class="testimonials-grid">
                 <div class="testimonial-card">
                     <div class="testimonial-header">
-                        <div class="testimonial-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
+                        <div class="testimonial-avatar"><i class="fas fa-user"></i></div>
                         <div class="testimonial-info">
                             <h4>João Silva</h4>
                             <p>Silva & Cia. Auto Center</p>
@@ -928,19 +980,12 @@
                     </div>
                     <p class="testimonial-text">"O sistema transformou minha oficina. Antes eu usava planilhas, agora tenho tudo organizado. O controle financeiro me ajudou a ver onde estava perdendo dinheiro."</p>
                     <div class="testimonial-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                 </div>
-
                 <div class="testimonial-card">
                     <div class="testimonial-header">
-                        <div class="testimonial-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
+                        <div class="testimonial-avatar"><i class="fas fa-user"></i></div>
                         <div class="testimonial-info">
                             <h4>Maria Santos</h4>
                             <p>Oficina Central</p>
@@ -948,19 +993,12 @@
                     </div>
                     <p class="testimonial-text">"O melhor sistema que já usei. Meus clientes adoram receber os orçamentos em PDF, dá um ar muito profissional. Recomendo demais!"</p>
                     <div class="testimonial-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                 </div>
-
                 <div class="testimonial-card">
                     <div class="testimonial-header">
-                        <div class="testimonial-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
+                        <div class="testimonial-avatar"><i class="fas fa-user"></i></div>
                         <div class="testimonial-info">
                             <h4>Carlos Oliveira</h4>
                             <p>Auto Express</p>
@@ -968,11 +1006,7 @@
                     </div>
                     <p class="testimonial-text">"Comecei com o plano básico e já fiz upgrade para o completo. O sistema é intuitivo e o suporte é excelente. Minha produtividade aumentou muito."</p>
                     <div class="testimonial-rating">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                     </div>
                 </div>
             </div>
@@ -1033,7 +1067,6 @@
     </footer>
 
     <script>
-        // Menu mobile
         function toggleMenu() {
             const menu = document.getElementById('navMenu');
             menu.classList.toggle('active');
@@ -1045,38 +1078,26 @@
             });
         });
 
-        // Smooth scroll
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             });
         });
 
-        // ========== SLIDESHOW ==========
         let slideIndex = 1;
         let slideInterval;
 
         function mostrarSlide(n) {
             let slides = document.querySelectorAll('.hero-background .slide');
             let dots = document.querySelectorAll('.hero .dot');
-            
             if (n > slides.length) slideIndex = 1;
             if (n < 1) slideIndex = slides.length;
-            
-            for (let i = 0; i < slides.length; i++) {
-                slides[i].classList.remove('active');
-            }
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].classList.remove('active');
-            }
-            
+            for (let i = 0; i < slides.length; i++) slides[i].classList.remove('active');
+            for (let i = 0; i < dots.length; i++) dots[i].classList.remove('active');
             slides[slideIndex-1].classList.add('active');
             dots[slideIndex-1].classList.add('active');
         }
@@ -1095,12 +1116,9 @@
         }
 
         function iniciarIntervalo() {
-            slideInterval = setInterval(() => {
-                mudarSlide(1);
-            }, 5000);
+            slideInterval = setInterval(() => mudarSlide(1), 5000);
         }
 
-        // Inicializa o slideshow
         mostrarSlide(slideIndex);
         iniciarIntervalo();
     </script>
