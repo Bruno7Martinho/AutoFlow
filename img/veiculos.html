@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veículos - AutoFlow</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/dashboard.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="main-header">
+            <div class="logo" style="display: flex; align-items: center; gap: 20px;">
+                <img src="../img/logo.png" alt="AutoFlow Logo"
+                    style="height: 100px; width: auto; max-width: 400px; object-fit: contain;"
+                    onerror="this.style.display='none'">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li><a href="clientes.html">Clientes</a></li>
+                    <li><a href="veiculos.html" class="active">Veículos</a></li>
+                    <li><a href="orcamentos.html">Orçamentos</a></li>
+                    <li><a href="financeiro.html">Financeiro</a></li>
+                </ul>
+            </nav>
+            <div class="user-info" id="user-info">
+                <!-- Preenchido por JavaScript -->
+            </div>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-section">
+                <div class="section-header">
+                    <h2>Gerenciamento de Veículos</h2>
+                    <button id="btn-novo-veiculo" class="btn btn-success">+ Novo Veículo</button>
+                </div>
+                
+                <div class="table-container">
+                    <div class="table-responsive">
+                        <table class="data-table" id="veiculos-table">
+                            <thead>
+                                <tr>
+                                    <th>Placa</th>
+                                    <th>Marca/Modelo</th>
+                                    <th>Ano</th>
+                                    <th>Cor</th>
+                                    <th>Cliente</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="veiculos-body">
+                                <!-- Dados serão carregados aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="loader" id="veiculos-loader"></div>
+            </div>
+        </main>
+
+        <footer class="main-footer">
+            <p>&copy; 2026 AutoFlow. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <!-- Modal para veículo -->
+    <div id="veiculo-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title-veiculo">Novo Veículo</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-veiculo">
+                    <div class="form-group">
+                        <label for="veiculo-placa">Placa *</label>
+                        <input type="text" id="veiculo-placa" required placeholder="ABC-1234" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-marca">Marca *</label>
+                        <input type="text" id="veiculo-marca" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-modelo">Modelo *</label>
+                        <input type="text" id="veiculo-modelo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-ano">Ano</label>
+                        <input type="number" id="veiculo-ano" min="1900" max="2026">
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-cor">Cor</label>
+                        <input type="text" id="veiculo-cor">
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-cliente">Cliente *</label>
+                        <select id="veiculo-cliente" required>
+                            <option value="">Carregando clientes...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-status">Status</label>
+                        <select id="veiculo-status">
+                            <option value="pendente">Pendente</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="entregue">Entregue</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-problema">Problema/Descrição</label>
+                        <textarea id="veiculo-problema" rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="veiculo-observacoes">Observações</label>
+                        <textarea id="veiculo-observacoes" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="btn-salvar-veiculo">Salvar Veículo</button>
+                        <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/firebase-config.js"></script>
+    <script>
+        // Gerenciamento de Veículos - VERSÃO CORRIGIDA
+        document.addEventListener('DOMContentLoaded', function() {
+            const oficinaId = sessionStorage.getItem('oficinaId');
+            const plano = sessionStorage.getItem('planoAtual') || 'basico';
+            
+            // Verificar se pode acessar (planos 50 e 70)
+            if (plano === 'basico') {
+                alert('⛔ Seu plano Básico (R$30) não permite acesso a veículos.');
+                window.location.href = 'orcamentos.html';
+                return;
+            }
+            
+            // Verificar autenticação
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    loadUserInfo(user);
+                    loadVeiculos();
+                    loadClientesParaSelect();
+                } else {
+                    window.location.href = 'login.html';
+                }
+            });
+            
+            // Configurar informações do usuário
+            function loadUserInfo(user) {
+                const userInfo = document.getElementById('user-info');
+                if (userInfo) {
+                    userInfo.innerHTML = `
+                        <span class="user-email">${user.email}</span>
+                        <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
+                    `;
+                    
+                    document.getElementById('logout-btn').addEventListener('click', function() {
+                        auth.signOut().then(() => {
+                            window.location.href = 'login.html';
+                        });
+                    });
+                }
+            }
+            
+            // Elementos do DOM
+            const veiculosBody = document.getElementById('veiculos-body');
+            const veiculosLoader = document.getElementById('veiculos-loader');
+            const veiculoModal = document.getElementById('veiculo-modal');
+            const modalTitle = document.getElementById('modal-title-veiculo');
+            const formVeiculo = document.getElementById('form-veiculo');
+            const selectCliente = document.getElementById('veiculo-cliente');
+            let veiculoAtualId = null;
+            let clientesMap = {};
+            
+            // ===========================================
+            // FUNÇÃO CORRIGIDA - CARREGAR CLIENTES PARA SELECT
+            // ===========================================
+            function loadClientesParaSelect() {
+                const oficinaId = sessionStorage.getItem('oficinaId');
+                
+                db.collection('oficinas').doc(oficinaId).collection('clientes').orderBy('nome').get()
+                    .then((snapshot) => {
+                        selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
+                        clientesMap = {};
+                        
+                        snapshot.forEach((doc) => {
+                            const cliente = doc.data();
+                            const option = document.createElement('option');
+                            option.value = doc.id;
+                            option.textContent = cliente.nome;
+                            selectCliente.appendChild(option);
+                            clientesMap[doc.id] = cliente.nome;
+                        });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar clientes:', error);
+                        selectCliente.innerHTML = '<option value="">Erro ao carregar clientes</option>';
+                    });
+            }
+            
+            // ===========================================
+            // FUNÇÃO CORRIGIDA - CARREGAR VEÍCULOS
+            // ===========================================
+            function loadVeiculos() {
+                const oficinaId = sessionStorage.getItem('oficinaId');
+                
+                veiculosLoader.style.display = 'block';
+                veiculosBody.innerHTML = '';
+                
+                // Buscar veículos da oficina
+                db.collection('oficinas').doc(oficinaId).collection('veiculos').orderBy('placa').get()
+                    .then((veiculosSnapshot) => {
+                        veiculosLoader.style.display = 'none';
+                        
+                        if (veiculosSnapshot.empty) {
+                            veiculosBody.innerHTML = `
+                                <tr>
+                                    <td colspan="7" class="text-center">
+                                        Nenhum veículo cadastrado.<br>
+                                        <button onclick="document.getElementById('btn-novo-veiculo').click()" class="btn btn-sm btn-primary" style="margin-top: 10px;">
+                                            + Cadastrar Primeiro Veículo
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            return;
+                        }
+                        
+                        // Buscar clientes para mostrar o nome
+                        db.collection('oficinas').doc(oficinaId).collection('clientes').get()
+                            .then((clientesSnapshot) => {
+                                const clientesMapLocal = {};
+                                clientesSnapshot.forEach(doc => {
+                                    clientesMapLocal[doc.id] = doc.data().nome;
+                                });
+                                
+                                veiculosSnapshot.forEach((doc) => {
+                                    const veiculo = doc.data();
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td><strong>${veiculo.placa || ''}</strong></td>
+                                        <td>${veiculo.marca || ''} ${veiculo.modelo || ''}</td>
+                                        <td>${veiculo.ano || ''}</td>
+                                        <td>${veiculo.cor || ''}</td>
+                                        <td>${clientesMapLocal[veiculo.clienteId] || 'Não informado'}</td>
+                                        <td><span class="status-badge status-${veiculo.status || 'pendente'}">${getStatusText(veiculo.status)}</span></td>
+                                        <td class="actions">
+                                            <button class="btn btn-sm btn-primary" onclick="editarVeiculo('${doc.id}')">Editar</button>
+                                            <button class="btn btn-sm btn-danger" onclick="excluirVeiculo('${doc.id}')">Excluir</button>
+                                        </td>
+                                    `;
+                                    veiculosBody.appendChild(row);
+                                });
+                            });
+                    })
+                    .catch((error) => {
+                        console.error('Erro ao carregar veículos:', error);
+                        veiculosLoader.style.display = 'none';
+                        veiculosBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center">Erro ao carregar veículos.</td>
+                            </tr>
+                        `;
+                    });
+            }
+            
+            // Obter texto do status
+            function getStatusText(status) {
+                const statusMap = {
+                    'pendente': 'Pendente',
+                    'andamento': 'Em Andamento',
+                    'concluido': 'Concluído',
+                    'entregue': 'Entregue'
+                };
+                return statusMap[status] || 'Pendente';
+            }
+            
+            // Configurar eventos
+            document.getElementById('btn-novo-veiculo').addEventListener('click', function() {
+                veiculoAtualId = null;
+                modalTitle.textContent = 'Novo Veículo';
+                document.getElementById('btn-salvar-veiculo').textContent = 'Salvar Veículo';
+                
+                // Limpar formulário
+                formVeiculo.reset();
+                
+                // Mostrar modal
+                veiculoModal.classList.add('active');
+            });
+            
+            // Fechar modal
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    veiculoModal.classList.remove('active');
+                });
+            });
+            
+            // Fechar modal ao clicar fora
+            veiculoModal.addEventListener('click', function(e) {
+                if (e.target === veiculoModal) {
+                    veiculoModal.classList.remove('active');
+                }
+            });
+            
+            // ===========================================
+            // FUNÇÃO CORRIGIDA - SALVAR VEÍCULO
+            // ===========================================
+            formVeiculo.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const oficinaId = sessionStorage.getItem('oficinaId');
+                
+                const veiculoData = {
+                    placa: document.getElementById('veiculo-placa').value.toUpperCase(),
+                    marca: document.getElementById('veiculo-marca').value,
+                    modelo: document.getElementById('veiculo-modelo').value,
+                    ano: document.getElementById('veiculo-ano').value,
+                    cor: document.getElementById('veiculo-cor').value,
+                    clienteId: document.getElementById('veiculo-cliente').value,
+                    status: document.getElementById('veiculo-status').value,
+                    problema: document.getElementById('veiculo-problema').value,
+                    observacoes: document.getElementById('veiculo-observacoes').value,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                const btnSalvar = document.getElementById('btn-salvar-veiculo');
+                const textoOriginal = btnSalvar.textContent;
+                btnSalvar.disabled = true;
+                btnSalvar.textContent = 'Salvando...';
+                
+                if (veiculoAtualId) {
+                    // Atualizar veículo existente
+                    db.collection('oficinas').doc(oficinaId).collection('veiculos').doc(veiculoAtualId).update(veiculoData)
+                        .then(() => {
+                            alert('Veículo atualizado com sucesso!');
+                            veiculoModal.classList.remove('active');
+                            loadVeiculos();
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao atualizar veículo:', error);
+                            alert('Erro ao atualizar veículo. Tente novamente.');
+                        })
+                        .finally(() => {
+                            btnSalvar.disabled = false;
+                            btnSalvar.textContent = textoOriginal;
+                        });
+                } else {
+                    // Adicionar novo veículo
+                    veiculoData.createdAt = new Date().toISOString();
+                    
+                    db.collection('oficinas').doc(oficinaId).collection('veiculos').add(veiculoData)
+                        .then(() => {
+                            alert('Veículo salvo com sucesso!');
+                            veiculoModal.classList.remove('active');
+                            loadVeiculos();
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao salvar veículo:', error);
+                            alert('Erro ao salvar veículo. Tente novamente.');
+                        })
+                        .finally(() => {
+                            btnSalvar.disabled = false;
+                            btnSalvar.textContent = textoOriginal;
+                        });
+                }
+            });
+            
+            // ===========================================
+            // FUNÇÃO CORRIGIDA - EDITAR VEÍCULO
+            // ===========================================
+            window.editarVeiculo = function(veiculoId) {
+                const oficinaId = sessionStorage.getItem('oficinaId');
+                
+                Promise.all([
+                    db.collection('oficinas').doc(oficinaId).collection('veiculos').doc(veiculoId).get(),
+                    db.collection('oficinas').doc(oficinaId).collection('clientes').orderBy('nome').get()
+                ])
+                .then(([veiculoDoc, clientesSnapshot]) => {
+                    if (!veiculoDoc.exists) {
+                        alert('Veículo não encontrado.');
+                        return;
+                    }
+                    
+                    const veiculo = veiculoDoc.data();
+                    veiculoAtualId = veiculoId;
+                    modalTitle.textContent = 'Editar Veículo';
+                    document.getElementById('btn-salvar-veiculo').textContent = 'Atualizar Veículo';
+                    
+                    // Preencher formulário
+                    document.getElementById('veiculo-placa').value = veiculo.placa || '';
+                    document.getElementById('veiculo-marca').value = veiculo.marca || '';
+                    document.getElementById('veiculo-modelo').value = veiculo.modelo || '';
+                    document.getElementById('veiculo-ano').value = veiculo.ano || '';
+                    document.getElementById('veiculo-cor').value = veiculo.cor || '';
+                    document.getElementById('veiculo-status').value = veiculo.status || 'pendente';
+                    document.getElementById('veiculo-problema').value = veiculo.problema || '';
+                    document.getElementById('veiculo-observacoes').value = veiculo.observacoes || '';
+                    
+                    // Atualizar select de clientes
+                    selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
+                    clientesSnapshot.forEach((doc) => {
+                        const cliente = doc.data();
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = cliente.nome;
+                        if (doc.id === veiculo.clienteId) {
+                            option.selected = true;
+                        }
+                        selectCliente.appendChild(option);
+                    });
+                    
+                    // Mostrar modal
+                    veiculoModal.classList.add('active');
+                })
+                .catch((error) => {
+                    console.error('Erro ao carregar veículo:', error);
+                    alert('Erro ao carregar dados do veículo.');
+                });
+            };
+            
+            // ===========================================
+            // FUNÇÃO CORRIGIDA - EXCLUIR VEÍCULO
+            // ===========================================
+            window.excluirVeiculo = function(veiculoId) {
+                const oficinaId = sessionStorage.getItem('oficinaId');
+                
+                if (confirm('Tem certeza que deseja excluir este veículo?')) {
+                    db.collection('oficinas').doc(oficinaId).collection('veiculos').doc(veiculoId).delete()
+                        .then(() => {
+                            alert('Veículo excluído com sucesso!');
+                            loadVeiculos();
+                        })
+                        .catch((error) => {
+                            console.error('Erro ao excluir veículo:', error);
+                            alert('Erro ao excluir veículo. Tente novamente.');
+                        });
+                }
+            };
+        });
+    </script>
+</body>
+</html>

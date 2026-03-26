@@ -146,110 +146,17 @@
             color: var(--primary);
         }
 
-        /* ===== HERO SECTION COM BACKGROUND SLIDESHOW ===== */
+        /* ===== HERO SECTION ===== */
         .hero {
-            position: relative;
             padding: 150px 0 80px;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--white) 100%);
         }
 
-        /* Slideshow de fundo */
-        .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .hero-background .slide {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            transition: opacity 0.8s ease-in-out;
-        }
-
-        .hero-background .slide.active {
-            opacity: 1;
-        }
-
-        .hero-background .slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.6); /* escurece a imagem para contraste com o texto */
-        }
-
-        /* Botões do slideshow */
-        .hero .prev, .hero .next {
-            cursor: pointer;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: auto;
-            padding: 16px;
-            background-color: rgba(0,0,0,0.5);
-            color: white;
-            font-weight: bold;
-            font-size: 20px;
-            border-radius: 0 8px 8px 0;
-            user-select: none;
-            transition: 0.3s;
-            z-index: 20;
-            text-decoration: none;
-        }
-
-        .hero .next {
-            right: 0;
-            border-radius: 8px 0 0 8px;
-        }
-
-        .hero .prev:hover, .hero .next:hover {
-            background-color: rgba(0,0,0,0.8);
-        }
-
-        /* Indicadores (pontinhos) */
-        .hero .dots-container {
-            position: absolute;
-            bottom: 30px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            z-index: 20;
-        }
-
-        .hero .dot {
-            cursor: pointer;
-            height: 12px;
-            width: 12px;
-            margin: 0 6px;
-            background-color: rgba(255,255,255,0.5);
-            border-radius: 50%;
-            display: inline-block;
-            transition: background-color 0.3s ease;
-        }
-
-        .hero .dot.active, .hero .dot:hover {
-            background-color: var(--primary);
-        }
-
-        /* Conteúdo sobreposto */
         .hero .container {
-            position: relative;
-            z-index: 10;
             display: grid;
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 50px;
             align-items: center;
-            text-align: center;
-            color: var(--white);
         }
 
         .hero-content h1 {
@@ -257,35 +164,28 @@
             font-weight: 800;
             line-height: 1.2;
             margin-bottom: 20px;
-            color: var(--white);
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+            color: var(--gray-800);
         }
 
         .hero-content h1 span {
-            color: var(--primary-light);
+            color: var(--primary);
         }
 
         .hero-content p {
             font-size: 1.2rem;
-            color: rgba(255,255,255,0.9);
+            color: var(--gray-600);
             margin-bottom: 30px;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
         }
 
         .hero-buttons {
             display: flex;
             gap: 15px;
-            justify-content: center;
         }
 
-        .hero-buttons .btn-outline {
-            border-color: var(--white);
-            color: var(--white);
-        }
-
-        .hero-buttons .btn-outline:hover {
-            background: var(--white);
-            color: var(--primary);
+        .hero-image img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
 
         /* ===== FEATURES ===== */
@@ -692,15 +592,6 @@
             .cta h2 {
                 font-size: 2rem;
             }
-
-            .hero .prev, .hero .next {
-                padding: 12px;
-                font-size: 16px;
-            }
-            .hero .dot {
-                height: 10px;
-                width: 10px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -746,45 +637,8 @@
         </div>
     </header>
 
-    <!-- HERO SECTION COM BACKGROUND SLIDESHOW -->
+    <!-- HERO SECTION -->
     <section id="home" class="hero">
-        <!-- Slideshow de fundo -->
-        <div class="hero-background">
-            <div class="slide active">
-                <img src="img/foto10.png" 
-                     alt="Oficina mecânica moderna"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+1'">
-            </div>
-            <div class="slide">
-                <img src="img/foto2.jpg" 
-                     alt="Diagnóstico automotivo"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+2'">
-            </div>
-            <div class="slide">
-                <img src="img/foto3.jpg" 
-                     alt="Equipamentos de última geração"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+3'">
-            </div>
-            <div class="slide">
-                <img src="img/foto9.png" 
-                     alt="Atendimento especializado"
-                     onerror="this.src='https://via.placeholder.com/1920x1080?text=AutoFlow+4'">
-            </div>
-        </div>
-
-        <!-- Botões de navegação do slideshow -->
-        <a class="prev" onclick="mudarSlide(-1)">&#10094;</a>
-        <a class="next" onclick="mudarSlide(1)">&#10095;</a>
-
-        <!-- Indicadores -->
-        <div class="dots-container">
-            <span class="dot" onclick="irParaSlide(1)"></span>
-            <span class="dot" onclick="irParaSlide(2)"></span>
-            <span class="dot" onclick="irParaSlide(3)"></span>
-            <span class="dot" onclick="irParaSlide(4)"></span>
-        </div>
-
-        <!-- Conteúdo principal -->
         <div class="container">
             <div class="hero-content">
                 <h1>Gestão completa para <span>oficinas mecânicas</span></h1>
@@ -793,6 +647,11 @@
                     <a href="#planos" class="btn btn-primary btn-large">Começar Agora</a>
                     <a href="#recursos" class="btn btn-outline btn-large">Conhecer Recursos</a>
                 </div>
+            </div>
+            <div class="hero-image">
+                <img src="img/logo.png" 
+                     alt="Oficina mecânica moderna" 
+                     onerror="this.src='https://via.placeholder.com/600x400?text=AutoFlow'">
             </div>
         </div>
     </section>
@@ -1033,19 +892,19 @@
     </footer>
 
     <script>
-        // Menu mobile
         function toggleMenu() {
             const menu = document.getElementById('navMenu');
             menu.classList.toggle('active');
         }
 
+        // Fechar menu ao clicar em um link
         document.querySelectorAll('.nav-menu a').forEach(link => {
             link.addEventListener('click', () => {
                 document.getElementById('navMenu').classList.remove('active');
             });
         });
 
-        // Smooth scroll
+        // Smooth scroll para os links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -1058,51 +917,6 @@
                 }
             });
         });
-
-        // ========== SLIDESHOW ==========
-        let slideIndex = 1;
-        let slideInterval;
-
-        function mostrarSlide(n) {
-            let slides = document.querySelectorAll('.hero-background .slide');
-            let dots = document.querySelectorAll('.hero .dot');
-            
-            if (n > slides.length) slideIndex = 1;
-            if (n < 1) slideIndex = slides.length;
-            
-            for (let i = 0; i < slides.length; i++) {
-                slides[i].classList.remove('active');
-            }
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].classList.remove('active');
-            }
-            
-            slides[slideIndex-1].classList.add('active');
-            dots[slideIndex-1].classList.add('active');
-        }
-
-        function mudarSlide(n) {
-            clearInterval(slideInterval);
-            mostrarSlide(slideIndex += n);
-            iniciarIntervalo();
-        }
-
-        function irParaSlide(n) {
-            clearInterval(slideInterval);
-            slideIndex = n;
-            mostrarSlide(slideIndex);
-            iniciarIntervalo();
-        }
-
-        function iniciarIntervalo() {
-            slideInterval = setInterval(() => {
-                mudarSlide(1);
-            }, 5000);
-        }
-
-        // Inicializa o slideshow
-        mostrarSlide(slideIndex);
-        iniciarIntervalo();
     </script>
 </body>
 </html>
