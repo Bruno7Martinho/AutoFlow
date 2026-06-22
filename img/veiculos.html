@@ -38,7 +38,7 @@
                     <h2>Gerenciamento de Veículos</h2>
                     <button id="btn-novo-veiculo" class="btn btn-success">+ Novo Veículo</button>
                 </div>
-                
+
                 <div class="table-container">
                     <div class="table-responsive">
                         <table class="data-table" id="veiculos-table">
@@ -59,7 +59,7 @@
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="loader" id="veiculos-loader"></div>
             </div>
         </main>
@@ -136,14 +136,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             const oficinaId = sessionStorage.getItem('oficinaId');
             const plano = sessionStorage.getItem('planoAtual') || 'basico';
-            
+
             // Verificar se pode acessar (planos 50 e 70)
             if (plano === 'basico') {
-                alert('⛔ Seu plano Básico (R$30) não permite acesso a veículos.');
+                alert('Seu plano Básico (R$30) não permite acesso a veículos.');
                 window.location.href = 'orcamentos.html';
                 return;
             }
-            
+
             // Verificar autenticação
             auth.onAuthStateChanged(function(user) {
                 if (user) {
@@ -154,7 +154,7 @@
                     window.location.href = 'login.html';
                 }
             });
-            
+
             // Configurar informações do usuário
             function loadUserInfo(user) {
                 const userInfo = document.getElementById('user-info');
@@ -163,7 +163,7 @@
                         <span class="user-email">${user.email}</span>
                         <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
                     `;
-                    
+
                     document.getElementById('logout-btn').addEventListener('click', function() {
                         auth.signOut().then(() => {
                             window.location.href = 'login.html';
@@ -171,7 +171,7 @@
                     });
                 }
             }
-            
+
             // Elementos do DOM
             const veiculosBody = document.getElementById('veiculos-body');
             const veiculosLoader = document.getElementById('veiculos-loader');
@@ -181,18 +181,18 @@
             const selectCliente = document.getElementById('veiculo-cliente');
             let veiculoAtualId = null;
             let clientesMap = {};
-            
+
             // ===========================================
             // FUNÇÃO CORRIGIDA - CARREGAR CLIENTES PARA SELECT
             // ===========================================
             function loadClientesParaSelect() {
                 const oficinaId = sessionStorage.getItem('oficinaId');
-                
+
                 db.collection('oficinas').doc(oficinaId).collection('clientes').orderBy('nome').get()
                     .then((snapshot) => {
                         selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
                         clientesMap = {};
-                        
+
                         snapshot.forEach((doc) => {
                             const cliente = doc.data();
                             const option = document.createElement('option');
@@ -207,21 +207,21 @@
                         selectCliente.innerHTML = '<option value="">Erro ao carregar clientes</option>';
                     });
             }
-            
+
             // ===========================================
             // FUNÇÃO CORRIGIDA - CARREGAR VEÍCULOS
             // ===========================================
             function loadVeiculos() {
                 const oficinaId = sessionStorage.getItem('oficinaId');
-                
+
                 veiculosLoader.style.display = 'block';
                 veiculosBody.innerHTML = '';
-                
+
                 // Buscar veículos da oficina
                 db.collection('oficinas').doc(oficinaId).collection('veiculos').orderBy('placa').get()
                     .then((veiculosSnapshot) => {
                         veiculosLoader.style.display = 'none';
-                        
+
                         if (veiculosSnapshot.empty) {
                             veiculosBody.innerHTML = `
                                 <tr>
@@ -235,7 +235,7 @@
                             `;
                             return;
                         }
-                        
+
                         // Buscar clientes para mostrar o nome
                         db.collection('oficinas').doc(oficinaId).collection('clientes').get()
                             .then((clientesSnapshot) => {
@@ -243,7 +243,7 @@
                                 clientesSnapshot.forEach(doc => {
                                     clientesMapLocal[doc.id] = doc.data().nome;
                                 });
-                                
+
                                 veiculosSnapshot.forEach((doc) => {
                                     const veiculo = doc.data();
                                     const row = document.createElement('tr');
@@ -273,7 +273,7 @@
                         `;
                     });
             }
-            
+
             // Obter texto do status
             function getStatusText(status) {
                 const statusMap = {
@@ -284,42 +284,42 @@
                 };
                 return statusMap[status] || 'Pendente';
             }
-            
+
             // Configurar eventos
             document.getElementById('btn-novo-veiculo').addEventListener('click', function() {
                 veiculoAtualId = null;
                 modalTitle.textContent = 'Novo Veículo';
                 document.getElementById('btn-salvar-veiculo').textContent = 'Salvar Veículo';
-                
+
                 // Limpar formulário
                 formVeiculo.reset();
-                
+
                 // Mostrar modal
                 veiculoModal.classList.add('active');
             });
-            
+
             // Fechar modal
             document.querySelectorAll('.modal-close').forEach(btn => {
                 btn.addEventListener('click', function() {
                     veiculoModal.classList.remove('active');
                 });
             });
-            
+
             // Fechar modal ao clicar fora
             veiculoModal.addEventListener('click', function(e) {
                 if (e.target === veiculoModal) {
                     veiculoModal.classList.remove('active');
                 }
             });
-            
+
             // ===========================================
             // FUNÇÃO CORRIGIDA - SALVAR VEÍCULO
             // ===========================================
             formVeiculo.addEventListener('submit', function(e) {
                 e.preventDefault();
-                
+
                 const oficinaId = sessionStorage.getItem('oficinaId');
-                
+
                 const veiculoData = {
                     placa: document.getElementById('veiculo-placa').value.toUpperCase(),
                     marca: document.getElementById('veiculo-marca').value,
@@ -332,12 +332,12 @@
                     observacoes: document.getElementById('veiculo-observacoes').value,
                     updatedAt: new Date().toISOString()
                 };
-                
+
                 const btnSalvar = document.getElementById('btn-salvar-veiculo');
                 const textoOriginal = btnSalvar.textContent;
                 btnSalvar.disabled = true;
                 btnSalvar.textContent = 'Salvando...';
-                
+
                 if (veiculoAtualId) {
                     // Atualizar veículo existente
                     db.collection('oficinas').doc(oficinaId).collection('veiculos').doc(veiculoAtualId).update(veiculoData)
@@ -357,7 +357,7 @@
                 } else {
                     // Adicionar novo veículo
                     veiculoData.createdAt = new Date().toISOString();
-                    
+
                     db.collection('oficinas').doc(oficinaId).collection('veiculos').add(veiculoData)
                         .then(() => {
                             alert('Veículo salvo com sucesso!');
@@ -374,13 +374,13 @@
                         });
                 }
             });
-            
+
             // ===========================================
             // FUNÇÃO CORRIGIDA - EDITAR VEÍCULO
             // ===========================================
             window.editarVeiculo = function(veiculoId) {
                 const oficinaId = sessionStorage.getItem('oficinaId');
-                
+
                 Promise.all([
                     db.collection('oficinas').doc(oficinaId).collection('veiculos').doc(veiculoId).get(),
                     db.collection('oficinas').doc(oficinaId).collection('clientes').orderBy('nome').get()
@@ -390,12 +390,12 @@
                         alert('Veículo não encontrado.');
                         return;
                     }
-                    
+
                     const veiculo = veiculoDoc.data();
                     veiculoAtualId = veiculoId;
                     modalTitle.textContent = 'Editar Veículo';
                     document.getElementById('btn-salvar-veiculo').textContent = 'Atualizar Veículo';
-                    
+
                     // Preencher formulário
                     document.getElementById('veiculo-placa').value = veiculo.placa || '';
                     document.getElementById('veiculo-marca').value = veiculo.marca || '';
@@ -405,7 +405,7 @@
                     document.getElementById('veiculo-status').value = veiculo.status || 'pendente';
                     document.getElementById('veiculo-problema').value = veiculo.problema || '';
                     document.getElementById('veiculo-observacoes').value = veiculo.observacoes || '';
-                    
+
                     // Atualizar select de clientes
                     selectCliente.innerHTML = '<option value="">Selecione um cliente</option>';
                     clientesSnapshot.forEach((doc) => {
@@ -418,7 +418,7 @@
                         }
                         selectCliente.appendChild(option);
                     });
-                    
+
                     // Mostrar modal
                     veiculoModal.classList.add('active');
                 })
@@ -427,13 +427,13 @@
                     alert('Erro ao carregar dados do veículo.');
                 });
             };
-            
+
             // ===========================================
             // FUNÇÃO CORRIGIDA - EXCLUIR VEÍCULO
             // ===========================================
             window.excluirVeiculo = function(veiculoId) {
                 const oficinaId = sessionStorage.getItem('oficinaId');
-                
+
                 if (confirm('Tem certeza que deseja excluir este veículo?')) {
                     db.collection('oficinas').doc(oficinaId).collection('veiculos').doc(veiculoId).delete()
                         .then(() => {

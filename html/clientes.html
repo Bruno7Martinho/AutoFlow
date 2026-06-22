@@ -39,7 +39,7 @@
                     <h2>Gerenciamento de Clientes</h2>
                     <button id="btn-novo-cliente" class="btn btn-success">+ Novo Cliente</button>
                 </div>
-                
+
                 <div class="table-container">
                     <div class="table-responsive">
                         <table class="data-table" id="clientes-table">
@@ -59,7 +59,7 @@
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="loader" id="clientes-loader" style="display: none;"></div>
             </div>
         </main>
@@ -119,24 +119,24 @@
         async function verificarPlano() {
             const oficinaId = sessionStorage.getItem('oficinaId');
             const plano = sessionStorage.getItem('planoAtual') || 'basico';
-            
+
             // Se for plano básico, redireciona
             if (plano === 'basico') {
-                alert('⛔ Seu plano Básico (R$30) não permite acesso a clientes.');
+                alert('Seu plano Básico (R$30) não permite acesso a clientes.');
                 window.location.href = 'orcamentos.html';
                 return false;
             }
-            
+
             return true;
         }
-        
+
         // ===========================================
         // INICIALIZAÇÃO
         // ===========================================
         document.addEventListener('DOMContentLoaded', async function() {
             const podeAcessar = await verificarPlano();
             if (!podeAcessar) return;
-            
+
             // Verificar autenticação
             auth.onAuthStateChanged(function(user) {
                 if (user) {
@@ -146,17 +146,17 @@
                     window.location.href = 'login.html';
                 }
             });
-            
+
             // Configurar eventos
             document.getElementById('btn-novo-cliente').addEventListener('click', showNovoClienteForm);
-            
+
             // Fechar modal
             document.querySelectorAll('.modal-close').forEach(btn => {
                 btn.addEventListener('click', function() {
                     document.getElementById('cliente-modal').classList.remove('active');
                 });
             });
-            
+
             // Fechar modal ao clicar fora
             document.getElementById('cliente-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -181,7 +181,7 @@
                     <span class="user-email">${user.email}</span>
                     <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
                 `;
-                
+
                 document.getElementById('logout-btn').addEventListener('click', function() {
                     auth.signOut().then(() => {
                         window.location.href = 'login.html';
@@ -195,28 +195,28 @@
         // ===========================================
         function loadClientes() {
             if (carregandoClientes) return;
-            
+
             const loader = document.getElementById('clientes-loader');
             const clientesBody = document.getElementById('clientes-body');
             const oficinaId = sessionStorage.getItem('oficinaId');
-            
+
             if (!oficinaId) {
                 console.error('ID da oficina não encontrado');
                 return;
             }
-            
+
             carregandoClientes = true;
-            
+
             if (loader) loader.style.display = 'block';
             if (clientesBody) clientesBody.innerHTML = '<tr><td colspan="6" class="text-center">Carregando...</td></tr>';
-            
+
             db.collection('oficinas').doc(oficinaId).collection('clientes').orderBy('nome').get()
                 .then((snapshot) => {
                     carregandoClientes = false;
                     if (loader) loader.style.display = 'none';
-                    
+
                     if (!clientesBody) return;
-                    
+
                     if (snapshot.empty) {
                         clientesBody.innerHTML = `
                             <tr>
@@ -230,9 +230,9 @@
                         `;
                         return;
                     }
-                    
+
                     clientesBody.innerHTML = '';
-                    
+
                     snapshot.forEach((doc) => {
                         const cliente = doc.data();
                         const row = document.createElement('tr');
@@ -271,7 +271,7 @@
             clienteAtualId = null;
             document.getElementById('modal-title').textContent = 'Novo Cliente';
             document.getElementById('btn-salvar-cliente').textContent = 'Salvar Cliente';
-            
+
             document.getElementById('form-cliente').reset();
             document.getElementById('cliente-modal').classList.add('active');
         };
@@ -284,11 +284,11 @@
                 const oficinaDoc = await db.collection('oficinas').doc(oficinaId).get();
                 const oficina = oficinaDoc.data();
                 const plano = oficina.plano || 'basico';
-                
+
                 if (plano === 'intermediario') {
                     const clientesSnap = await db.collection('oficinas').doc(oficinaId).collection('clientes').get();
                     const totalClientes = clientesSnap.size;
-                    
+
                     if (totalClientes >= 100) {
                         return {
                             permitido: false,
@@ -296,9 +296,9 @@
                         };
                     }
                 }
-                
+
                 return { permitido: true };
-                
+
             } catch (error) {
                 console.error('Erro ao verificar limite:', error);
                 return { permitido: true };
@@ -310,14 +310,14 @@
         // ===========================================
         document.getElementById('form-cliente').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const oficinaId = sessionStorage.getItem('oficinaId');
-            
+
             if (!oficinaId) {
                 alert('Erro: ID da oficina não encontrado');
                 return;
             }
-            
+
             const clienteData = {
                 nome: document.getElementById('cliente-nome').value,
                 cpf: document.getElementById('cliente-cpf').value,
@@ -327,19 +327,19 @@
                 observacoes: document.getElementById('cliente-observacoes').value,
                 updatedAt: new Date().toISOString()
             };
-            
+
             const limite = await verificarLimiteClientes(oficinaId);
-            
+
             if (!limite.permitido) {
                 alert(limite.mensagem);
                 return;
             }
-            
+
             const btnSalvar = document.getElementById('btn-salvar-cliente');
             const textoOriginal = btnSalvar.textContent;
             btnSalvar.disabled = true;
             btnSalvar.textContent = 'Salvando...';
-            
+
             try {
                 if (clienteAtualId) {
                     await db.collection('oficinas').doc(oficinaId).collection('clientes').doc(clienteAtualId).update(clienteData);
@@ -349,10 +349,10 @@
                     await db.collection('oficinas').doc(oficinaId).collection('clientes').add(clienteData);
                     alert('Cliente salvo com sucesso!');
                 }
-                
+
                 document.getElementById('cliente-modal').classList.remove('active');
                 loadClientes();
-                
+
             } catch (error) {
                 console.error('Erro ao salvar cliente:', error);
                 alert('Erro ao salvar cliente. Tente novamente.');
@@ -367,35 +367,35 @@
         // ===========================================
         window.editarCliente = async function(clienteId) {
             const oficinaId = sessionStorage.getItem('oficinaId');
-            
+
             if (!oficinaId) {
                 alert('Erro: ID da oficina não encontrado');
                 return;
             }
-            
+
             try {
                 const doc = await db.collection('oficinas').doc(oficinaId).collection('clientes').doc(clienteId).get();
-                
+
                 if (!doc.exists) {
                     alert('Cliente não encontrado.');
                     return;
                 }
-                
+
                 const cliente = doc.data();
                 clienteAtualId = clienteId;
-                
+
                 document.getElementById('modal-title').textContent = 'Editar Cliente';
                 document.getElementById('btn-salvar-cliente').textContent = 'Atualizar Cliente';
-                
+
                 document.getElementById('cliente-nome').value = cliente.nome || '';
                 document.getElementById('cliente-cpf').value = cliente.cpf || '';
                 document.getElementById('cliente-telefone').value = cliente.telefone || '';
                 document.getElementById('cliente-email').value = cliente.email || '';
                 document.getElementById('cliente-endereco').value = cliente.endereco || '';
                 document.getElementById('cliente-observacoes').value = cliente.observacoes || '';
-                
+
                 document.getElementById('cliente-modal').classList.add('active');
-                
+
             } catch (error) {
                 console.error('Erro ao carregar cliente:', error);
                 alert('Erro ao carregar dados do cliente.');
@@ -407,14 +407,14 @@
         // ===========================================
         window.excluirCliente = async function(clienteId) {
             const oficinaId = sessionStorage.getItem('oficinaId');
-            
+
             if (!oficinaId) {
                 alert('Erro: ID da oficina não encontrado');
                 return;
             }
-            
+
             if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
-            
+
             try {
                 await db.collection('oficinas').doc(oficinaId).collection('clientes').doc(clienteId).delete();
                 alert('Cliente excluído com sucesso!');

@@ -24,7 +24,7 @@
 
         .stat-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 0;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             display: flex;
@@ -84,7 +84,7 @@
 
         .chart-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 0;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -100,7 +100,7 @@
 
         .recent-list {
             background: white;
-            border-radius: 10px;
+            border-radius: 0;
             padding: 20px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -130,7 +130,7 @@
 
         .recent-status {
             padding: 4px 12px;
-            border-radius: 20px;
+            border-radius: 0;
             font-size: 12px;
             font-weight: bold;
         }
@@ -192,7 +192,7 @@
         .action-btn {
             background: #f8f9fa;
             border: 1px solid #dee2e6;
-            border-radius: 8px;
+            border-radius: 0;
             padding: 15px;
             text-align: center;
             cursor: pointer;
@@ -243,12 +243,12 @@
 
         <main class="main-content">
             <div class="admin-container">
-                <h2>👑 Painel Administrativo</h2>
+                <h2>Painel Administrativo</h2>
 
                 <!-- Stats Cards -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-icon">🏪</div>
+
                         <div class="stat-info">
                             <div class="stat-value" id="total-oficinas">0</div>
                             <div class="stat-label">Total de Oficinas</div>
@@ -257,7 +257,7 @@
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon">👥</div>
+
                         <div class="stat-info">
                             <div class="stat-value" id="total-clientes">0</div>
                             <div class="stat-label">Clientes Cadastrados</div>
@@ -266,7 +266,7 @@
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon">💰</div>
+
                         <div class="stat-info">
                             <div class="stat-value" id="faturamento-mensal">R$ 0</div>
                             <div class="stat-label">Faturamento Mensal</div>
@@ -275,7 +275,7 @@
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon">📝</div>
+
                         <div class="stat-info">
                             <div class="stat-value" id="total-orcamentos">0</div>
                             <div class="stat-label">Orçamentos</div>
@@ -287,7 +287,7 @@
                 <!-- Gráficos -->
                 <div class="charts-grid">
                     <div class="chart-card">
-                        <div class="chart-title">📊 Distribuição de Planos</div>
+                        <div class="chart-title">Distribuição de Planos</div>
                         <div class="planos-chart">
                             <div class="plano-item">
                                 <div class="plano-quantidade plano-basico" id="qtd-basico">0</div>
@@ -308,7 +308,7 @@
                     </div>
 
                     <div class="chart-card">
-                        <div class="chart-title">📈 Status das Oficinas</div>
+                        <div class="chart-title">Status das Oficinas</div>
                         <div class="planos-chart">
                             <div class="plano-item">
                                 <div class="plano-quantidade" style="color: #28a745;" id="status-ativas">0</div>
@@ -331,7 +331,7 @@
 
                 <!-- Atividades Recentes -->
                 <div class="recent-list">
-                    <h3>🕐 Últimas Atividades</h3>
+                    <h3>Últimas Atividades</h3>
                     <div id="atividades-recentes">
                         <div class="recent-item">
                             <div class="recent-info">
@@ -344,15 +344,15 @@
                 <!-- Ações Rápidas -->
                 <div class="quick-actions">
                     <a href="admin-oficinas.html" class="action-btn">
-                        <i>🏪</i>
+                        <i></i>
                         <span>Nova Oficina</span>
                     </a>
                     <a href="admin-relatorios.html" class="action-btn">
-                        <i>📊</i>
+                        <i></i>
                         <span>Relatórios</span>
                     </a>
                     <a href="admin-usuarios.html" class="action-btn">
-                        <i>👥</i>
+                        <i></i>
                         <span>Usuários</span>
                     </a>
                 </div>
@@ -368,7 +368,7 @@
                     const ADMIN_EMAILS = ['admin@autoflow.com', 'rafael@gmail.com', 'admin@gmail.com'];
 
                     if (!ADMIN_EMAILS.includes(user.email)) {
-                        alert('⛔ Acesso negado! Apenas administradores.');
+                        alert('Acesso negado! Apenas administradores.');
                         window.location.href = 'dashboard.html';
                         return;
                     }
@@ -382,7 +382,7 @@
 
             function loadUserInfo(user) {
                 document.getElementById('user-info').innerHTML = `
-                    <span class="user-email">👑 ${user.email}</span>
+                    <span class="user-email">${user.email}</span>
                     <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
                 `;
                 document.getElementById('logout-btn').addEventListener('click', () => {
@@ -512,7 +512,7 @@
                         html += `
                             <div class="recent-item">
                                 <div class="recent-info">
-                                    <h4>🏪 ${of.nome || 'Oficina'}</h4>
+                                    <h4>${of.nome || 'Oficina'}</h4>
                                     <p>${dataStr} • ${of.email || 'Sem email'} • Plano: ${of.plano || 'basico'}</p>
                                 </div>
                                 <span class="recent-status status-${of.status || 'ativa'}">${of.status || 'ativa'}</span>

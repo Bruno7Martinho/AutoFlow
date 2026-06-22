@@ -126,7 +126,7 @@
                 <h2 id="modal-title">Nova Oficina</h2>
                 <button class="modal-close">&times;</button>
             </div>
-            
+
             <form id="form-oficina">
                 <div class="form-tabs">
                     <button type="button" class="form-tab-btn active" data-tab="basico">Básico</button>
@@ -140,7 +140,7 @@
                         <label>Nome da Oficina *</label>
                         <input type="text" id="oficina-nome" required placeholder="Ex: Auto Mecânica Silva">
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Email do Dono *</label>
@@ -238,50 +238,50 @@
                         <div class="form-group col-md-6">
                             <label>Status</label>
                             <select id="oficina-status">
-                                <option value="ativa">✅ Ativa</option>
-                                <option value="bloqueada">⛔ Bloqueada</option>
-                                <option value="inativa">⚠️ Inativa</option>
+                                <option value="ativa">Ativa</option>
+                                <option value="bloqueada">Bloqueada</option>
+                                <option value="inativa">Inativa</option>
                             </select>
                         </div>
                     </div>
 
                     <!-- Cards de resumo dos planos -->
-                    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-                        <h4 style="margin-top: 0;">📊 Comparativo de Planos:</h4>
+                    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 0;">
+                        <h4 style="margin-top: 0;">Comparativo de Planos:</h4>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px;">
-                            <div style="border: 1px solid #cd7f32; border-radius: 8px; padding: 15px; text-align: center;">
-                                <div style="font-size: 32px;">📝</div>
+                            <div style="border: 1px solid #cd7f32; border-radius: 0; padding: 15px; text-align: center;">
+
                                 <h4 style="color: #cd7f32; margin: 10px 0;">Básico</h4>
                                 <div style="font-size: 24px; font-weight: bold;">R$ 30</div>
                                 <div style="margin: 10px 0; font-size: 13px;">
-                                    <p>✅ Orçamentos</p>
-                                    <p>❌ Clientes</p>
-                                    <p>❌ Veículos</p>
-                                    <p>❌ Financeiro</p>
+                                    <p>Orçamentos</p>
+                                    <p>Clientes</p>
+                                    <p>Veículos</p>
+                                    <p>Financeiro</p>
                                 </div>
                             </div>
-                            
-                            <div style="border: 1px solid #c0c0c0; border-radius: 8px; padding: 15px; text-align: center;">
-                                <div style="font-size: 32px;">🚗</div>
+
+                            <div style="border: 1px solid #c0c0c0; border-radius: 0; padding: 15px; text-align: center;">
+
                                 <h4 style="color: #666; margin: 10px 0;">Intermediário</h4>
                                 <div style="font-size: 24px; font-weight: bold;">R$ 50</div>
                                 <div style="margin: 10px 0; font-size: 13px;">
-                                    <p>✅ Orçamentos</p>
-                                    <p>✅ Clientes</p>
-                                    <p>✅ Veículos</p>
-                                    <p>❌ Financeiro</p>
+                                    <p>Orçamentos</p>
+                                    <p>Clientes</p>
+                                    <p>Veículos</p>
+                                    <p>Financeiro</p>
                                 </div>
                             </div>
-                            
-                            <div style="border: 1px solid #ffd700; border-radius: 8px; padding: 15px; text-align: center; background: #fff9e6;">
-                                <div style="font-size: 32px;">👑</div>
+
+                            <div style="border: 1px solid #ffd700; border-radius: 0; padding: 15px; text-align: center; background: #fff9e6;">
+
                                 <h4 style="color: #b8860b; margin: 10px 0;">Completo</h4>
                                 <div style="font-size: 24px; font-weight: bold;">R$ 70</div>
                                 <div style="margin: 10px 0; font-size: 13px;">
-                                    <p>✅ Orçamentos</p>
-                                    <p>✅ Clientes</p>
-                                    <p>✅ Veículos</p>
-                                    <p>✅ Financeiro</p>
+                                    <p>Orçamentos</p>
+                                    <p>Clientes</p>
+                                    <p>Veículos</p>
+                                    <p>Financeiro</p>
                                 </div>
                             </div>
                         </div>
@@ -299,7 +299,7 @@
 
                     <div class="form-group">
                         <label>
-                            <input type="checkbox" id="oficina-enviar-acesso" checked> 
+                            <input type="checkbox" id="oficina-enviar-acesso" checked>
                             Criar acesso e enviar email com dados de login para o dono
                         </label>
                     </div>
@@ -354,32 +354,32 @@
     <script>
         // admin-oficinas.js - VERSÃO COM CRIAÇÃO DE USUÁRIO
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Iniciando admin-oficinas...');
-            
+            console.log('Iniciando admin-oficinas...');
+
             // Verificar se é admin
             auth.onAuthStateChanged(function(user) {
                 if (user) {
-                    console.log('👤 Usuário logado:', user.email);
-                    
+                    console.log('Usuário logado:', user.email);
+
                     // Lista de admins
                     const ADMIN_EMAILS = [
                         'admin@autoflow.com',
                         'rafael@gmail.com',
                         'admin@gmail.com'
                     ];
-                    
+
                     if (!ADMIN_EMAILS.includes(user.email)) {
-                        alert('⛔ Acesso negado! Apenas administradores.');
+                        alert('Acesso negado! Apenas administradores.');
                         window.location.href = 'dashboard.html';
                         return;
                     }
-                    
+
                     loadUserInfo(user);
                     loadOficinas();
                     loadEstatisticas();
-                    
+
                 } else {
-                    console.log('🔒 Usuário não logado');
+                    console.log('Usuário não logado');
                     window.location.href = 'login.html';
                 }
             });
@@ -392,7 +392,7 @@
             const bloquearModal = document.getElementById('bloquear-modal');
             const form = document.getElementById('form-oficina');
             const btnSalvar = document.getElementById('btn-salvar-oficina');
-            
+
             // Variáveis de estado
             let oficinas = [];
             let oficinasFiltradas = [];
@@ -411,10 +411,10 @@
                 const userInfo = document.getElementById('user-info');
                 if (userInfo) {
                     userInfo.innerHTML = `
-                        <span class="user-email">👑 ${user.email}</span>
+                        <span class="user-email">${user.email}</span>
                         <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
                     `;
-                    
+
                     document.getElementById('logout-btn').addEventListener('click', function() {
                         auth.signOut().then(() => {
                             window.location.href = 'login.html';
@@ -426,31 +426,31 @@
             async function loadEstatisticas() {
                 try {
                     const snapshot = await db.collection('oficinas').get();
-                    
+
                     let ativas = 0;
                     let bloqueadas = 0;
                     let inativas = 0;
                     let totalClientes = 0;
-                    
+
                     for (const doc of snapshot.docs) {
                         const oficina = doc.data();
-                        
+
                         if (oficina.status === 'ativa') ativas++;
                         else if (oficina.status === 'bloqueada') bloqueadas++;
                         else if (oficina.status === 'inativa') inativas++;
-                        
+
                         // Contar clientes desta oficina
                         try {
                             const clientesSnap = await db.collection('oficinas').doc(doc.id).collection('clientes').get();
                             totalClientes += clientesSnap.size;
                         } catch (e) {}
                     }
-                    
+
                     document.getElementById('total-oficinas').textContent = snapshot.size;
                     document.getElementById('oficinas-ativas').textContent = ativas;
                     document.getElementById('oficinas-bloqueadas').textContent = bloqueadas;
                     document.getElementById('total-clientes').textContent = totalClientes;
-                    
+
                 } catch (error) {
                     console.error('Erro ao carregar estatísticas:', error);
                 }
@@ -459,17 +459,17 @@
             async function loadOficinas() {
                 if (loader) loader.style.display = 'block';
                 if (oficinasBody) oficinasBody.innerHTML = '<tr><td colspan="7" class="text-center">Carregando...</td></tr>';
-                
+
                 try {
                     const snapshot = await db.collection('oficinas').get();
-                    
+
                     if (loader) loader.style.display = 'none';
-                    
+
                     if (snapshot.empty) {
                         oficinasBody.innerHTML = `
                             <tr>
                                 <td colspan="7" class="text-center">
-                                    📭 Nenhuma oficina cadastrada.<br>
+                                     Nenhuma oficina cadastrada.<br>
                                     <button onclick="criarOficinaTeste()" class="btn btn-sm btn-success" style="margin-top: 10px;">
                                         + Criar Primeira Oficina
                                     </button>
@@ -478,7 +478,7 @@
                         `;
                         return;
                     }
-                    
+
                     oficinas = [];
                     snapshot.forEach(doc => {
                         oficinas.push({
@@ -486,23 +486,23 @@
                             ...doc.data()
                         });
                     });
-                    
+
                     oficinas.sort((a, b) => {
                         const nomeA = (a.nome || '').toLowerCase();
                         const nomeB = (b.nome || '').toLowerCase();
                         return nomeA.localeCompare(nomeB);
                     });
-                    
+
                     oficinasFiltradas = [...oficinas];
                     renderizarTabela();
-                    
+
                 } catch (error) {
-                    console.error('❌ ERRO:', error);
+                    console.error('ERRO:', error);
                     if (loader) loader.style.display = 'none';
                     oficinasBody.innerHTML = `
                         <tr>
                             <td colspan="7" class="text-center">
-                                ❌ Erro ao carregar oficinas: ${error.message}
+                                 Erro ao carregar oficinas: ${error.message}
                             </td>
                         </tr>
                     `;
@@ -513,53 +513,49 @@
                 const inicio = (paginaAtual - 1) * itensPorPagina;
                 const fim = inicio + itensPorPagina;
                 const paginaData = oficinasFiltradas.slice(inicio, fim);
-                
+
                 oficinasBody.innerHTML = '';
-                
+
                 if (paginaData.length === 0) {
                     oficinasBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhuma oficina encontrada.</td></tr>';
                     return;
                 }
-                
+
                 paginaData.forEach(oficina => {
                     const row = document.createElement('tr');
                     const planoInfo = PLANOS[oficina.plano] || PLANOS.basico;
-                    
+
                     row.innerHTML = `
                         <td>
                             <strong>${oficina.nome || 'Sem nome'}</strong><br>
                             <small>${oficina.id?.substring(0, 8) || ''}...</small>
                         </td>
-                        <td>
-                            📧 ${oficina.emailDono || '-'}<br>
-                            📞 ${formatarTelefone(oficina.telefone) || '-'}
+                        <td>${oficina.emailDono || '-'}<br>${formatarTelefone(oficina.telefone) || '-'}
                         </td>
                         <td>${formatarCNPJ(oficina.cnpj) || '-'}</td>
                         <td>
-                            <span style="color: ${planoInfo.cor}; font-weight: bold;">
-                                ${planoInfo.nome} - R$ ${planoInfo.preco}
+                            <span style="color: ${planoInfo.cor}; font-weight: bold;">${planoInfo.nome} - R$ ${planoInfo.preco}
                             </span>
                         </td>
                         <td>
-                            <span class="status-badge status-${oficina.status || 'ativa'}">
-                                ${traduzirStatus(oficina.status || 'ativa')}
+                            <span class="status-badge status-${oficina.status || 'ativa'}">${traduzirStatus(oficina.status || 'ativa')}
                             </span>
                         </td>
                         <td>${formatarData(oficina.createdAt)}</td>
                         <td class="actions">
-                            <button class="btn btn-sm btn-info" onclick="verOficina('${oficina.id}')" title="Visualizar">👁️</button>
-                            <button class="btn btn-sm btn-primary" onclick="editarOficina('${oficina.id}')" title="Editar">✏️</button>
-                            ${oficina.status === 'bloqueada' ? 
-                                `<button class="btn btn-sm btn-success" onclick="desbloquearOficina('${oficina.id}')" title="Desbloquear">🔓</button>` : 
-                                `<button class="btn btn-sm btn-warning" onclick="bloquearOficina('${oficina.id}')" title="Bloquear">🔒</button>`
+                            <button class="btn btn-sm btn-info" onclick="verOficina('${oficina.id}')" title="Visualizar">Ver</button>
+                            <button class="btn btn-sm btn-primary" onclick="editarOficina('${oficina.id}')" title="Editar">Editar</button>
+                            ${oficina.status === 'bloqueada' ?
+                                `<button class="btn btn-sm btn-success" onclick="desbloquearOficina('${oficina.id}')" title="Desbloquear">Liberar</button>` :
+                                `<button class="btn btn-sm btn-warning" onclick="bloquearOficina('${oficina.id}')" title="Bloquear">Bloquear</button>`
                             }
-                            <button class="btn btn-sm btn-danger" onclick="excluirOficina('${oficina.id}')" title="Excluir">🗑️</button>
-                            <button class="btn btn-sm btn-secondary" onclick="acessarComoAdmin('${oficina.id}')" title="Acessar como">👑</button>
+                            <button class="btn btn-sm btn-danger" onclick="excluirOficina('${oficina.id}')" title="Excluir">Excluir</button>
+                            <button class="btn btn-sm btn-secondary" onclick="acessarComoAdmin('${oficina.id}')" title="Acessar como">Acessar</button>
                         </td>
                     `;
                     oficinasBody.appendChild(row);
                 });
-                
+
                 const totalPaginas = Math.ceil(oficinasFiltradas.length / itensPorPagina);
                 document.getElementById('page-info').textContent = `Página ${paginaAtual} de ${totalPaginas}`;
                 document.getElementById('prev-page').disabled = paginaAtual === 1;
@@ -568,9 +564,9 @@
 
             function traduzirStatus(status) {
                 const map = {
-                    'ativa': '✅ Ativa',
-                    'bloqueada': '⛔ Bloqueada',
-                    'inativa': '⚠️ Inativa'
+                    'ativa': 'Ativa',
+                    'bloqueada': 'Bloqueada',
+                    'inativa': 'Inativa'
                 };
                 return map[status] || status;
             }
@@ -611,18 +607,18 @@
                 const busca = document.getElementById('search-oficina')?.value.toLowerCase() || '';
                 const status = document.getElementById('filter-status')?.value || '';
                 const plano = document.getElementById('filter-plano')?.value || '';
-                
+
                 oficinasFiltradas = oficinas.filter(oficina => {
-                    const matchBusca = !busca || 
+                    const matchBusca = !busca ||
                         (oficina.nome && oficina.nome.toLowerCase().includes(busca)) ||
                         (oficina.emailDono && oficina.emailDono.toLowerCase().includes(busca));
-                    
+
                     const matchStatus = !status || oficina.status === status;
                     const matchPlano = !plano || oficina.plano === plano;
-                    
+
                     return matchBusca && matchStatus && matchPlano;
                 });
-                
+
                 paginaAtual = 1;
                 renderizarTabela();
             }
@@ -648,7 +644,7 @@
                 btn.addEventListener('click', function() {
                     document.querySelectorAll('.form-tab-btn').forEach(b => b.classList.remove('active'));
                     document.querySelectorAll('.form-tab-content').forEach(c => c.classList.remove('active'));
-                    
+
                     this.classList.add('active');
                     const tab = this.getAttribute('data-tab');
                     document.getElementById(`tab-${tab}`).classList.add('active');
@@ -668,15 +664,15 @@
                                 document.getElementById('oficina-cidade').value = data.localidade || '';
                                 document.getElementById('oficina-uf').value = data.uf || '';
                             } else {
-                                alert('❌ CEP não encontrado');
+                                alert('CEP não encontrado');
                             }
                         })
                         .catch(err => {
                             console.error('Erro ao buscar CEP:', err);
-                            alert('❌ Erro ao buscar CEP');
+                            alert('Erro ao buscar CEP');
                         });
                 } else {
-                    alert('❌ CEP inválido');
+                    alert('CEP inválido');
                 }
             });
 
@@ -685,15 +681,15 @@
                 oficinaSelecionadaId = null;
                 document.getElementById('modal-title').textContent = 'Nova Oficina';
                 document.getElementById('btn-salvar-oficina').innerHTML = '<i class="fas fa-save"></i> Salvar Oficina';
-                
+
                 if (form) form.reset();
-                
+
                 document.getElementById('oficina-status').value = 'ativa';
                 document.getElementById('oficina-plano').value = 'basico';
                 document.getElementById('oficina-senha').value = '123456';
-                
+
                 document.querySelectorAll('.form-tab-btn')[0]?.click();
-                
+
                 if (modal) modal.classList.add('active');
             });
 
@@ -704,16 +700,16 @@
                 try {
                     // Criar usuário no Firebase Auth
                     const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
-                    console.log('✅ Usuário criado no Firebase Auth:', userCredential.user.email);
-                    
-                    return { 
-                        sucesso: true, 
+                    console.log('Usuário criado no Firebase Auth:', userCredential.user.email);
+
+                    return {
+                        sucesso: true,
                         mensagem: 'Usuário criado com sucesso!',
                         uid: userCredential.user.uid
                     };
                 } catch (error) {
-                    console.error('❌ Erro ao criar usuário:', error);
-                    
+                    console.error('Erro ao criar usuário:', error);
+
                     // Tratar erros específicos
                     let mensagem = '';
                     if (error.code === 'auth/email-already-in-use') {
@@ -725,9 +721,9 @@
                     } else {
                         mensagem = error.message;
                     }
-                    
-                    return { 
-                        sucesso: false, 
+
+                    return {
+                        sucesso: false,
                         mensagem: mensagem
                     };
                 }
@@ -736,25 +732,25 @@
             // Salvar oficina (com criação de usuário)
             form?.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 const nome = document.getElementById('oficina-nome')?.value;
                 const email = document.getElementById('oficina-email')?.value;
                 const senha = document.getElementById('oficina-senha')?.value;
                 const telefone = document.getElementById('oficina-telefone')?.value;
                 const plano = document.getElementById('oficina-plano')?.value;
-                
+
                 if (!nome || !email || !telefone || !plano || !senha) {
-                    alert('❌ Preencha todos os campos obrigatórios!');
+                    alert('Preencha todos os campos obrigatórios!');
                     return;
                 }
-                
+
                 if (senha.length < 6) {
-                    alert('❌ A senha deve ter pelo menos 6 caracteres!');
+                    alert('A senha deve ter pelo menos 6 caracteres!');
                     return;
                 }
-                
+
                 const criarAcesso = document.getElementById('oficina-enviar-acesso')?.checked || true;
-                
+
                 const oficinaData = {
                     nome: nome,
                     emailDono: email,
@@ -774,61 +770,61 @@
                     observacoes: document.getElementById('oficina-observacoes')?.value || '',
                     updatedAt: new Date().toISOString()
                 };
-                
+
                 if (btnSalvar) {
                     btnSalvar.disabled = true;
                     btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
                 }
-                
+
                 try {
                     if (oficinaSelecionadaId) {
                         // ATUALIZAR - não recria usuário
                         await db.collection('oficinas').doc(oficinaSelecionadaId).update(oficinaData);
-                        alert('✅ Oficina atualizada com sucesso!');
-                        
+                        alert('Oficina atualizada com sucesso!');
+
                     } else {
                         // CRIAR NOVA OFICINA
-                        
+
                         // 1. Primeiro criar usuário no Firebase Auth (se marcado)
                         if (criarAcesso) {
                             const resultado = await criarUsuarioFirebase(email, senha);
-                            
+
                             if (!resultado.sucesso) {
                                 // Se erro ao criar usuário, não prossegue
-                                alert(`❌ Erro ao criar acesso: ${resultado.mensagem}`);
+                                alert(`Erro ao criar acesso: ${resultado.mensagem}`);
                                 if (btnSalvar) {
                                     btnSalvar.disabled = false;
                                     btnSalvar.innerHTML = '<i class="fas fa-save"></i> Salvar Oficina';
                                 }
                                 return;
                             }
-                            
+
                             // Adicionar UID do usuário aos dados da oficina
                             oficinaData.uid = resultado.uid;
                             oficinaData.senhaCriada = true;
-                            
-                            alert(`✅ Usuário criado! Email: ${email} | Senha: ${senha}`);
+
+                            alert(`Usuário criado! Email: ${email} | Senha: ${senha}`);
                         }
-                        
+
                         // 2. Depois criar documento da oficina no Firestore
                         oficinaData.createdAt = new Date().toISOString();
                         const docRef = await db.collection('oficinas').add(oficinaData);
-                        
-                        alert('✅ Oficina criada com sucesso!');
+
+                        alert('Oficina criada com sucesso!');
                     }
-                    
+
                     if (modal) modal.classList.remove('active');
                     loadOficinas();
                     loadEstatisticas();
-                    
+
                 } catch (error) {
-                    console.error('❌ Erro:', error);
-                    alert('❌ Erro ao salvar oficina: ' + error.message);
+                    console.error('Erro:', error);
+                    alert('Erro ao salvar oficina: ' + error.message);
                 } finally {
                     if (btnSalvar) {
                         btnSalvar.disabled = false;
-                        btnSalvar.innerHTML = oficinaSelecionadaId ? 
-                            '<i class="fas fa-save"></i> Atualizar Oficina' : 
+                        btnSalvar.innerHTML = oficinaSelecionadaId ?
+                            '<i class="fas fa-save"></i> Atualizar Oficina' :
                             '<i class="fas fa-save"></i> Salvar Oficina';
                     }
                 }
@@ -861,16 +857,16 @@
                 try {
                     const doc = await db.collection('oficinas').doc(oficinaId).get();
                     if (!doc.exists) {
-                        alert('❌ Oficina não encontrada');
+                        alert('Oficina não encontrada');
                         return;
                     }
-                    
+
                     const of = doc.data();
                     const planoInfo = PLANOS[of.plano] || PLANOS.basico;
-                    
+
                     const detalhesDiv = document.getElementById('oficina-detalhes');
                     if (!detalhesDiv) return;
-                    
+
                     detalhesDiv.innerHTML = `
                         <div style="padding: 20px;">
                             <h3 style="margin-top: 0; color: #c62828;">${of.nome || 'Sem nome'}</h3>
@@ -884,12 +880,12 @@
                             <p><strong>Cidade/UF:</strong> ${of.cidade || ''}/${of.uf || ''}</p>
                         </div>
                     `;
-                    
+
                     if (viewModal) viewModal.classList.add('active');
-                    
+
                 } catch (error) {
-                    console.error('❌ Erro:', error);
-                    alert('❌ Erro ao carregar detalhes');
+                    console.error('Erro:', error);
+                    alert('Erro ao carregar detalhes');
                 }
             };
 
@@ -897,13 +893,13 @@
                 try {
                     const doc = await db.collection('oficinas').doc(oficinaId).get();
                     if (!doc.exists) return;
-                    
+
                     const of = doc.data();
                     oficinaSelecionadaId = oficinaId;
-                    
+
                     document.getElementById('modal-title').textContent = 'Editar Oficina';
                     document.getElementById('btn-salvar-oficina').innerHTML = '<i class="fas fa-save"></i> Atualizar Oficina';
-                    
+
                     document.getElementById('oficina-nome').value = of.nome || '';
                     document.getElementById('oficina-email').value = of.emailDono || '';
                     document.getElementById('oficina-senha').value = '••••••'; // Senha não é editável
@@ -921,14 +917,14 @@
                     document.getElementById('oficina-status').value = of.status || 'ativa';
                     document.getElementById('oficina-vencimento').value = of.dataVencimento || '';
                     document.getElementById('oficina-observacoes').value = of.observacoes || '';
-                    
+
                     document.querySelectorAll('.form-tab-btn')[0]?.click();
-                    
+
                     if (modal) modal.classList.add('active');
-                    
+
                 } catch (error) {
-                    console.error('❌ Erro:', error);
-                    alert('❌ Erro ao carregar oficina');
+                    console.error('Erro:', error);
+                    alert('Erro ao carregar oficina');
                 }
             };
 
@@ -939,22 +935,22 @@
                     <p>O dono não conseguirá mais acessar o sistema.</p>
                 `;
                 bloquearModal.classList.add('active');
-                
+
                 document.getElementById('confirmar-bloqueio').onclick = async function() {
                     try {
                         await db.collection('oficinas').doc(oficinaId).update({
                             status: 'bloqueada',
                             updatedAt: new Date().toISOString()
                         });
-                        
-                        alert('✅ Oficina bloqueada!');
+
+                        alert('Oficina bloqueada!');
                         bloquearModal.classList.remove('active');
                         loadOficinas();
                         loadEstatisticas();
-                        
+
                     } catch (error) {
-                        console.error('❌ Erro:', error);
-                        alert('❌ Erro ao bloquear');
+                        console.error('Erro:', error);
+                        alert('Erro ao bloquear');
                     }
                 };
             };
@@ -966,36 +962,36 @@
                     <p>O dono poderá acessar o sistema novamente.</p>
                 `;
                 bloquearModal.classList.add('active');
-                
+
                 document.getElementById('confirmar-bloqueio').onclick = async function() {
                     try {
                         await db.collection('oficinas').doc(oficinaId).update({
                             status: 'ativa',
                             updatedAt: new Date().toISOString()
                         });
-                        
-                        alert('✅ Oficina desbloqueada!');
+
+                        alert('Oficina desbloqueada!');
                         bloquearModal.classList.remove('active');
                         loadOficinas();
                         loadEstatisticas();
-                        
+
                     } catch (error) {
-                        console.error('❌ Erro:', error);
-                        alert('❌ Erro ao desbloquear');
+                        console.error('Erro:', error);
+                        alert('Erro ao desbloquear');
                     }
                 };
             };
 
             window.excluirOficina = function(oficinaId) {
-                if (confirm('⚠️ Excluir esta oficina? Todos os dados serão perdidos.')) {
+                if (confirm('Excluir esta oficina? Todos os dados serão perdidos.')) {
                     db.collection('oficinas').doc(oficinaId).delete()
                         .then(() => {
-                            alert('✅ Oficina excluída!');
+                            alert('Oficina excluída!');
                             loadOficinas();
                         })
                         .catch(error => {
-                            console.error('❌ Erro:', error);
-                            alert('❌ Erro ao excluir');
+                            console.error('Erro:', error);
+                            alert('Erro ao excluir');
                         });
                 }
             };
@@ -1016,23 +1012,23 @@
                     status: 'ativa',
                     createdAt: new Date().toISOString()
                 };
-                
+
                 try {
                     // Criar usuário
                     const resultado = await criarUsuarioFirebase(emailTeste, '123456');
-                    
+
                     if (resultado.sucesso) {
                         oficinaTeste.uid = resultado.uid;
                         await db.collection('oficinas').add(oficinaTeste);
-                        alert(`✅ Oficina de teste criada! Email: ${emailTeste} | Senha: 123456`);
+                        alert(`Oficina de teste criada! Email: ${emailTeste} | Senha: 123456`);
                     } else {
-                        alert('❌ Erro ao criar usuário: ' + resultado.mensagem);
+                        alert('Erro ao criar usuário: ' + resultado.mensagem);
                     }
-                    
+
                     loadOficinas();
                     loadEstatisticas();
                 } catch (error) {
-                    alert('❌ Erro: ' + error.message);
+                    alert('Erro: ' + error.message);
                 }
             };
         });

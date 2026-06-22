@@ -15,27 +15,27 @@
             margin: 30px auto;
             padding: 20px;
         }
-        
+
         .populate-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 0;
             padding: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
+
         .progress-area {
             margin: 20px 0;
             display: none;
         }
-        
+
         .progress-bar {
             height: 30px;
             background-color: #e9ecef;
-            border-radius: 15px;
+            border-radius: 0;
             overflow: hidden;
             margin-bottom: 10px;
         }
-        
+
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, #28a745, #20c997);
@@ -47,12 +47,12 @@
             color: white;
             font-weight: bold;
         }
-        
+
         .log-area {
             background: #2d2d2d;
             color: #fff;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 0;
             height: 300px;
             overflow-y: auto;
             font-family: 'Courier New', monospace;
@@ -60,61 +60,61 @@
             line-height: 1.5;
             margin: 20px 0;
         }
-        
+
         .log-success { color: #4CAF50; }
         .log-error { color: #f44336; }
         .log-info { color: #2196F3; }
-        
+
         .stats-box {
             background: #f8f9fa;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 0;
             margin: 20px 0;
         }
-        
+
         .config-group {
             margin: 20px 0;
         }
-        
+
         .config-row {
             display: flex;
             gap: 20px;
             margin-bottom: 15px;
         }
-        
+
         .config-item {
             flex: 1;
         }
-        
+
         .config-item label {
             display: block;
             margin-bottom: 5px;
             font-weight: 500;
         }
-        
+
         .config-item input,
         .config-item select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 0;
         }
-        
+
         .warning-box {
             background: #fff3cd;
             border: 1px solid #ffeeba;
             color: #856404;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 0;
             margin: 20px 0;
         }
-        
+
         .success-box {
             background: #d4edda;
             border: 1px solid #c3e6cb;
             color: #155724;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 0;
             margin: 20px 0;
         }
     </style>
@@ -138,16 +138,15 @@
         <main class="main-content">
             <div class="populate-container">
                 <div class="populate-card">
-                    <h2 class="text-center">🚀 Populador de Oficinas</h2>
+                    <h2 class="text-center">Populador de Oficinas</h2>
                     <p class="text-center">Crie múltiplas oficinas para teste automaticamente</p>
-                    
-                    <div id="login-warning" class="warning-box" style="display: none;">
-                        ⚠️ Você precisa estar logado como admin para usar esta ferramenta.
+
+                    <div id="login-warning" class="warning-box" style="display: none;">Você precisa estar logado como admin para usar esta ferramenta.
                     </div>
-                    
+
                     <div class="config-group" id="config-section">
                         <h3>Configurações</h3>
-                        
+
                         <div class="config-row">
                             <div class="config-item">
                                 <label>Quantidade de Oficinas</label>
@@ -158,7 +157,7 @@
                                 <input type="number" id="qtd-clientes" min="0" max="50" value="5">
                             </div>
                         </div>
-                        
+
                         <div class="config-row">
                             <div class="config-item">
                                 <label>Distribuição dos Planos</label>
@@ -178,7 +177,7 @@
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div class="config-row">
                             <div class="config-item">
                                 <label>
@@ -193,7 +192,7 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="config-row">
                             <div class="config-item">
                                 <label>
@@ -208,33 +207,33 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <div class="stats-box">
-                            <h4>📊 Prévia:</h4>
+                            <h4>Prévia:</h4>
                             <p><strong>Oficinas:</strong> <span id="preview-oficinas">20</span></p>
                             <p><strong>Clientes:</strong> <span id="preview-clientes">100</span></p>
                             <p><strong>Veículos:</strong> <span id="preview-veiculos">200</span></p>
                             <p><strong>Orçamentos:</strong> ≈ <span id="preview-orcamentos">150</span></p>
                         </div>
-                        
+
                         <div class="warning-box">
-                            ⚠️ <strong>Atenção:</strong> Isso criará muitos documentos no Firestore.
+                             <strong>Atenção:</strong> Isso criará muitos documentos no Firestore.
                             Certifique-se de que está em ambiente de teste.
                         </div>
-                        
+
                         <div style="display: flex; gap: 10px;">
-                            <button id="btn-popular" class="btn btn-success btn-block">🚀 Iniciar População</button>
-                            <button id="btn-limpar" class="btn btn-danger">🗑️ Limpar Tudo</button>
+                            <button id="btn-popular" class="btn btn-success btn-block">Iniciar População</button>
+                            <button id="btn-limpar" class="btn btn-danger">Limpar Tudo</button>
                         </div>
                     </div>
-                    
+
                     <div class="progress-area" id="progress-area">
                         <div class="progress-bar">
                             <div class="progress-fill" id="progress-fill">0%</div>
                         </div>
                         <div class="log-area" id="log-area"></div>
                     </div>
-                    
+
                     <div id="result-area"></div>
                 </div>
             </div>
@@ -250,7 +249,7 @@
             'Santa Maria', 'Pelotas', 'Rio Grande', 'Passo Fundo', 'Caxias do Sul',
             'Bento Gonçalves', 'Gramado', 'Canela', 'Torres', 'Uruguaiana'
         ];
-        
+
         const nomesOficinas = [
             'Auto Mecânica', 'Oficina do Povo', 'Mecânica Rápida', 'Auto Center',
             'Oficina Central', 'Mecânica Express', 'Auto Socorro', 'Oficina Modelo',
@@ -258,19 +257,19 @@
             'Auto Service', 'Oficina Popular', 'Mecânica União', 'Auto Reparos',
             'Oficina São Jorge', 'Mecânica Santa Clara', 'Auto Norte', 'Oficina Sul'
         ];
-        
+
         const sobrenomes = [
             'Silva', 'Santos', 'Oliveira', 'Souza', 'Rodrigues', 'Ferreira',
             'Alves', 'Pereira', 'Lima', 'Gomes', 'Costa', 'Ribeiro', 'Martins',
             'Carvalho', 'Almeida', 'Lopes', 'Soares', 'Fernandes', 'Vieira', 'Barbosa'
         ];
-        
+
         const nomes = [
             'João', 'Maria', 'José', 'Ana', 'Pedro', 'Paulo', 'Carlos', 'Marcos',
             'Lucas', 'Gabriel', 'Rafael', 'Fernanda', 'Juliana', 'Camila', 'Patrícia',
             'Roberto', 'Ricardo', 'Eduardo', 'Bruno', 'Thiago'
         ];
-        
+
         const veiculos = [
             { marca: 'Fiat', modelos: ['Uno', 'Palio', 'Toro', 'Strada', 'Mobi'] },
             { marca: 'Volkswagen', modelos: ['Gol', 'Polo', 'T-Cross', 'Saveiro', 'Voyage'] },
@@ -283,18 +282,18 @@
             { marca: 'Jeep', modelos: ['Renegade', 'Compass', 'Grand Cherokee', 'Wrangler'] },
             { marca: 'Nissan', modelos: ['Kicks', 'Frontier', 'Versa', 'March', 'Sentra'] }
         ];
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             auth.onAuthStateChanged(function(user) {
                 if (user) {
                     const ADMIN_EMAILS = ['admin@autoflow.com', 'rafael@gmail.com', 'admin@gmail.com'];
-                    
+
                     if (!ADMIN_EMAILS.includes(user.email)) {
                         document.getElementById('login-warning').style.display = 'block';
                         document.getElementById('config-section').style.display = 'none';
                         return;
                     }
-                    
+
                     loadUserInfo(user);
                     atualizarPreview();
                 } else {
@@ -302,31 +301,31 @@
                     document.getElementById('config-section').style.display = 'none';
                 }
             });
-            
+
             // Atualizar preview
             document.getElementById('qtd-oficinas').addEventListener('input', atualizarPreview);
             document.getElementById('qtd-clientes').addEventListener('input', atualizarPreview);
-            
+
             function atualizarPreview() {
                 const oficinas = parseInt(document.getElementById('qtd-oficinas').value) || 0;
                 const clientes = parseInt(document.getElementById('qtd-clientes').value) || 0;
-                
+
                 document.getElementById('preview-oficinas').textContent = oficinas;
                 document.getElementById('preview-clientes').textContent = oficinas * clientes;
                 document.getElementById('preview-veiculos').textContent = oficinas * clientes * 2;
                 document.getElementById('preview-orcamentos').textContent = Math.round(oficinas * clientes * 0.6);
             }
-            
+
             // Botão popular
             document.getElementById('btn-popular').addEventListener('click', popularOficinas);
-            
+
             // Botão limpar
             document.getElementById('btn-limpar').addEventListener('click', limparTudo);
         });
-        
+
         function loadUserInfo(user) {
             document.getElementById('user-info').innerHTML = `
-                <span class="user-email">👑 ${user.email}</span>
+                <span class="user-email">${user.email}</span>
                 <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
             `;
             document.getElementById('logout-btn').addEventListener('click', () => {
@@ -335,7 +334,7 @@
                 window.location.href = 'login.html';
             });
         }
-        
+
         function log(message, type = 'info') {
             const logArea = document.getElementById('log-area');
             const entry = document.createElement('div');
@@ -345,14 +344,14 @@
             logArea.scrollTop = logArea.scrollHeight;
             console.log(message);
         }
-        
+
         function updateProgress(percent, message) {
             const fill = document.getElementById('progress-fill');
             fill.style.width = percent + '%';
             fill.textContent = percent + '%';
             if (message) log(message);
         }
-        
+
         async function popularOficinas() {
             const qtdOficinas = parseInt(document.getElementById('qtd-oficinas').value);
             const qtdClientes = parseInt(document.getElementById('qtd-clientes').value);
@@ -360,20 +359,20 @@
             const criarVeiculos = document.getElementById('criar-veiculos').checked;
             const criarOrcamentos = document.getElementById('criar-orcamentos').checked;
             const manterDados = document.getElementById('manter-dados').checked;
-            
+
             // Mostrar área de progresso
             document.getElementById('progress-area').style.display = 'block';
             document.getElementById('log-area').innerHTML = '';
             document.getElementById('result-area').innerHTML = '';
             document.getElementById('btn-popular').disabled = true;
-            
-            log('🚀 INICIANDO POPULAÇÃO DE OFICINAS...', 'info');
-            log(`📊 Configuração: ${qtdOficinas} oficinas, ${qtdClientes} clientes cada`, 'info');
-            
+
+            log('INICIANDO POPULAÇÃO DE OFICINAS...', 'info');
+            log(`Configuração: ${qtdOficinas} oficinas, ${qtdClientes} clientes cada`, 'info');
+
             try {
                 // Se não manter dados, limpar existentes
                 if (!manterDados) {
-                    log('🗑️ Removendo dados existentes...', 'warning');
+                    log('Removendo dados existentes...', 'warning');
                     const snapshot = await db.collection('oficinas').get();
                     let count = 0;
                     for (const doc of snapshot.docs) {
@@ -381,24 +380,24 @@
                         count++;
                         if (count % 10 === 0) log(`   ${count} oficinas removidas...`);
                     }
-                    log(`✅ ${count} oficinas removidas`, 'success');
+                    log(` ${count} oficinas removidas`, 'success');
                 }
-                
+
                 let oficinasCriadas = 0;
                 let clientesCriados = 0;
                 let veiculosCriados = 0;
                 let orcamentosCriados = 0;
-                
+
                 for (let i = 0; i < qtdOficinas; i++) {
                     // Escolher plano baseado na distribuição
                     const plano = escolherPlano();
-                    
+
                     // Gerar dados da oficina
                     const cidade = cidadesRS[Math.floor(Math.random() * cidadesRS.length)];
                     const nomeBase = nomesOficinas[Math.floor(Math.random() * nomesOficinas.length)];
                     const numero = Math.floor(Math.random() * 9000) + 100;
                     const status = escolherStatus();
-                    
+
                     const oficinaData = {
                         nome: `${nomeBase} ${numero}`,
                         emailDono: `oficina${numero}@teste.com`,
@@ -418,13 +417,13 @@
                         createdAt: gerarDataAleatoria(),
                         updatedAt: new Date().toISOString()
                     };
-                    
+
                     // Salvar oficina
                     const oficinaRef = await db.collection('oficinas').add(oficinaData);
                     oficinasCriadas++;
-                    
-                    log(`✅ Oficina ${i+1}/${qtdOficinas}: ${oficinaData.nome} (${plano})`, 'success');
-                    
+
+                    log(`Oficina ${i+1}/${qtdOficinas}: ${oficinaData.nome} (${plano})`, 'success');
+
                     // Criar clientes se solicitado
                     if (criarClientes && qtdClientes > 0) {
                         const clientes = await criarClientesParaOficina(oficinaRef, qtdClientes, cidade);
@@ -432,59 +431,59 @@
                         veiculosCriados += clientes.veiculos;
                         orcamentosCriados += clientes.orcamentos;
                     }
-                    
+
                     // Atualizar progresso
                     const percent = Math.round(((i + 1) / qtdOficinas) * 100);
                     updateProgress(percent, `Progresso: ${i+1}/${qtdOficinas} oficinas`);
                 }
-                
+
                 // Resultado final
-                log('🎉✅🎉 POPULAÇÃO CONCLUÍDA COM SUCESSO! 🎉✅🎉', 'success');
-                
+                log('POPULAÇÃO CONCLUÍDA COM SUCESSO! ', 'success');
+
                 const resultHtml = `
                     <div class="success-box">
-                        <h3>✅ População Concluída!</h3>
-                        <p><strong>📊 Resumo:</strong></p>
+                        <h3>População Concluída!</h3>
+                        <p><strong>Resumo:</strong></p>
                         <ul>
-                            <li>🏪 Oficinas: ${oficinasCriadas}</li>
-                            <li>👥 Clientes: ${clientesCriados}</li>
-                            <li>🚗 Veículos: ${veiculosCriados}</li>
-                            <li>📝 Orçamentos: ${orcamentosCriados}</li>
+                            <li>Oficinas: ${oficinasCriadas}</li>
+                            <li>Clientes: ${clientesCriados}</li>
+                            <li>Veículos: ${veiculosCriados}</li>
+                            <li>Orçamentos: ${orcamentosCriados}</li>
                         </ul>
                         <p><a href="admin-oficinas.html" class="btn btn-primary">Ver Oficinas</a></p>
                     </div>
                 `;
-                
+
                 document.getElementById('result-area').innerHTML = resultHtml;
-                
+
             } catch (error) {
-                log(`❌ ERRO: ${error.message}`, 'error');
+                log(`ERRO: ${error.message}`, 'error');
                 console.error(error);
             } finally {
                 document.getElementById('btn-popular').disabled = false;
             }
         }
-        
+
         function escolherPlano() {
             const distribuicao = document.getElementById('distribuicao-planos').value;
             const rand = Math.random();
-            
+
             switch(distribuicao) {
                 case 'balanceado':
                     if (rand < 0.33) return 'basico';
                     if (rand < 0.66) return 'intermediario';
                     return 'completo';
-                    
+
                 case 'mais-basico':
                     if (rand < 0.6) return 'basico';
                     if (rand < 0.8) return 'intermediario';
                     return 'completo';
-                    
+
                 case 'mais-completo':
                     if (rand < 0.2) return 'basico';
                     if (rand < 0.4) return 'intermediario';
                     return 'completo';
-                    
+
                 case 'realista':
                 default:
                     if (rand < 0.5) return 'basico';
@@ -492,20 +491,20 @@
                     return 'completo';
             }
         }
-        
+
         function escolherStatus() {
             const distribuicao = document.getElementById('distribuicao-status').value;
             const rand = Math.random();
-            
+
             switch(distribuicao) {
                 case 'todas-ativas':
                     return 'ativa';
-                    
+
                 case 'variado':
                     if (rand < 0.7) return 'ativa';
                     if (rand < 0.9) return 'bloqueada';
                     return 'inativa';
-                    
+
                 case 'realista':
                 default:
                     if (rand < 0.8) return 'ativa';
@@ -513,12 +512,12 @@
                     return 'inativa';
             }
         }
-        
+
         async function criarClientesParaOficina(oficinaRef, qtd, cidade) {
             let clientesCount = 0;
             let veiculosCount = 0;
             let orcamentosCount = 0;
-            
+
             for (let c = 0; c < qtd; c++) {
                 const nomeCliente = gerarNomeCliente();
                 const clienteData = {
@@ -534,17 +533,17 @@
                     cep: gerarCEP(),
                     createdAt: gerarDataAleatoria()
                 };
-                
+
                 const clienteRef = await oficinaRef.collection('clientes').add(clienteData);
                 clientesCount++;
-                
+
                 // Criar veículos para o cliente
                 if (document.getElementById('criar-veiculos').checked) {
                     const numVeiculos = Math.floor(Math.random() * 2) + 1; // 1-2 veículos
                     for (let v = 0; v < numVeiculos; v++) {
                         const veiculo = veiculos[Math.floor(Math.random() * veiculos.length)];
                         const modelo = veiculo.modelos[Math.floor(Math.random() * veiculo.modelos.length)];
-                        
+
                         await clienteRef.collection('veiculos').add({
                             marca: veiculo.marca,
                             modelo: modelo,
@@ -556,7 +555,7 @@
                         veiculosCount++;
                     }
                 }
-                
+
                 // Criar orçamentos
                 if (document.getElementById('criar-orcamentos').checked && Math.random() > 0.5) {
                     const numOrcamentos = Math.floor(Math.random() * 3) + 1; // 1-3 orçamentos
@@ -573,35 +572,35 @@
                     }
                 }
             }
-            
+
             return { count: clientesCount, veiculos: veiculosCount, orcamentos: orcamentosCount };
         }
-        
+
         // Funções geradoras
         function gerarTelefone() {
             const ddd = Math.floor(Math.random() * (99 - 11 + 1)) + 11;
             const num = Math.floor(Math.random() * 9000) + 1000;
             return `(${ddd}) ${num}-${Math.floor(Math.random() * 9000) + 1000}`;
         }
-        
+
         function gerarCelular() {
             const ddd = Math.floor(Math.random() * (99 - 11 + 1)) + 11;
             const num = Math.floor(Math.random() * 90000) + 10000;
             return `(${ddd}) 9${num}`;
         }
-        
+
         function gerarCNPJ() {
             return `${Math.floor(Math.random() * 90) + 10}.${Math.floor(Math.random() * 900) + 100}.${Math.floor(Math.random() * 900) + 100}/0001-${Math.floor(Math.random() * 90) + 10}`;
         }
-        
+
         function gerarCPF() {
             return `${Math.floor(Math.random() * 900) + 100}.${Math.floor(Math.random() * 900) + 100}.${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 90) + 10}`;
         }
-        
+
         function gerarCEP() {
             return `${Math.floor(Math.random() * 90000) + 10000}-${Math.floor(Math.random() * 900) + 100}`;
         }
-        
+
         function gerarPlaca() {
             const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             let placa = '';
@@ -611,31 +610,31 @@
             placa += Math.floor(Math.random() * 100);
             return placa;
         }
-        
+
         function gerarCor() {
             const cores = ['Preto', 'Branco', 'Prata', 'Vermelho', 'Azul', 'Cinza', 'Verde', 'Amarelo'];
             return cores[Math.floor(Math.random() * cores.length)];
         }
-        
+
         function gerarNomeCliente() {
             const nome = nomes[Math.floor(Math.random() * nomes.length)];
             const sobrenome = sobrenomes[Math.floor(Math.random() * sobrenomes.length)];
             const sobrenome2 = Math.random() > 0.5 ? ' ' + sobrenomes[Math.floor(Math.random() * sobrenomes.length)] : '';
             return `${nome} ${sobrenome}${sobrenome2}`;
         }
-        
+
         function gerarDataAleatoria() {
             const start = new Date(2022, 0, 1);
             const end = new Date();
             return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString();
         }
-        
+
         function gerarDataVencimento() {
             const data = new Date();
             data.setMonth(data.getMonth() + Math.floor(Math.random() * 3) + 1);
             return data.toISOString().split('T')[0];
         }
-        
+
         function gerarServicos() {
             const servicosPossiveis = [
                 { descricao: 'Troca de óleo', valor: 150 },
@@ -649,10 +648,10 @@
                 { descricao: 'Troca de amortecedores', valor: 1200 },
                 { descricao: 'Alinhamento e balanceamento', valor: 120 }
             ];
-            
+
             const numServicos = Math.floor(Math.random() * 3) + 1;
             const servicos = [];
-            
+
             for (let i = 0; i < numServicos; i++) {
                 const s = servicosPossiveis[Math.floor(Math.random() * servicosPossiveis.length)];
                 const qtd = Math.floor(Math.random() * 2) + 1;
@@ -663,25 +662,25 @@
                     total: s.valor * qtd
                 });
             }
-            
+
             return servicos;
         }
-        
+
         async function limparTudo() {
-            if (!confirm('⚠️ ISSO VAI APAGAR TODAS AS OFICINAS E DADOS! Tem certeza?')) return;
-            if (!confirm('🔴 ÚLTIMA CHAMADA! Esta ação é IRREVERSÍVEL!')) return;
-            
+            if (!confirm('ISSO VAI APAGAR TODAS AS OFICINAS E DADOS! Tem certeza?')) return;
+            if (!confirm('ÚLTIMA CHAMADA! Esta ação é IRREVERSÍVEL!')) return;
+
             try {
                 const snapshot = await db.collection('oficinas').get();
                 let count = 0;
-                
+
                 for (const doc of snapshot.docs) {
                     await doc.ref.delete();
                     count++;
                 }
-                
-                alert(`✅ ${count} oficinas apagadas com sucesso!`);
-                
+
+                alert(` ${count} oficinas apagadas com sucesso!`);
+
             } catch (error) {
                 console.error('Erro:', error);
                 alert('Erro ao limpar: ' + error.message);

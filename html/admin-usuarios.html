@@ -80,7 +80,7 @@
         .user-avatar {
             width: 40px;
             height: 40px;
-            border-radius: 50%;
+            border-radius: 0;
             background: #c62828;
             color: white;
             display: flex;
@@ -264,14 +264,14 @@
         .text-center {
             text-align: center;
         }
-        
+
         .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
         }
-        
+
         .section-header h2 {
             margin: 0;
             color: #c62828;
@@ -304,7 +304,7 @@
         <main class="main-content">
             <div class="admin-container">
                 <div class="section-header">
-                    <h2>👥 Gerenciar Usuários</h2>
+                    <h2>Gerenciar Usuários</h2>
                     <button id="btn-novo-usuario" class="btn btn-success">+ Novo Usuário</button>
                 </div>
 
@@ -546,7 +546,7 @@
             // ===========================================
             function renderizarTabela(lista) {
                 const tbody = document.getElementById('usuarios-body');
-                
+
                 // Calcular página atual
                 const inicio = (paginaAtual - 1) * itensPorPagina;
                 const fim = inicio + itensPorPagina;
@@ -585,19 +585,18 @@
                             </div>
                         </td>
                         <td>${usuario.email}</td>
-                        <td><span class="role-badge">${usuario.tipo === 'admin' ? '👑 Admin' : '🏪 Dono'}</span></td>
+                        <td><span class="role-badge">${usuario.tipo === 'admin' ? 'Admin' : 'Dono'}</span></td>
                         <td>${usuario.oficina ? usuario.oficina.nome : '-'}</td>
                         <td>
-                            <span class="status-badge ${statusClass}">
-                                ${usuario.status === 'ativo' ? '✅ Ativo' : '⛔ Bloqueado'}
+                            <span class="status-badge ${statusClass}">${usuario.status === 'ativo' ? 'Ativo' : 'Bloqueado'}
                             </span>
                         </td>
                         <td>${dataAcesso}</td>
                         <td class="actions">
-                            <button class="btn btn-sm btn-primary" onclick="editarUsuario('${usuario.email}')">✏️</button>
+                            <button class="btn btn-sm btn-primary" onclick="editarUsuario('${usuario.email}')">Editar</button>
                             ${usuario.status === 'ativo' ?
-                                `<button class="btn btn-sm btn-warning" onclick="bloquearUsuario('${usuario.email}')">🔒</button>` :
-                                `<button class="btn btn-sm btn-success" onclick="desbloquearUsuario('${usuario.email}')">🔓</button>`
+                                `<button class="btn btn-sm btn-warning" onclick="bloquearUsuario('${usuario.email}')">Bloquear</button>` :
+                                `<button class="btn btn-sm btn-success" onclick="desbloquearUsuario('${usuario.email}')">Liberar</button>`
                             }
                         </td>
                     `;
@@ -628,7 +627,7 @@
                 const status = filterStatus?.value || '';
 
                 const filtrados = usuarios.filter(u => {
-                    const matchBusca = !busca || 
+                    const matchBusca = !busca ||
                         (u.nome && u.nome.toLowerCase().includes(busca)) ||
                         (u.email && u.email.toLowerCase().includes(busca));
 
@@ -728,7 +727,7 @@
                         // Criar novo admin no Auth
                         const userCredential = await auth.createUserWithEmailAndPassword(email, senha);
                         await userCredential.user.updateProfile({ displayName: nome });
-                        
+
                         // Salvar no Firestore
                         await db.collection('usuarios').doc(userCredential.user.uid).set({
                             nome: nome,
@@ -737,9 +736,9 @@
                             status: status,
                             createdAt: new Date().toISOString()
                         });
-                        
-                        alert('✅ Administrador criado com sucesso!');
-                        
+
+                        alert('Administrador criado com sucesso!');
+
                     } else if (!usuarioEditando && tipo === 'oficina') {
                         // Vincular dono à oficina existente
                         const oficinaId = document.getElementById('usuario-oficina').value;
@@ -747,9 +746,9 @@
                             emailDono: email,
                             status: status === 'ativo' ? 'ativa' : 'bloqueada'
                         });
-                        
-                        alert('✅ Usuário vinculado à oficina com sucesso!');
-                        
+
+                        alert('Usuário vinculado à oficina com sucesso!');
+
                     } else if (usuarioEditando) {
                         // Editar usuário existente
                         if (usuarioEditando.tipo === 'oficina' && usuarioEditando.oficina) {
@@ -757,7 +756,7 @@
                                 status: status === 'ativo' ? 'ativa' : 'bloqueada'
                             });
                         }
-                        alert('✅ Usuário atualizado com sucesso!');
+                        alert('Usuário atualizado com sucesso!');
                     }
 
                     modal.classList.remove('active');
@@ -803,7 +802,7 @@
 
                 try {
                     const usuario = usuarios.find(u => u.email === email);
-                    
+
                     if (usuario.tipo === 'oficina' && usuario.oficina) {
                         await db.collection('oficinas').doc(usuario.oficina.id).update({
                             status: 'bloqueada'
@@ -814,8 +813,8 @@
                         alert('Admin não pode ser bloqueado diretamente no Auth pelo frontend');
                         return;
                     }
-                    
-                    alert('✅ Usuário bloqueado');
+
+                    alert('Usuário bloqueado');
                     carregarUsuarios();
                 } catch (error) {
                     console.error('Erro:', error);
@@ -828,14 +827,14 @@
 
                 try {
                     const usuario = usuarios.find(u => u.email === email);
-                    
+
                     if (usuario.tipo === 'oficina' && usuario.oficina) {
                         await db.collection('oficinas').doc(usuario.oficina.id).update({
                             status: 'ativa'
                         });
                     }
-                    
-                    alert('✅ Usuário desbloqueado');
+
+                    alert('Usuário desbloqueado');
                     carregarUsuarios();
                 } catch (error) {
                     console.error('Erro:', error);
@@ -845,7 +844,7 @@
 
             function loadUserInfo(user) {
                 document.getElementById('user-info').innerHTML = `
-                    <span class="user-email">👑 ${user.email}</span>
+                    <span class="user-email">${user.email}</span>
                     <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
                 `;
                 document.getElementById('logout-btn').addEventListener('click', () => {

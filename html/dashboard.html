@@ -66,7 +66,7 @@
         // ===========================================
         // DASHBOARD - APENAS DADOS REAIS
         // ===========================================
-        
+
         document.addEventListener('DOMContentLoaded', function() {
             // Verificar autenticação
             auth.onAuthStateChanged(function(user) {
@@ -83,13 +83,13 @@
         // ===========================================
         function loadDashboard(user) {
             const oficinaId = sessionStorage.getItem('oficinaId');
-            
+
             if (!oficinaId) {
                 console.error('ID da oficina não encontrado');
                 window.location.href = 'login.html';
                 return;
             }
-            
+
             // Atualizar informações do usuário
             const userInfo = document.getElementById('user-info');
             if (userInfo) {
@@ -190,7 +190,7 @@
                         snapshot.forEach(doc => {
                             const orcamento = doc.data();
                             const dataPagamento = orcamento.dataPagamento || orcamento.data;
-                            
+
                             if (dataPagamento) {
                                 const data = new Date(dataPagamento);
                                 if (data >= primeiroDiaMes && data <= ultimoDiaMes) {
@@ -269,31 +269,31 @@
 
             dashboardGrid.innerHTML = `
                 <div class="dashboard-card">
-                    <h3><span class="card-icon">👥</span> Gerenciar Clientes</h3>
+                    <h3>Gerenciar Clientes</h3>
                     <p>Cadastre novos clientes e visualize todos os clientes cadastrados no sistema.</p>
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
                         <a href="clientes.html" class="btn btn-primary">Ver Clientes</a>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
-                    <h3><span class="card-icon">🚗</span> Gerenciar Veículos</h3>
+                    <h3>Gerenciar Veículos</h3>
                     <p>Controle a frota de veículos, histórico de serviços e próximas revisões.</p>
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
                         <a href="veiculos.html" class="btn btn-primary">Ver Veículos</a>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
-                    <h3><span class="card-icon">💰</span> Criar Orçamento</h3>
+                    <h3>Criar Orçamento</h3>
                     <p>Gere novos orçamentos para seus clientes de forma rápida e profissional.</p>
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
                         <a href="orcamentos.html" class="btn btn-primary">Ver Orçamentos</a>
                     </div>
                 </div>
-                
+
                 <div class="dashboard-card">
-                    <h3><span class="card-icon">📊</span> Controle Financeiro</h3>
+                    <h3>Controle Financeiro</h3>
                     <p>Acompanhe receitas, despesas e tenha uma visão completa das finanças.</p>
                     <div style="margin-top: 20px; display: flex; gap: 10px;">
                         <a href="financeiro.html" class="btn btn-primary">Ver Financeiro</a>
@@ -435,15 +435,14 @@
                     recentActivity.innerHTML = `
                         <div class="dashboard-section">
                             <h3>Atividade Recente</h3>
-                            <p class="text-center" style="color: #c62828;">
-                                Erro ao carregar dados.
+                            <p class="text-center" style="color: #c62828;">Erro ao carregar dados.
                             </p>
                         </div>
                     `;
                 });
         }
     </script>
-    
+
 </body>
 
 </html>

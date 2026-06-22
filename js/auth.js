@@ -16,11 +16,11 @@ function initializeAuthElements() {
     dashboardContent = document.getElementById('dashboard-content');
     userInfo = document.getElementById('user-info');
     authMessage = document.getElementById('auth-message');
-    
+
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
     }
-    
+
     const registerBtn = document.getElementById('register-btn');
     if (registerBtn) {
         registerBtn.addEventListener('click', showRegisterForm);
@@ -43,12 +43,12 @@ function checkAuthState() {
 // Manipular login
 function handleLogin(e) {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
+
     showMessage('Autenticando...', 'info');
-    
+
     auth.signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
             showMessage('Login realizado com sucesso!', 'success');
@@ -62,7 +62,7 @@ function handleLogin(e) {
 // Mostrar formulário de registro
 function showRegisterForm() {
     const loginForm = document.getElementById('login-form');
-    
+
     // Alterar o formulário para registro
     loginForm.innerHTML = `
         <h3>Criar Nova Conta</h3>
@@ -81,7 +81,7 @@ function showRegisterForm() {
         <button type="button" id="do-register-btn" class="btn btn-primary">Criar Conta</button>
         <button type="button" id="cancel-register-btn" class="btn btn-secondary">Voltar ao Login</button>
     `;
-    
+
     document.getElementById('do-register-btn').addEventListener('click', handleRegister);
     document.getElementById('cancel-register-btn').addEventListener('click', () => {
         location.reload();
@@ -93,19 +93,19 @@ function handleRegister() {
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
     const confirmPassword = document.getElementById('reg-confirm-password').value;
-    
+
     if (password !== confirmPassword) {
         showMessage('As senhas não coincidem!', 'error');
         return;
     }
-    
+
     if (password.length < 6) {
         showMessage('A senha deve ter pelo menos 6 caracteres!', 'error');
         return;
     }
-    
+
     showMessage('Criando conta...', 'info');
-    
+
     auth.createUserWithEmailAndPassword(email, password)
         .then((userCredential) => {
             // Criar documento do usuário no Firestore
@@ -128,13 +128,13 @@ function handleRegister() {
 function showDashboard(user) {
     // Esconder seção de login
     if (loginSection) loginSection.classList.add('hidden');
-    
+
     // Mostrar conteúdo do dashboard
     if (dashboardContent) {
         dashboardContent.classList.remove('hidden');
         loadDashboardContent(user);
     }
-    
+
     // Atualizar informações do usuário
     if (userInfo) {
         userInfo.innerHTML = `
@@ -143,7 +143,7 @@ function showDashboard(user) {
         `;
         document.getElementById('logout-btn').addEventListener('click', handleLogout);
     }
-    
+
     // Atualizar navegação
     loadNavigation();
 }
@@ -154,7 +154,7 @@ function loadDashboardContent(user) {
         <div class="dashboard-section">
             <h2>Dashboard - Alexandre Reparos Automotivos</h2>
             <p>Bem-vindo, ${user.email}</p>
-            
+
             <div class="stats-container">
                 <div class="stat-card">
                     <div class="stat-value" id="clientes-count">0</div>
@@ -174,40 +174,40 @@ function loadDashboardContent(user) {
                 </div>
             </div>
         </div>
-        
+
         <div class="dashboard-grid">
             <div class="dashboard-card">
-                <h3><span class="card-icon">👥</span> Clientes</h3>
+                <h3>Clientes</h3>
                 <p>Gerencie os clientes da oficina</p>
                 <button id="btn-clientes" class="btn btn-primary">Gerenciar Clientes</button>
             </div>
-            
+
             <div class="dashboard-card">
-                <h3><span class="card-icon">🚗</span> Veículos</h3>
+                <h3>Veículos</h3>
                 <p>Controle os veículos em reparo</p>
                 <button id="btn-veiculos" class="btn btn-primary">Gerenciar Veículos</button>
             </div>
-            
+
             <div class="dashboard-card">
-                <h3><span class="card-icon">💰</span> Orçamentos</h3>
+                <h3>Orçamentos</h3>
                 <p>Crie e gerencie orçamentos</p>
                 <button id="btn-orcamentos" class="btn btn-primary">Gerenciar Orçamentos</button>
             </div>
-            
+
             <div class="dashboard-card">
-                <h3><span class="card-icon">📊</span> Financeiro</h3>
+                <h3>Financeiro</h3>
                 <p>Controle financeiro da oficina</p>
                 <button id="btn-financeiro" class="btn btn-primary">Gerenciar Financeiro</button>
             </div>
         </div>
     `;
-    
+
     // Adicionar event listeners aos botões
     document.getElementById('btn-clientes').addEventListener('click', () => loadModule('clientes'));
     document.getElementById('btn-veiculos').addEventListener('click', () => loadModule('veiculos'));
     document.getElementById('btn-orcamentos').addEventListener('click', () => loadModule('orcamentos'));
     document.getElementById('btn-financeiro').addEventListener('click', () => loadModule('financeiro'));
-    
+
     // Carregar estatísticas
     loadStats();
 }
@@ -218,17 +218,17 @@ function loadStats() {
     db.collection('clientes').get().then((snapshot) => {
         document.getElementById('clientes-count').textContent = snapshot.size;
     });
-    
+
     // Contar veículos
     db.collection('veiculos').get().then((snapshot) => {
         document.getElementById('veiculos-count').textContent = snapshot.size;
     });
-    
+
     // Contar orçamentos
     db.collection('orcamentos').get().then((snapshot) => {
         document.getElementById('orcamentos-count').textContent = snapshot.size;
     });
-    
+
     // Calcular receita total
     db.collection('orcamentos').where('status', '==', 'pago').get().then((snapshot) => {
         let total = 0;
@@ -280,16 +280,16 @@ function handleLogout() {
 // Mostrar mensagens
 function showMessage(message, type) {
     if (!authMessage) return;
-    
+
     authMessage.textContent = message;
     authMessage.className = 'auth-message';
-    
+
     if (type === 'success') {
         authMessage.classList.add('message-success');
     } else if (type === 'error') {
         authMessage.classList.add('message-error');
     }
-    
+
     // Limpar mensagem após 5 segundos
     setTimeout(() => {
         authMessage.textContent = '';
@@ -327,38 +327,12 @@ function loadNavigation() {
     if (nav) {
         nav.innerHTML = `
             <ul>
-                <li><a href="#" id="nav-dashboard">Dashboard</a></li>
-                <li><a href="#" id="nav-clientes">Clientes</a></li>
-                <li><a href="#" id="nav-veiculos">Veículos</a></li>
-                <li><a href="#" id="nav-orcamentos">Orçamentos</a></li>
-                <li><a href="#" id="nav-financeiro">Financeiro</a></li>
+                <li><a href="dashboard.html" id="nav-dashboard">Dashboard</a></li>
+                <li><a href="clientes.html" id="nav-clientes">Clientes</a></li>
+                <li><a href="veiculos.html" id="nav-veiculos">Veículos</a></li>
+                <li><a href="orcamentos.html" id="nav-orcamentos">Orçamentos</a></li>
+                <li><a href="financeiro.html" id="nav-financeiro">Financeiro</a></li>
             </ul>
         `;
-        
-        // Adicionar event listeners
-        document.getElementById('nav-dashboard').addEventListener('click', (e) => {
-            e.preventDefault();
-            loadDashboardContent(auth.currentUser);
-        });
-        
-        document.getElementById('nav-clientes').addEventListener('click', (e) => {
-            e.preventDefault();
-            loadModule('clientes');
-        });
-        
-        document.getElementById('nav-veiculos').addEventListener('click', (e) => {
-            e.preventDefault();
-            loadModule('veiculos');
-        });
-        
-        document.getElementById('nav-orcamentos').addEventListener('click', (e) => {
-            e.preventDefault();
-            loadModule('orcamentos');
-        });
-        
-        document.getElementById('nav-financeiro').addEventListener('click', (e) => {
-            e.preventDefault();
-            loadModule('financeiro');
-        });
     }
 }

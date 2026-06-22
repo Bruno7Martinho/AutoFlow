@@ -543,7 +543,7 @@
                     </select>
                     <button id="btn-filtrar-modal" class="btn btn-primary">Filtrar</button>
                 </div>
-                
+
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
@@ -579,7 +579,7 @@
 
             // Verificar se tem acesso ao financeiro (plano completo)
             if (!window.permissoes.temFuncionalidade('financeiro')) {
-                alert('⛔ Seu plano não permite acesso ao Financeiro.');
+                alert('Seu plano não permite acesso ao Financeiro.');
                 window.location.href = 'dashboard.html';
                 return;
             }
@@ -587,8 +587,8 @@
             // Gerar menu dinâmico
             const menuHtml = await window.permissoes.gerarMenu();
             document.getElementById('main-menu').innerHTML = menuHtml;
-            
-            
+
+
 
             const oficinaId = sessionStorage.getItem('oficinaId');
             if (!oficinaId) {
@@ -619,7 +619,7 @@
                         <span class="user-email">${user.email}</span>
                         <button id="logout-btn" class="btn btn-sm btn-danger">Sair</button>
                     `;
-                    
+
                     document.getElementById('logout-btn').addEventListener('click', function() {
                         auth.signOut().then(() => {
                             window.location.href = 'login.html';
@@ -632,20 +632,20 @@
                 const anoAtual = new Date().getFullYear();
                 const selectAno = document.getElementById('filtro-ano');
                 const selectAnoModal = document.getElementById('filtro-ano-modal');
-                
+
                 let html = `<option value="${anoAtual}">${anoAtual}</option>`;
                 for (let i = 1; i <= 3; i++) {
                     const ano = anoAtual - i;
                     html += `<option value="${ano}">${ano}</option>`;
                 }
-                
+
                 if (selectAno) selectAno.innerHTML = html;
                 if (selectAnoModal) selectAnoModal.innerHTML = `<option value="">Todos os anos</option>` + html;
-                
+
                 const mesAtual = String(new Date().getMonth() + 1).padStart(2, '0');
                 document.getElementById('filtro-mes').value = mesAtual;
-                
-                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                               'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
                 document.getElementById('mes-atual-label').textContent = `${meses[parseInt(mesAtual) - 1]}/${anoAtual}`;
             }
@@ -653,16 +653,16 @@
             async function carregarDadosFinanceirosCompletos() {
                 const loader = document.getElementById('financeiro-loader');
                 if (loader) loader.style.display = 'block';
-                
+
                 try {
                     const [orcamentosSnapshot, despesasSnapshot] = await Promise.all([
                         db.collection('oficinas').doc(oficinaId).collection('orcamentos').get(),
                         db.collection('oficinas').doc(oficinaId).collection('despesas').get()
                     ]);
-                    
+
                     processarDadosFinanceiros(orcamentosSnapshot, despesasSnapshot);
                     criarGraficoFinanceiro(orcamentosSnapshot, despesasSnapshot);
-                    
+
                     if (loader) loader.style.display = 'none';
                 } catch (error) {
                     console.error('Erro ao carregar dados financeiros:', error);
@@ -675,22 +675,22 @@
                 let despesasTotal = 0;
                 let receitaMes = 0;
                 let despesasMes = 0;
-                
+
                 const mesFiltro = filtroMesAtual || String(new Date().getMonth() + 1).padStart(2, '0');
                 const anoFiltro = filtroAnoAtual || new Date().getFullYear();
-                
+
                 const receitasMesArray = [];
                 const despesasMesArray = [];
-                
+
                 // Processar orçamentos
                 orcamentosSnapshot.forEach(doc => {
                     const orc = doc.data();
                     const valor = parseFloat(orc.valorTotal) || 0;
                     const dataPagamento = orc.dataPagamento || '';
-                    
+
                     if (orc.status === 'pago' || orc.status === 'concluido') {
                         receitaTotal += valor;
-                        
+
                         if (dataPagamento && verificarMesAno(dataPagamento, mesFiltro, anoFiltro)) {
                             receitaMes += valor;
                             receitasMesArray.push({
@@ -703,15 +703,15 @@
                         }
                     }
                 });
-                
+
                 // Processar despesas
                 despesasSnapshot.forEach(doc => {
                     const despesa = doc.data();
                     const valor = parseFloat(despesa.valor) || 0;
                     const dataDespesa = despesa.data || '';
-                    
+
                     despesasTotal += valor;
-                    
+
                     if (dataDespesa && verificarMesAno(dataDespesa, mesFiltro, anoFiltro)) {
                         despesasMes += valor;
                         despesasMesArray.push({
@@ -723,12 +723,12 @@
                         });
                     }
                 });
-                
+
                 const liquidoTotal = receitaTotal - despesasTotal;
                 const liquidoMes = receitaMes - despesasMes;
                 const margemTotal = receitaTotal > 0 ? ((liquidoTotal / receitaTotal) * 100) : 0;
                 const margemMes = receitaMes > 0 ? ((liquidoMes / receitaMes) * 100) : 0;
-                
+
                 atualizarEstatisticas(receitaTotal, despesasTotal, liquidoTotal, margemTotal);
                 atualizarEstatisticasMes(receitaMes, despesasMes, liquidoMes, margemMes);
                 atualizarTabelaReceitas(receitasMesArray);
@@ -749,11 +749,11 @@
             function atualizarEstatisticas(receita, despesas, liquido, margem) {
                 document.getElementById('receita-total').textContent = formatarMoeda(receita);
                 document.getElementById('despesas-total').textContent = formatarMoeda(despesas);
-                
+
                 const liquidoElement = document.getElementById('liquido-total');
                 liquidoElement.textContent = formatarMoeda(liquido);
                 liquidoElement.style.color = liquido >= 0 ? '#28a745' : '#dc3545';
-                
+
                 const margemElement = document.getElementById('margem-lucro');
                 margemElement.textContent = `${margem.toFixed(1)}%`;
                 margemElement.style.color = margem >= 0 ? '#28a745' : '#dc3545';
@@ -762,11 +762,11 @@
             function atualizarEstatisticasMes(receita, despesas, liquido, margem) {
                 document.getElementById('receita-mes').textContent = formatarMoeda(receita);
                 document.getElementById('despesas-mes').textContent = formatarMoeda(despesas);
-                
+
                 const liquidoElement = document.getElementById('liquido-mes');
                 liquidoElement.textContent = formatarMoeda(liquido);
                 liquidoElement.style.color = liquido >= 0 ? '#28a745' : '#dc3545';
-                
+
                 const margemElement = document.getElementById('margem-mes');
                 margemElement.textContent = `${margem.toFixed(1)}%`;
                 margemElement.style.color = margem >= 0 ? '#28a745' : '#dc3545';
@@ -775,15 +775,15 @@
             function atualizarTabelaReceitas(receitas) {
                 const tbody = document.getElementById('receitas-mes-body');
                 const message = document.getElementById('receitas-message');
-                
+
                 tbody.innerHTML = '';
-                
+
                 if (receitas.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhuma receita neste período</td></tr>';
                     message.textContent = 'Nenhuma receita neste período';
                 } else {
                     receitas.sort((a, b) => new Date(b.data) - new Date(a.data));
-                    
+
                     receitas.forEach(receita => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -794,7 +794,7 @@
                         `;
                         tbody.appendChild(row);
                     });
-                    
+
                     message.textContent = `${receitas.length} receitas encontradas`;
                 }
             }
@@ -802,15 +802,15 @@
             function atualizarTabelaDespesas(despesas) {
                 const tbody = document.getElementById('despesas-mes-body');
                 const message = document.getElementById('despesas-message');
-                
+
                 tbody.innerHTML = '';
-                
+
                 if (despesas.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhuma despesa neste período</td></tr>';
                     message.textContent = 'Nenhuma despesa neste período';
                 } else {
                     despesas.sort((a, b) => new Date(b.data) - new Date(a.data));
-                    
+
                     despesas.forEach(despesa => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -823,20 +823,20 @@
                         `;
                         tbody.appendChild(row);
                     });
-                    
+
                     message.textContent = `${despesas.length} despesas encontradas`;
                 }
             }
 
             function criarGraficoFinanceiro(orcamentosSnapshot, despesasSnapshot) {
                 const ctx = document.getElementById('grafico-financeiro').getContext('2d');
-                
+
                 const mesesDados = obterDadosUltimosMeses(orcamentosSnapshot, despesasSnapshot, 6);
-                
+
                 if (chartFinanceiro) {
                     chartFinanceiro.destroy();
                 }
-                
+
                 chartFinanceiro = new Chart(ctx, {
                     type: 'bar',
                     data: {
@@ -889,19 +889,19 @@
                 const receitas = [];
                 const despesas = [];
                 const lucros = [];
-                
+
                 for (let i = meses - 1; i >= 0; i--) {
                     const data = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
                     const mes = String(data.getMonth() + 1).padStart(2, '0');
                     const ano = data.getFullYear();
-                    
-                    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 
+
+                    const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
                                        'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                     labels.push(`${mesesNomes[data.getMonth()]}/${ano.toString().slice(-2)}`);
-                    
+
                     let receitaMes = 0;
                     let despesaMes = 0;
-                    
+
                     orcamentosSnapshot.forEach(doc => {
                         const orc = doc.data();
                         if ((orc.status === 'pago' || orc.status === 'concluido') && orc.dataPagamento) {
@@ -910,19 +910,19 @@
                             }
                         }
                     });
-                    
+
                     despesasSnapshot.forEach(doc => {
                         const despesa = doc.data();
                         if (despesa.data && verificarMesAno(despesa.data, mes, ano)) {
                             despesaMes += parseFloat(despesa.valor) || 0;
                         }
                     });
-                    
+
                     receitas.push(receitaMes);
                     despesas.push(despesaMes);
                     lucros.push(receitaMes - despesaMes);
                 }
-                
+
                 return { labels, receitas, despesas, lucros };
             }
 
@@ -961,7 +961,7 @@
                 const mes = String(hoje.getMonth() + 1).padStart(2, '0');
                 const dia = String(hoje.getDate()).padStart(2, '0');
                 const dataFormatada = `${ano}-${mes}-${dia}`;
-                
+
                 document.getElementById('pagamento-data').value = dataFormatada;
                 document.getElementById('despesa-data').value = dataFormatada;
             }
@@ -969,15 +969,15 @@
             async function carregarOrcamentosParaPagamento() {
                 const select = document.getElementById('pagamento-orcamento');
                 if (!select) return;
-                
+
                 select.innerHTML = '<option value="">Carregando...</option>';
-                
+
                 try {
                     const snapshot = await db.collection('oficinas').doc(oficinaId).collection('orcamentos').get();
-                    
+
                     let html = '<option value="">Selecione um orçamento</option>';
                     let encontrados = 0;
-                    
+
                     snapshot.forEach(doc => {
                         const orc = doc.data();
                         if (orc.status !== 'pago' && orc.status !== 'cancelado') {
@@ -985,19 +985,18 @@
                             const valor = parseFloat(orc.valorTotal) || 0;
                             const numero = orc.numero || ('ORC-' + doc.id.substring(0, 6));
                             const cliente = orc.cliente?.nome || orc.clienteNome || 'Cliente';
-                            
-                            html += `<option value="${doc.id}" data-valor="${valor}">
-                                ${numero} - ${cliente} - R$ ${valor.toFixed(2)}
+
+                            html += `<option value="${doc.id}" data-valor="${valor}">${numero} - ${cliente} - R$ ${valor.toFixed(2)}
                             </option>`;
                         }
                     });
-                    
+
                     if (encontrados === 0) {
                         html = '<option value="">Nenhum orçamento pendente</option>';
                     }
-                    
+
                     select.innerHTML = html;
-                    
+
                     select.addEventListener('change', function() {
                         const option = this.options[this.selectedIndex];
                         if (option.value) {
@@ -1005,7 +1004,7 @@
                             document.getElementById('pagamento-valor').value = valor;
                         }
                     });
-                    
+
                 } catch (error) {
                     console.error('Erro:', error);
                     select.innerHTML = '<option value="">Erro ao carregar</option>';
@@ -1015,10 +1014,10 @@
             async function carregarTodasDespesas() {
                 const tbody = document.getElementById('todas-despesas-body');
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center">Carregando...</td></tr>';
-                
+
                 try {
                     const snapshot = await db.collection('oficinas').doc(oficinaId).collection('despesas').orderBy('data', 'desc').get();
-                    
+
                     if (snapshot.empty) {
                         tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma despesa</td></tr>';
                     } else {
@@ -1093,18 +1092,18 @@
 
             document.getElementById('form-pagamento').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 const orcamentoId = document.getElementById('pagamento-orcamento').value;
                 const valor = parseFloat(document.getElementById('pagamento-valor').value);
                 const forma = document.getElementById('pagamento-forma').value;
                 const data = document.getElementById('pagamento-data').value;
                 const obs = document.getElementById('pagamento-observacoes').value;
-                
+
                 if (!orcamentoId || !valor || !forma || !data) {
                     alert('Preencha todos os campos obrigatórios!');
                     return;
                 }
-                
+
                 try {
                     await db.collection('oficinas').doc(oficinaId).collection('orcamentos').doc(orcamentoId).update({
                         status: 'pago',
@@ -1113,33 +1112,33 @@
                         observacoesPagamento: obs,
                         updatedAt: new Date().toISOString()
                     });
-                    
-                    alert('✅ Pagamento registrado!');
+
+                    alert('Pagamento registrado!');
                     document.getElementById('pagamento-modal').classList.remove('active');
                     this.reset();
                     configurarDataAtual();
                     carregarDadosFinanceirosCompletos();
-                    
+
                 } catch (error) {
                     console.error('Erro:', error);
-                    alert('❌ Erro ao registrar pagamento');
+                    alert('Erro ao registrar pagamento');
                 }
             });
 
             document.getElementById('form-despesa').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 const tipo = document.getElementById('despesa-tipo').value;
                 const desc = document.getElementById('despesa-descricao').value.trim();
                 const valor = parseFloat(document.getElementById('despesa-valor').value);
                 const data = document.getElementById('despesa-data').value;
                 const documento = document.getElementById('despesa-documento').value.trim();
-                
+
                 if (!tipo || !desc || isNaN(valor) || !data) {
                     alert('Preencha todos os campos!');
                     return;
                 }
-                
+
                 try {
                     await db.collection('oficinas').doc(oficinaId).collection('despesas').add({
                         tipo: tipo,
@@ -1149,16 +1148,16 @@
                         documento: documento || '',
                         createdAt: new Date().toISOString()
                     });
-                    
-                    alert('✅ Despesa salva!');
+
+                    alert('Despesa salva!');
                     document.getElementById('despesa-modal').classList.remove('active');
                     this.reset();
                     configurarDataAtual();
                     carregarDadosFinanceirosCompletos();
-                    
+
                 } catch (error) {
                     console.error('Erro:', error);
-                    alert('❌ Erro ao salvar despesa');
+                    alert('Erro ao salvar despesa');
                 }
             });
 
@@ -1166,12 +1165,12 @@
                 if (confirm('Excluir esta despesa?')) {
                     try {
                         await db.collection('oficinas').doc(oficinaId).collection('despesas').doc(id).delete();
-                        alert('✅ Despesa excluída!');
+                        alert('Despesa excluída!');
                         carregarDadosFinanceirosCompletos();
                         carregarTodasDespesas();
                     } catch (error) {
                         console.error('Erro:', error);
-                        alert('❌ Erro ao excluir');
+                        alert('Erro ao excluir');
                     }
                 }
             };

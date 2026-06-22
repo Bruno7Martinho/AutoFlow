@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>AutoFlow - Sistema de Gestão para Oficinas</title>
-    
+
     <!-- Fontes e ícones -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <style>
         * {
             margin: 0;
@@ -132,7 +132,7 @@
             background: var(--primary);
             color: var(--white) !important;
             padding: 8px 24px !important;
-            border-radius: 30px;
+            border-radius: 0;
             transition: all 0.3s;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -165,7 +165,7 @@
         .btn {
             display: inline-block;
             padding: 12px 28px;
-            border-radius: 8px;
+            border-radius: 0;
             font-weight: 600;
             font-size: 1rem;
             text-decoration: none;
@@ -256,7 +256,7 @@
             color: white;
             font-weight: bold;
             font-size: 20px;
-            border-radius: 0 8px 8px 0;
+            border-radius: 0;
             user-select: none;
             transition: 0.3s;
             z-index: 20;
@@ -265,7 +265,7 @@
 
         .hero .next {
             right: 0;
-            border-radius: 8px 0 0 8px;
+            border-radius: 0;
         }
 
         .hero .prev:hover, .hero .next:hover {
@@ -287,7 +287,7 @@
             width: 12px;
             margin: 0 6px;
             background-color: rgba(255,255,255,0.5);
-            border-radius: 50%;
+            border-radius: 0;
             display: inline-block;
             transition: background-color 0.3s ease;
         }
@@ -378,7 +378,7 @@
         .feature-card {
             background: var(--white);
             padding: 40px 30px;
-            border-radius: 10px;
+            border-radius: 0;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             transition: all 0.3s;
             text-align: center;
@@ -395,7 +395,7 @@
             width: 80px;
             height: 80px;
             background: rgba(198,40,40,0.1);
-            border-radius: 50%;
+            border-radius: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -430,7 +430,7 @@
 
         .pricing-card {
             background: var(--white);
-            border-radius: 10px;
+            border-radius: 0;
             padding: 40px 30px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             transition: all 0.3s;
@@ -452,7 +452,7 @@
             background: var(--primary);
             color: var(--white);
             padding: 5px 20px;
-            border-radius: 20px;
+            border-radius: 0;
             font-size: 0.85rem;
             font-weight: 600;
         }
@@ -528,7 +528,7 @@
         .testimonial-card {
             background: var(--white);
             padding: 30px;
-            border-radius: 10px;
+            border-radius: 0;
             box-shadow: 0 5px 20px rgba(0,0,0,0.05);
             border: 1px solid var(--gray-200);
         }
@@ -543,7 +543,7 @@
         .testimonial-avatar {
             width: 60px;
             height: 60px;
-            border-radius: 50%;
+            border-radius: 0;
             background: var(--gray-200);
             display: flex;
             align-items: center;
@@ -594,7 +594,7 @@
             color: var(--primary);
             font-size: 1.2rem;
             padding: 15px 50px;
-            border-radius: 50px;
+            border-radius: 0;
             font-weight: 700;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
@@ -659,7 +659,7 @@
             width: 40px;
             height: 40px;
             background: rgba(255,255,255,0.1);
-            border-radius: 50%;
+            border-radius: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -723,7 +723,7 @@
                 width: 100%;
                 text-align: center;
                 padding: 12px;
-                border-radius: 8px;
+                border-radius: 0;
             }
 
             .nav-menu a::after {
@@ -802,6 +802,219 @@
                 transform: translateY(0);
             }
         }
+
+        /* ===== PROFESSIONAL LANDING POLISH ===== */
+        .header {
+            border-bottom: 1px solid rgba(222, 226, 230, 0.9);
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+        }
+
+        .btn,
+        .btn-login-nav,
+        .feature-card,
+        .pricing-card,
+        .testimonial-card {
+            border-radius: 0;
+        }
+
+        .btn-login-nav {
+            padding: 9px 18px !important;
+        }
+
+        .hero {
+            min-height: 92vh;
+        }
+
+        .hero-background .slide img {
+            filter: brightness(0.52) contrast(1.04);
+        }
+
+        .hero-content h1 {
+            letter-spacing: 0;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .hero-content h1 span {
+            color: #ffb4b4;
+        }
+
+        .hero-content p {
+            max-width: 720px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .feature-card,
+        .pricing-card,
+        .testimonial-card {
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+            border-color: #e2e8f0;
+        }
+
+        .feature-card:hover,
+        .pricing-card:hover,
+        .testimonial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+        }
+
+        .feature-icon {
+            width: 58px;
+            height: 58px;
+            border-radius: 0;
+            margin: 0 auto 20px;
+        }
+
+        .pricing-card.featured {
+            transform: none;
+            border-width: 2px;
+        }
+
+        .pricing-card.featured:hover {
+            transform: translateY(-4px);
+        }
+
+        .cta {
+            background: #1f2937;
+        }
+
+        .cta .btn {
+            border-radius: 0;
+        }
+
+        *,
+        *::before,
+        *::after {
+            border-radius: 0 !important;
+        }
+
+        .btn:hover,
+        .btn-primary:hover,
+        .btn-outline:hover,
+        .feature-card:hover,
+        .pricing-card:hover,
+        .testimonial-card:hover,
+        .pricing-card.featured:hover {
+            transform: none !important;
+        }
+
+        .feature-card,
+        .pricing-card,
+        .testimonial-card {
+            box-shadow: none;
+        }
+
+        .home-menu-backdrop {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                z-index: 1300;
+            }
+
+            .header .container {
+                min-height: 66px;
+            }
+
+            .mobile-menu-btn {
+                width: 42px;
+                height: 42px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid var(--gray-300);
+                background: #ffffff;
+                color: var(--gray-800);
+                z-index: 1201;
+            }
+
+            .nav-menu {
+                display: flex !important;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: min(84vw, 320px);
+                height: 100vh;
+                padding: 78px 18px 18px;
+                background: #ffffff;
+                border-right: 1px solid var(--gray-300);
+                box-shadow: 12px 0 30px rgba(15, 23, 42, 0.16);
+                flex-direction: column;
+                gap: 0;
+                transform: translateX(-105%);
+                transition: transform 0.22s ease;
+                z-index: 1200;
+                overflow-y: auto;
+                animation: none;
+            }
+
+            .nav-menu::before {
+                content: "Menu";
+                position: absolute;
+                top: 24px;
+                left: 18px;
+                right: 18px;
+                padding-bottom: 14px;
+                border-bottom: 1px solid var(--gray-200);
+                color: var(--gray-800);
+                font-size: 0.9rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+            }
+
+            .nav-menu.active {
+                transform: translateX(0);
+            }
+
+            .nav-menu li {
+                width: 100%;
+            }
+
+            .nav-menu a {
+                width: 100%;
+                display: block;
+                padding: 14px 4px;
+                text-align: left;
+                border-bottom: 1px solid var(--gray-200);
+            }
+
+            .nav-menu a:hover,
+            .nav-menu a.active {
+                background: transparent;
+            }
+
+            .btn-login-nav {
+                margin-top: 8px;
+                text-align: left;
+                background: transparent;
+                color: var(--primary) !important;
+                box-shadow: none;
+                padding-left: 4px !important;
+            }
+
+            .home-menu-backdrop {
+                position: fixed;
+                inset: 0;
+                display: block;
+                background: rgba(15, 23, 42, 0.45);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.22s ease;
+                z-index: 1100;
+                border: 0;
+            }
+
+            body.home-menu-open {
+                overflow: hidden;
+            }
+
+            body.home-menu-open .home-menu-backdrop {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -822,11 +1035,12 @@
                     <li><a href="html/login.html" class="btn-login-nav">Login</a></li>
                 </ul>
             </nav>
-            <button class="mobile-menu-btn" onclick="toggleMenu()">
+            <button class="mobile-menu-btn" type="button" onclick="toggleMenu()" aria-label="Abrir menu" aria-expanded="false">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
     </header>
+    <button class="home-menu-backdrop" type="button" onclick="toggleMenu(false)" aria-label="Fechar menu"></button>
 
     <!-- HERO SECTION COM BACKGROUND SLIDESHOW -->
     <section id="home" class="hero">
@@ -1067,15 +1281,24 @@
     </footer>
 
     <script>
-        function toggleMenu() {
+        function toggleMenu(forceOpen) {
             const menu = document.getElementById('navMenu');
-            menu.classList.toggle('active');
+            const button = document.querySelector('.mobile-menu-btn');
+            const shouldOpen = typeof forceOpen === 'boolean' ? forceOpen : !menu.classList.contains('active');
+
+            menu.classList.toggle('active', shouldOpen);
+            document.body.classList.toggle('home-menu-open', shouldOpen);
+            button?.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
         }
 
         document.querySelectorAll('.nav-menu a').forEach(link => {
             link.addEventListener('click', () => {
-                document.getElementById('navMenu').classList.remove('active');
+                toggleMenu(false);
             });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') toggleMenu(false);
         });
 
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {

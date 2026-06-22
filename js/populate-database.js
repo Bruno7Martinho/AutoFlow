@@ -5,13 +5,13 @@
 // 1. Faça login como admin no sistema
 // 2. Abra o console do navegador (F12)
 // 3. Cole este script inteiro e pressione Enter
-// 4. Aguarde a mensagem "✅ Banco populado com sucesso!"
+// 4. Aguarde a mensagem "Banco populado com sucesso!"
 // ===========================================
 
 (async function popularBanco() {
-    console.log('🚀 Iniciando população do banco de dados...');
+    console.log('Iniciando população do banco de dados...');
     console.log('⏳ Isso pode levar alguns segundos...');
-    
+
     // ===========================================
     // CONFIGURAÇÕES
     // ===========================================
@@ -19,11 +19,11 @@
     const TOTAL_OFICINAS = 5; // Quantas oficinas criar
     const CLIENTES_POR_OFICINA = 15; // Clientes por oficina
     const VEICULOS_POR_CLIENTE = 2; // Veículos por cliente
-    
+
     // ===========================================
     // DADOS FAKES REALISTAS
     // ===========================================
-    
+
     // Nomes de oficinas
     const oficinasData = [
         {
@@ -87,7 +87,7 @@
             plano: 'pro'
         }
     ];
-    
+
     // Nomes de clientes
     const nomesClientes = [
         'Ana Beatriz Souza', 'Carlos Eduardo Lima', 'Maria Fernanda Santos',
@@ -101,7 +101,7 @@
         'Cristiane Barbosa Melo', 'Fábio Henrique Correia', 'Simone Aparecida Lima',
         'André Luiz Vieira', 'Luciana Santos Pereira', 'Thiago Oliveira Costa'
     ];
-    
+
     // Marcas e modelos de veículos
     const veiculosData = [
         { marca: 'Fiat', modelo: 'Uno', ano: 2018, placa: 'ABC1234' },
@@ -129,7 +129,7 @@
         { marca: 'Hyundai', modelo: 'HB20', ano: 2020, placa: 'OPQ9012' },
         { marca: 'Hyundai', modelo: 'Creta', ano: 2022, placa: 'RST3456' }
     ];
-    
+
     // Serviços realizados
     const servicos = [
         'Troca de óleo', 'Revisão completa', 'Alinhamento', 'Balanceamento',
@@ -137,43 +137,43 @@
         'Ar condicionado', 'Suspensão', 'Embreagem', 'Troca de correia dentada',
         'Diagnóstico computadorizado', 'Funilaria', 'Pintura', 'Troca de bateria'
     ];
-    
+
     // ===========================================
     // FUNÇÕES AUXILIARES
     // ===========================================
-    
+
     function randomDate(start, end) {
         return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
     }
-    
+
     function randomInt(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    
+
     function randomItem(array) {
         return array[Math.floor(Math.random() * array.length)];
     }
-    
+
     function formatarTelefone() {
         const ddd = randomInt(11, 99);
         const prefixo = randomInt(3000, 9999);
         const sufixo = randomInt(1000, 9999);
         return `(${ddd}) ${prefixo}-${sufixo}`;
     }
-    
+
     function formatarCelular() {
         const ddd = randomInt(11, 99);
         const prefixo = randomInt(90000, 99999);
         const sufixo = randomInt(1000, 9999);
         return `(${ddd}) ${prefixo}-${sufixo}`;
     }
-    
+
     function formatarCPF() {
         const n = () => randomInt(100, 999);
         const d = () => randomInt(10, 99);
         return `${n()}.${n()}.${n()}-${d()}`;
     }
-    
+
     function formatarPlaca() {
         const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let placa = '';
@@ -181,14 +181,14 @@
         placa += randomInt(100, 999);
         return placa;
     }
-    
+
     // ===========================================
     // POPULAR BANCO
     // ===========================================
-    
+
     try {
-        console.log('📊 Criando oficinas...');
-        
+        console.log('Criando oficinas...');
+
         // Criar oficinas
         for (let i = 0; i < TOTAL_OFICINAS; i++) {
             const ofData = oficinasData[i] || {
@@ -203,7 +203,7 @@
                 uf: 'RS',
                 plano: randomItem(['basico', 'pro', 'enterprise'])
             };
-            
+
             // Criar documento da oficina
             const oficinaRef = await db.collection('oficinas').add({
                 ...ofData,
@@ -212,16 +212,16 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 createdBy: ADMIN_UID
             });
-            
-            console.log(`  ✅ Oficina criada: ${ofData.nome} (${oficinaRef.id})`);
-            
+
+            console.log(`Oficina criada: ${ofData.nome} (${oficinaRef.id})`);
+
             // Criar clientes para esta oficina
-            console.log(`    👥 Criando clientes...`);
-            
+            console.log(`Criando clientes...`);
+
             for (let c = 0; c < CLIENTES_POR_OFICINA; c++) {
                 const nomeCliente = nomesClientes[c % nomesClientes.length] + ` ${c+1}`;
                 const dataNascimento = randomDate(new Date(1970, 0, 1), new Date(2002, 0, 1));
-                
+
                 const clienteRef = await oficinaRef.collection('clientes').add({
                     nome: nomeCliente,
                     cpf: formatarCPF(),
@@ -239,14 +239,14 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     createdBy: ADMIN_UID
                 });
-                
-                console.log(`      ✅ Cliente: ${nomeCliente}`);
-                
+
+                console.log(`Cliente: ${nomeCliente}`);
+
                 // Criar veículos para este cliente
                 for (let v = 0; v < VEICULOS_POR_CLIENTE; v++) {
                     const veiculo = veiculosData[randomInt(0, veiculosData.length - 1)];
                     const ano = randomInt(2015, 2023);
-                    
+
                     await clienteRef.collection('veiculos').add({
                         marca: veiculo.marca,
                         modelo: veiculo.modelo,
@@ -262,20 +262,20 @@
                         createdBy: ADMIN_UID
                     });
                 }
-                
+
                 // Criar alguns orçamentos aleatórios para alguns clientes
                 if (Math.random() > 0.6) {
                     const numOrcamentos = randomInt(1, 3);
-                    
+
                     for (let o = 0; o < numOrcamentos; o++) {
                         const valorTotal = randomInt(200, 5000);
                         const servicosEscolhidos = [];
                         const numServicos = randomInt(1, 4);
-                        
+
                         for (let s = 0; s < numServicos; s++) {
                             servicosEscolhidos.push(randomItem(servicos));
                         }
-                        
+
                         await clienteRef.collection('orcamentos').add({
                             numero: `OR${randomInt(1000, 9999)}`,
                             servicos: servicosEscolhidos,
@@ -289,26 +289,26 @@
                     }
                 }
             }
-            
+
             // Pausa pequena para não sobrecarregar
             await new Promise(resolve => setTimeout(resolve, 500));
         }
-        
-        console.log('\n✅✅✅ BANCO POPULADO COM SUCESSO! ✅✅✅');
-        console.log(`📊 Resumo:`);
-        console.log(`   🏪 ${TOTAL_OFICINAS} oficinas criadas`);
-        console.log(`   👥 ${TOTAL_OFICINAS * CLIENTES_POR_OFICINA} clientes criados`);
-        console.log(`   🚗 ${TOTAL_OFICINAS * CLIENTES_POR_OFICINA * VEICULOS_POR_CLIENTE} veículos criados`);
-        console.log(`\n📝 Próximos passos:`);
+
+        console.log('\n BANCO POPULADO COM SUCESSO! ');
+        console.log(`Resumo:`);
+        console.log(`    ${TOTAL_OFICINAS} oficinas criadas`);
+        console.log(`    ${TOTAL_OFICINAS * CLIENTES_POR_OFICINA} clientes criados`);
+        console.log(`    ${TOTAL_OFICINAS * CLIENTES_POR_OFICINA * VEICULOS_POR_CLIENTE} veículos criados`);
+        console.log(`\n Próximos passos:`);
         console.log(`   1. Vá para admin-oficinas.html e veja suas oficinas`);
         console.log(`   2. Faça login como dono de uma oficina para testar`);
         console.log(`   3. Emails de teste:`);
         for (let i = 0; i < Math.min(3, TOTAL_OFICINAS); i++) {
             console.log(`      - ${oficinasData[i]?.emailDono || `oficina${i+1}@teste.com`}`);
         }
-        
+
     } catch (error) {
-        console.error('❌ Erro ao popular banco:', error);
+        console.error('Erro ao popular banco:', error);
         console.log('Tentando novamente em 5 segundos...');
         setTimeout(popularBanco, 5000);
     }

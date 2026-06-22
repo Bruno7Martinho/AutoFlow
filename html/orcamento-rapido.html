@@ -704,7 +704,7 @@
                             <p><strong>Data:</strong> ${new Date(orc.data).toLocaleDateString('pt-BR')}</p>
                             <p><strong>Status:</strong> <span class="status-badge status-${orc.status}">${orc.status}</span></p>
                         </div>
-                        
+
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                             <div>
                                 <h4>Cliente</h4>
@@ -722,7 +722,7 @@
                                 <p><strong>KM:</strong> ${orc.veiculo?.km || '-'}</p>
                             </div>
                         </div>
-                        
+
                         <h4>Itens</h4>
                         <table class="data-table" style="margin-bottom: 20px;">
                             <thead>
@@ -1180,11 +1180,11 @@
 
                     // Salvar PDF
                     doc.save(`orcamento-${orc.numero || 'sem-numero'}.pdf`);
-                    alert('✅ PDF gerado com sucesso!');
+                    alert('PDF gerado com sucesso!');
 
                 } catch (error) {
                     console.error('Erro detalhado ao gerar PDF:', error);
-                    alert('❌ Erro ao gerar PDF: ' + error.message);
+                    alert('Erro ao gerar PDF: ' + error.message);
                 }
             };
 
@@ -1229,6 +1229,7 @@
             }
         });
     </script>
+    <script src="../js/pdf-layout.js"></script>
 </body>
 
 </html>

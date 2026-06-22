@@ -89,32 +89,32 @@ const CACHE_TIME = 5 * 60 * 1000;
 async function verificarPermissaoPagina() {
     const oficinaId = sessionStorage.getItem('oficinaId');
     const paginaAtual = window.location.pathname.split('/').pop();
-    
+
     console.log('Verificando permissão para:', paginaAtual);
     console.log('Oficina ID:', oficinaId);
-    
+
     // Se não tem oficinaId, é admin - permite tudo
     if (!oficinaId) {
         console.log('Modo admin - acesso liberado');
         return true;
     }
-    
+
     // Páginas públicas (sempre acessíveis)
     const paginasPublicas = ['login.html', 'primeiro-acesso.html', 'recuperar-senha.html', 'logout.html'];
     if (paginasPublicas.includes(paginaAtual)) {
         return true;
     }
-    
+
     try {
         // Buscar dados da oficina (com cache)
         const oficina = await getDadosOficina(oficinaId);
-        
+
         if (!oficina) {
             console.error('Oficina não encontrada');
             window.location.href = 'login.html';
             return false;
         }
-        
+
         // Verificar status
         if (oficina.status !== 'ativa') {
             const mensagens = {
@@ -125,35 +125,35 @@ async function verificarPermissaoPagina() {
             window.location.href = 'logout.html';
             return false;
         }
-        
+
         // Obter configurações do plano
         const plano = oficina.plano || 'basico';
         const config = PLANOS_CONFIG[plano] || PLANOS_CONFIG.basico;
-        
+
         // SALVAR NA SESSÃO - ESSENCIAL!
         sessionStorage.setItem('planoAtual', plano);
         sessionStorage.setItem('planoNome', config.nome);
         sessionStorage.setItem('planoPreco', config.preco);
         sessionStorage.setItem('planoFuncionalidades', JSON.stringify(config.funcionalidades));
-        
+
         console.log('Plano atual:', plano, config.nome);
         console.log('Dados salvos na sessão');
-        
+
         // Verificar se a página atual é permitida
         if (!config.rotasPermitidas.includes(paginaAtual)) {
             console.log(`Plano ${config.nome} não permite ${paginaAtual}`);
-            
-            const mensagem = config.mensagemRestricao || 
+
+            const mensagem = config.mensagemRestricao ||
                 `Seu plano ${config.nome} (R$${config.preco}) não inclui acesso a esta página.`;
-            
+
             alert(mensagem);
             window.location.href = config.redirectSeNaoPermitido;
             return false;
         }
-        
+
         console.log(`Acesso permitido a ${paginaAtual}`);
         return true;
-        
+
     } catch (error) {
         console.error('Erro ao verificar permissões:', error);
         return false;
@@ -166,32 +166,32 @@ async function verificarPermissaoPagina() {
 async function getDadosOficina(oficinaId) {
     // Verificar cache
     const agora = Date.now();
-    if (planoCache.id === oficinaId && 
-        planoCache.dados && 
+    if (planoCache.id === oficinaId &&
+        planoCache.dados &&
         (agora - planoCache.timestamp) < CACHE_TIME) {
         console.log('Usando cache do plano');
         return planoCache.dados;
     }
-    
+
     try {
         console.log('Buscando dados da oficina no Firestore...');
         const doc = await db.collection('oficinas').doc(oficinaId).get();
-        
+
         if (!doc.exists) {
             return null;
         }
-        
+
         const dados = doc.data();
-        
+
         // Atualizar cache
         planoCache = {
             id: oficinaId,
             dados: dados,
             timestamp: agora
         };
-        
+
         return dados;
-        
+
     } catch (error) {
         console.error('Erro ao buscar oficina:', error);
         return null;
@@ -204,13 +204,13 @@ async function getDadosOficina(oficinaId) {
 async function atualizarPlano() {
     const oficinaId = sessionStorage.getItem('oficinaId');
     if (!oficinaId) return;
-    
+
     // Limpar cache
     planoCache.id = null;
-    
+
     // Buscar novo
     const oficina = await getDadosOficina(oficinaId);
-    
+
     if (oficina) {
         const config = PLANOS_CONFIG[oficina.plano || 'basico'];
         sessionStorage.setItem('planoAtual', oficina.plano || 'basico');
@@ -225,7 +225,7 @@ async function atualizarPlano() {
 async function gerarMenu() {
     const oficinaId = sessionStorage.getItem('oficinaId');
     const adminMode = sessionStorage.getItem('adminMode');
-    
+
     // Menu para admin
     if (!oficinaId || adminMode === 'true') {
         return `
@@ -237,19 +237,19 @@ async function gerarMenu() {
             <li><a href="admin-oficinas.html" style="color: #ffc107; font-weight: 600;">Admin</a></li>
         `;
     }
-    
+
     // Buscar plano da sessão (já deve estar salvo)
     const plano = sessionStorage.getItem('planoAtual') || 'basico';
     const config = PLANOS_CONFIG[plano] || PLANOS_CONFIG.basico;
-    
+
     console.log('Gerando menu para plano:', plano, config.nome);
-    
+
     let menuHtml = '';
     config.menu.forEach(item => {
         const activeClass = window.location.pathname.includes(item.url) ? 'active' : '';
         menuHtml += `<li><a href="${item.url}" class="${activeClass}">${item.nome}</a></li>`;
     });
-    
+
     return menuHtml;
 }
 
@@ -259,7 +259,7 @@ async function gerarMenu() {
 function temFuncionalidade(funcionalidade) {
     const funcsString = sessionStorage.getItem('planoFuncionalidades');
     if (!funcsString) return false;
-    
+
     try {
         const funcionalidades = JSON.parse(funcsString);
         return funcionalidades.includes(funcionalidade);
@@ -275,19 +275,19 @@ function mostrarBannerPlano() {
     const plano = sessionStorage.getItem('planoAtual') || 'basico';
     const planoNome = sessionStorage.getItem('planoNome') || 'Básico';
     const planoPreco = sessionStorage.getItem('planoPreco') || '30';
-    
+
     const cores = {
         basico: '#cd7f32',
         intermediario: '#6c757d',
         completo: '#ffc107'
     };
-    
+
     const textos = {
         basico: 'Plano Básico - Acesso apenas a orçamentos.',
         intermediario: 'Plano Intermediário - Acesso a clientes e veículos.',
         completo: 'Plano Completo - Todos os recursos liberados.'
     };
-    
+
     const banner = document.createElement('div');
     banner.style.cssText = `
         background: ${cores[plano]};
@@ -300,21 +300,19 @@ function mostrarBannerPlano() {
         font-size: 14px;
         border: 1px solid #e0e0e0;
     `;
-    
+
     banner.innerHTML = `
         <span>
-            <strong>${textos[plano]}</strong> 
-            <span style="margin-left: 10px; background: rgba(255,255,255,0.2); padding: 4px 8px; border: 1px solid rgba(255,255,255,0.3);">
-                R$ ${planoPreco}/mês
+            <strong>${textos[plano]}</strong>
+            <span style="margin-left: 10px; background: rgba(255,255,255,0.2); padding: 4px 8px; border: 1px solid rgba(255,255,255,0.3);">R$ ${planoPreco}/mês
             </span>
         </span>
-        <a href="planos.html" style="color: ${plano === 'completo' ? '#000' : '#fff'}; text-decoration: underline;">
-            Gerenciar Plano →
+        <a href="planos.html" style="color: ${plano === 'completo' ? '#000' : '#fff'}; text-decoration: underline;">Gerenciar Plano →
         </a>
     `;
-    
+
     banner.classList.add('plano-banner');
-    
+
     const content = document.querySelector('.main-content');
     if (content) {
         const bannerAntigo = document.querySelector('.plano-banner');

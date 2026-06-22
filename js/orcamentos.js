@@ -3,14 +3,14 @@
 function loadOrcamentosModule() {
     const user = auth.currentUser;
     if (!user) return;
-    
+
     dashboardContent.innerHTML = `
         <div class="dashboard-section">
             <div class="section-header">
                 <h2>Gerenciamento de Orçamentos</h2>
                 <button id="btn-novo-orcamento" class="btn btn-success">+ Novo Orçamento</button>
             </div>
-            
+
             <div class="table-container">
                 <div class="table-responsive">
                     <table class="data-table" id="orcamentos-table">
@@ -31,14 +31,14 @@ function loadOrcamentosModule() {
                     </table>
                 </div>
             </div>
-            
+
             <div class="loader" id="orcamentos-loader"></div>
         </div>
     `;
-    
+
     // Carregar orçamentos
     loadOrcamentos();
-    
+
     // Adicionar evento ao botão de novo orçamento
     document.getElementById('btn-novo-orcamento').addEventListener('click', showNovoOrcamentoForm);
 }
@@ -47,14 +47,14 @@ function loadOrcamentosModule() {
 function loadOrcamentos() {
     const loader = document.getElementById('orcamentos-loader');
     const orcamentosBody = document.getElementById('orcamentos-body');
-    
+
     loader.style.display = 'block';
     orcamentosBody.innerHTML = '';
-    
+
     db.collection('orcamentos').orderBy('data', 'desc').get()
         .then((snapshot) => {
             loader.style.display = 'none';
-            
+
             if (snapshot.empty) {
                 orcamentosBody.innerHTML = `
                     <tr>
@@ -63,28 +63,28 @@ function loadOrcamentos() {
                 `;
                 return;
             }
-            
+
             // Carregar clientes e veículos para associação
             const clientesPromise = db.collection('clientes').get();
             const veiculosPromise = db.collection('veiculos').get();
-            
+
             Promise.all([snapshot, clientesPromise, veiculosPromise])
                 .then(([orcamentosSnapshot, clientesSnapshot, veiculosSnapshot]) => {
                     const clientesMap = {};
                     clientesSnapshot.forEach(doc => {
                         clientesMap[doc.id] = doc.data().nome;
                     });
-                    
+
                     const veiculosMap = {};
                     veiculosSnapshot.forEach(doc => {
                         const veiculo = doc.data();
                         veiculosMap[doc.id] = `${veiculo.placa} - ${veiculo.marca} ${veiculo.modelo}`;
                     });
-                    
+
                     orcamentosSnapshot.forEach((doc) => {
                         const orcamento = doc.data();
                         const dataFormatada = orcamento.data ? orcamento.data.toDate().toLocaleDateString('pt-BR') : '';
-                        
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${orcamento.numero || ''}</td>
@@ -138,39 +138,37 @@ function showNovoOrcamentoForm() {
             const cliente = doc.data();
             clientesOptions += `<option value="${doc.id}">${cliente.nome}</option>`;
         });
-        
+
         let veiculosOptions = '<option value="">Selecione um veículo</option>';
         veiculosSnapshot.forEach((doc) => {
             const veiculo = doc.data();
             veiculosOptions += `<option value="${doc.id}">${veiculo.placa} - ${veiculo.marca} ${veiculo.modelo}</option>`;
         });
-        
+
         const modal = criarModal();
         modal.innerHTML = `
             <div class="modal-content">
                 <button class="modal-close">&times;</button>
                 <h2 class="modal-title">Novo Orçamento</h2>
-                
+
                 <form id="form-orcamento">
                     <div class="form-group">
                         <label for="orcamento-numero">Número do Orçamento</label>
                         <input type="text" id="orcamento-numero" placeholder="Gerado automaticamente" readonly>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="orcamento-cliente">Cliente *</label>
-                        <select id="orcamento-cliente" required>
-                            ${clientesOptions}
+                        <select id="orcamento-cliente" required>${clientesOptions}
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="orcamento-veiculo">Veículo *</label>
-                        <select id="orcamento-veiculo" required>
-                            ${veiculosOptions}
+                        <select id="orcamento-veiculo" required>${veiculosOptions}
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="orcamento-status">Status</label>
                         <select id="orcamento-status">
@@ -180,17 +178,17 @@ function showNovoOrcamentoForm() {
                             <option value="pago">Pago</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="orcamento-validade">Validade (dias)</label>
                         <input type="number" id="orcamento-validade" value="7" min="1">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="orcamento-descricao">Descrição do Serviço</label>
                         <textarea id="orcamento-descricao" rows="4" placeholder="Descreva os serviços a serem realizados"></textarea>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>Itens do Orçamento</label>
                         <div id="orcamento-itens">
@@ -203,16 +201,16 @@ function showNovoOrcamentoForm() {
                         </div>
                         <button type="button" id="btn-add-item" class="btn btn-sm btn-secondary mt-10">+ Adicionar Item</button>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="orcamento-observacoes">Observações</label>
                         <textarea id="orcamento-observacoes" rows="3"></textarea>
                     </div>
-                    
+
                     <div class="form-group">
                         <label>Total: <span id="orcamento-total">R$ 0,00</span></label>
                     </div>
-                    
+
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">Salvar Orçamento</button>
                         <button type="button" class="btn btn-secondary modal-close">Cancelar</button>
@@ -220,22 +218,22 @@ function showNovoOrcamentoForm() {
                 </form>
             </div>
         `;
-        
+
         // Gerar número automático para o orçamento
         gerarNumeroOrcamento();
-        
+
         // Configurar evento de fechamento
         modal.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', () => modal.remove());
         });
-        
+
         // Configurar adição de itens
         document.getElementById('btn-add-item').addEventListener('click', adicionarItemOrcamento);
-        
+
         // Configurar cálculo do total
         const itensContainer = document.getElementById('orcamento-itens');
         itensContainer.addEventListener('input', calcularTotalOrcamento);
-        
+
         // Configurar remoção de itens
         itensContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('remover-item')) {
@@ -245,7 +243,7 @@ function showNovoOrcamentoForm() {
                 }
             }
         });
-        
+
         // Configurar envio do formulário
         const form = document.getElementById('form-orcamento');
         form.addEventListener('submit', (e) => {
@@ -270,7 +268,7 @@ function gerarNumeroOrcamento() {
         .get()
         .then((snapshot) => {
             let proximoNumero = 1;
-            
+
             if (!snapshot.empty) {
                 const ultimoOrcamento = snapshot.docs[0].data();
                 const ultimoNumero = ultimoOrcamento.numero;
@@ -279,7 +277,7 @@ function gerarNumeroOrcamento() {
                     proximoNumero = parseInt(partes[2]) + 1;
                 }
             }
-            
+
             const numeroFormatado = `ORC-${ano}-${proximoNumero.toString().padStart(4, '0')}`;
             document.getElementById('orcamento-numero').value = numeroFormatado;
         })
@@ -307,13 +305,13 @@ function adicionarItemOrcamento() {
 function calcularTotalOrcamento() {
     const itens = document.querySelectorAll('.item-orcamento');
     let total = 0;
-    
+
     itens.forEach(item => {
         const quantidade = parseFloat(item.querySelector('.item-quantidade').value) || 0;
         const valor = parseFloat(item.querySelector('.item-valor').value) || 0;
         total += quantidade * valor;
     });
-    
+
     document.getElementById('orcamento-total').textContent = `R$ ${total.toFixed(2)}`;
 }
 
@@ -324,7 +322,7 @@ function salvarOrcamento() {
         const descricao = item.querySelector('.item-descricao').value;
         const quantidade = parseFloat(item.querySelector('.item-quantidade').value) || 0;
         const valor = parseFloat(item.querySelector('.item-valor').value) || 0;
-        
+
         if (descricao && quantidade > 0 && valor > 0) {
             itens.push({
                 descricao: descricao,
@@ -334,7 +332,7 @@ function salvarOrcamento() {
             });
         }
     });
-    
+
     const orcamentoData = {
         numero: document.getElementById('orcamento-numero').value,
         clienteId: document.getElementById('orcamento-cliente').value,
@@ -349,7 +347,7 @@ function salvarOrcamento() {
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
-    
+
     db.collection('orcamentos').add(orcamentoData)
         .then(() => {
             alert('Orçamento salvo com sucesso!');
@@ -374,27 +372,27 @@ function visualizarOrcamento(orcamentoId) {
             alert('Orçamento não encontrado.');
             return;
         }
-        
+
         const orcamento = orcamentoDoc.data();
         const clientesMap = {};
         clientesSnapshot.forEach(doc => {
             clientesMap[doc.id] = doc.data();
         });
-        
+
         const veiculosMap = {};
         veiculosSnapshot.forEach(doc => {
             veiculosMap[doc.id] = doc.data();
         });
-        
+
         const cliente = clientesMap[orcamento.clienteId] || {};
         const veiculo = veiculosMap[orcamento.veiculoId] || {};
-        
+
         const modal = criarModal();
         modal.innerHTML = `
             <div class="modal-content">
                 <button class="modal-close">&times;</button>
                 <h2 class="modal-title">Orçamento ${orcamento.numero}</h2>
-                
+
                 <div class="detail-card">
                     <h3>Informações do Orçamento</h3>
                     <div class="detail-row">
@@ -414,7 +412,7 @@ function visualizarOrcamento(orcamentoId) {
                         <div class="detail-value">${orcamento.validade || 7} dias</div>
                     </div>
                 </div>
-                
+
                 <div class="detail-card">
                     <h3>Cliente</h3>
                     <div class="detail-row">
@@ -430,7 +428,7 @@ function visualizarOrcamento(orcamentoId) {
                         <div class="detail-value">${cliente.email || 'Não informado'}</div>
                     </div>
                 </div>
-                
+
                 <div class="detail-card">
                     <h3>Veículo</h3>
                     <div class="detail-row">
@@ -446,7 +444,7 @@ function visualizarOrcamento(orcamentoId) {
                         <div class="detail-value">${veiculo.ano || ''} / ${veiculo.cor || ''}</div>
                     </div>
                 </div>
-                
+
                 <div class="detail-card">
                     <h3>Itens do Orçamento</h3>
                     <div class="table-container">
@@ -459,8 +457,7 @@ function visualizarOrcamento(orcamentoId) {
                                     <th>Total</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${orcamento.itens ? orcamento.itens.map(item => `
+                            <tbody>${orcamento.itens ? orcamento.itens.map(item => `
                                     <tr>
                                         <td>${item.descricao}</td>
                                         <td>${item.quantidade}</td>
@@ -476,20 +473,20 @@ function visualizarOrcamento(orcamentoId) {
                         </table>
                     </div>
                 </div>
-                
+
                 <div class="detail-card">
                     <h3>Descrição e Observações</h3>
                     <p><strong>Descrição:</strong> ${orcamento.descricao || 'Não informada'}</p>
                     <p><strong>Observações:</strong> ${orcamento.observacoes || 'Nenhuma'}</p>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="button" class="btn btn-success" onclick="gerarPDFOrcamento('${orcamentoId}')">Gerar PDF</button>
                     <button type="button" class="btn btn-secondary modal-close">Fechar</button>
                 </div>
             </div>
         `;
-        
+
         // Configurar evento de fechamento
         modal.querySelectorAll('.modal-close').forEach(btn => {
             btn.addEventListener('click', () => modal.remove());
@@ -513,68 +510,68 @@ function gerarPDFOrcamento(orcamentoId) {
             alert('Orçamento não encontrado.');
             return;
         }
-        
+
         const orcamento = orcamentoDoc.data();
         const clientesMap = {};
         clientesSnapshot.forEach(doc => {
             clientesMap[doc.id] = doc.data();
         });
-        
+
         const veiculosMap = {};
         veiculosSnapshot.forEach(doc => {
             veiculosMap[doc.id] = doc.data();
         });
-        
+
         const cliente = clientesMap[orcamento.clienteId] || {};
         const veiculo = veiculosMap[orcamento.veiculoId] || {};
-        
+
         // Criar conteúdo do PDF
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        
+
         // Configurações do documento
         const pageWidth = doc.internal.pageSize.width;
         const margin = 20;
         let y = 20;
-        
+
         // Cabeçalho
         doc.setFontSize(20);
         doc.setTextColor(26, 58, 143);
         doc.text("Alexandre Reparos Automotivos", pageWidth / 2, y, { align: 'center' });
-        
+
         doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
         y += 10;
         doc.text("Soluções completas para seu veículo", pageWidth / 2, y, { align: 'center' });
-        
+
         y += 15;
         doc.setDrawColor(26, 58, 143);
         doc.setLineWidth(0.5);
         doc.line(margin, y, pageWidth - margin, y);
-        
+
         // Título do orçamento
         y += 15;
         doc.setFontSize(16);
         doc.setTextColor(26, 58, 143);
         doc.text(`ORÇAMENTO: ${orcamento.numero}`, pageWidth / 2, y, { align: 'center' });
-        
+
         // Informações do orçamento
         y += 15;
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
-        
+
         doc.text(`Data: ${orcamento.data ? orcamento.data.toDate().toLocaleDateString('pt-BR') : ''}`, margin, y);
         doc.text(`Validade: ${orcamento.validade || 7} dias`, pageWidth - margin, y, { align: 'right' });
-        
+
         y += 10;
         doc.text(`Status: ${getStatusOrcamentoText(orcamento.status)}`, margin, y);
-        
+
         // Informações do cliente
         y += 20;
         doc.setFontSize(12);
         doc.setTextColor(26, 58, 143);
         doc.text("CLIENTE", margin, y);
-        
+
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
         y += 8;
@@ -585,13 +582,13 @@ function gerarPDFOrcamento(orcamentoId) {
         doc.text(`E-mail: ${cliente.email || 'Não informado'}`, margin + 5, y);
         y += 6;
         doc.text(`CPF: ${cliente.cpf || 'Não informado'}`, margin + 5, y);
-        
+
         // Informações do veículo
         y += 15;
         doc.setFontSize(12);
         doc.setTextColor(26, 58, 143);
         doc.text("VEÍCULO", margin, y);
-        
+
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
         y += 8;
@@ -602,59 +599,59 @@ function gerarPDFOrcamento(orcamentoId) {
         doc.text(`Ano: ${veiculo.ano || 'Não informado'}`, margin + 5, y);
         y += 6;
         doc.text(`Cor: ${veiculo.cor || 'Não informado'}`, margin + 5, y);
-        
+
         // Descrição do serviço
         y += 15;
         doc.setFontSize(12);
         doc.setTextColor(26, 58, 143);
         doc.text("DESCRIÇÃO DO SERVIÇO", margin, y);
-        
+
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
         y += 8;
         const descricaoLines = doc.splitTextToSize(orcamento.descricao || 'Não informada', pageWidth - 2 * margin - 10);
         doc.text(descricaoLines, margin + 5, y);
         y += descricaoLines.length * 6;
-        
+
         // Itens do orçamento
         y += 10;
         doc.setFontSize(12);
         doc.setTextColor(26, 58, 143);
         doc.text("ITENS DO ORÇAMENTO", margin, y);
-        
+
         // Cabeçalho da tabela
         y += 10;
         doc.setFontSize(10);
         doc.setTextColor(255, 255, 255);
         doc.setFillColor(26, 58, 143);
         doc.rect(margin, y - 5, pageWidth - 2 * margin, 10, 'F');
-        
+
         doc.text("Descrição", margin + 5, y);
         doc.text("Qtd", pageWidth - 150, y);
         doc.text("Valor Unit.", pageWidth - 120, y);
         doc.text("Total", pageWidth - 70, y);
-        
+
         // Itens
         y += 10;
         doc.setTextColor(0, 0, 0);
-        
+
         if (orcamento.itens && orcamento.itens.length > 0) {
             orcamento.itens.forEach((item, index) => {
                 if (y > 250) {
                     doc.addPage();
                     y = 20;
                 }
-                
+
                 const descLines = doc.splitTextToSize(item.descricao, 80);
                 doc.text(descLines, margin + 5, y);
-                
+
                 const descHeight = descLines.length * 5;
                 doc.text(item.quantidade.toString(), pageWidth - 150, y + (descHeight / 2) - 2);
                 doc.text(`R$ ${item.valorUnitario.toFixed(2)}`, pageWidth - 120, y + (descHeight / 2) - 2);
                 doc.text(`R$ ${item.total.toFixed(2)}`, pageWidth - 70, y + (descHeight / 2) - 2);
-                
+
                 y += Math.max(descHeight, 10) + 5;
-                
+
                 // Linha divisória entre itens
                 if (index < orcamento.itens.length - 1) {
                     doc.setDrawColor(200, 200, 200);
@@ -666,44 +663,44 @@ function gerarPDFOrcamento(orcamentoId) {
             doc.text("Nenhum item cadastrado", margin + 5, y);
             y += 10;
         }
-        
+
         // Total
         y += 10;
         doc.setDrawColor(0, 0, 0);
         doc.setLineWidth(0.5);
         doc.line(pageWidth - 100, y, pageWidth - margin, y);
-        
+
         y += 10;
         doc.setFontSize(12);
         doc.text("TOTAL:", pageWidth - 90, y);
         doc.text(`R$ ${orcamento.valorTotal ? orcamento.valorTotal.toFixed(2) : '0,00'}`, pageWidth - 30, y, { align: 'right' });
-        
+
         // Observações
         y += 20;
         if (y > 250) {
             doc.addPage();
             y = 20;
         }
-        
+
         doc.setFontSize(12);
         doc.setTextColor(26, 58, 143);
         doc.text("OBSERVAÇÕES", margin, y);
-        
+
         doc.setFontSize(10);
         doc.setTextColor(0, 0, 0);
         y += 8;
         const obsLines = doc.splitTextToSize(orcamento.observacoes || 'Nenhuma', pageWidth - 2 * margin - 10);
         doc.text(obsLines, margin + 5, y);
-        
+
         // Rodapé
         y = doc.internal.pageSize.height - 30;
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
         doc.text("Alexandre Reparos Automotivos • (11) 99999-9999 • contato@alexandrereparos.com", pageWidth / 2, y, { align: 'center' });
-        
+
         // Salvar PDF
         doc.save(`orcamento-${orcamento.numero}.pdf`);
-        
+
         alert('PDF gerado com sucesso!');
     })
     .catch((error) => {
@@ -738,7 +735,7 @@ function adicionarEstilosOrcamento() {
             margin-bottom: 10px;
             align-items: center;
         }
-        
+
         .mt-10 {
             margin-top: 10px;
         }

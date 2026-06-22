@@ -50,7 +50,7 @@
         .main-content {
             background: white;
             padding: 40px 35px;
-            border-radius: 12px;
+            border-radius: 0;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             margin: 0;
         }
@@ -104,7 +104,7 @@
             width: 100%;
             padding: 14px 15px;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 0;
             font-size: 1rem;
             transition: all 0.3s ease;
             box-sizing: border-box;
@@ -129,7 +129,7 @@
             background-color: var(--vermelho-principal, #c62828);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 0;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.3s ease;
@@ -149,7 +149,7 @@
             padding: 15px;
             margin-top: 20px;
             font-size: 0.95rem;
-            border-radius: 8px;
+            border-radius: 0;
         }
 
         #loading-overlay {
@@ -167,7 +167,7 @@
         .spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid var(--vermelho-principal, #c62828);
-            border-radius: 50%;
+            border-radius: 0;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
@@ -227,10 +227,10 @@
 
         <main class="main-content">
             <div class="welcome-section">
-                
+
                 <!-- Logo -->
                 <img src="../img/logo.png" alt="AutoFlow Logo" class="logo-img" onerror="this.style.display='none'">
-                
+
                 <p>Faça login para acessar o sistema</p>
 
                 <form id="login-form" class="login-form">
@@ -255,7 +255,7 @@
                     <p>Verificando acesso...</p>
                 </div>
 
-            
+
             </div>
         </main>
 
@@ -338,25 +338,25 @@
 
                     switch (error.code) {
                         case 'auth/invalid-email':
-                            errorMsg = '❌ E-mail inválido. Verifique o formato.';
+                            errorMsg = 'E-mail inválido. Verifique o formato.';
                             break;
                         case 'auth/user-disabled':
-                            errorMsg = '❌ Esta conta foi desativada. Entre em contato com o suporte.';
+                            errorMsg = 'Esta conta foi desativada. Entre em contato com o suporte.';
                             break;
                         case 'auth/user-not-found':
-                            errorMsg = '❌ Usuário não encontrado. Verifique o e-mail.';
+                            errorMsg = 'Usuário não encontrado. Verifique o e-mail.';
                             break;
                         case 'auth/wrong-password':
-                            errorMsg = '❌ Senha incorreta. Tente novamente.';
+                            errorMsg = 'Senha incorreta. Tente novamente.';
                             break;
                         case 'auth/too-many-requests':
-                            errorMsg = '❌ Muitas tentativas. Aguarde alguns minutos.';
+                            errorMsg = 'Muitas tentativas. Aguarde alguns minutos.';
                             break;
                         case 'auth/network-request-failed':
-                            errorMsg = '❌ Erro de conexão. Verifique sua internet.';
+                            errorMsg = 'Erro de conexão. Verifique sua internet.';
                             break;
                         default:
-                            errorMsg = '❌ Erro ao fazer login: ' + error.message;
+                            errorMsg = 'Erro ao fazer login: ' + error.message;
                     }
 
                     showMessage(errorMsg, 'error');
@@ -366,8 +366,8 @@
             async function redirecionarUsuario(user) {
                 try {
                     if (ADMIN_EMAILS.includes(user.email)) {
-                        console.log('✅ Admin detectado. Redirecionando...');
-                        showMessage('✅ Bem-vindo, Administrador!', 'success');
+                        console.log('Admin detectado. Redirecionando...');
+                        showMessage('Bem-vindo, Administrador!', 'success');
 
                         sessionStorage.removeItem('oficinaId');
 
@@ -389,13 +389,13 @@
                         const oficina = oficinaDoc.data();
 
                         if (oficina.status === 'bloqueada') {
-                            showMessage('❌ Sua oficina está bloqueada. Entre em contato com o suporte.', 'error');
+                            showMessage('Sua oficina está bloqueada. Entre em contato com o suporte.', 'error');
                             await auth.signOut();
                             return;
                         }
 
                         if (oficina.status === 'inativa') {
-                            showMessage('❌ Sua oficina está inativa. Ative seu plano para acessar.', 'error');
+                            showMessage('Sua oficina está inativa. Ative seu plano para acessar.', 'error');
                             await auth.signOut();
                             return;
                         }
@@ -414,15 +414,15 @@
                         sessionStorage.setItem('planoNome', planoInfo.nome);
                         sessionStorage.setItem('planoPreco', planoInfo.preco);
 
-                        console.log(`✅ Dono de oficina detectado. Plano: ${plano}`);
+                        console.log(`Dono de oficina detectado. Plano: ${plano}`);
 
-                        let mensagem = `✅ Bem-vindo, ${oficina.nome}!`;
+                        let mensagem = `Bem-vindo, ${oficina.nome}!`;
                         if (plano === 'basico') {
-                            mensagem = `✅ Plano Básico - Acesso apenas a orçamentos rápidos.`;
+                            mensagem = `Plano Básico - Acesso apenas a orçamentos rápidos.`;
                         } else if (plano === 'intermediario') {
-                            mensagem = `✅ Plano Intermediário - Acesso a clientes e veículos.`;
+                            mensagem = `Plano Intermediário - Acesso a clientes e veículos.`;
                         } else if (plano === 'completo') {
-                            mensagem = `✅ Plano Completo - Todos os recursos liberados (inclui Financeiro).`;
+                            mensagem = `Plano Completo - Todos os recursos liberados (inclui Financeiro).`;
                         }
 
                         showMessage(mensagem, 'success');
@@ -432,14 +432,14 @@
                         }, 1500);
 
                     } else {
-                        console.log('❌ Usuário sem vínculo com oficina');
-                        showMessage('❌ Você não tem permissão para acessar o sistema.', 'error');
+                        console.log('Usuário sem vínculo com oficina');
+                        showMessage('Você não tem permissão para acessar o sistema.', 'error');
                         await auth.signOut();
                     }
 
                 } catch (error) {
                     console.error('Erro ao verificar permissões:', error);
-                    showMessage('❌ Erro ao verificar suas permissões. Tente novamente.', 'error');
+                    showMessage('Erro ao verificar suas permissões. Tente novamente.', 'error');
                     await auth.signOut();
                 }
             }
